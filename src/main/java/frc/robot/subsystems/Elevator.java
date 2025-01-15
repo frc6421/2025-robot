@@ -11,12 +11,16 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
@@ -34,9 +38,8 @@ public class Elevator extends SubsystemBase {
   private final Mechanism2d elevator2d;
   private final MechanismRoot2d elevatorRoot;
   private final MechanismLigament2d elevatorLigament;
-  private double elevatorLength = 0;
-
   private final ShuffleboardTab elevatorTab;
+  private double elevatorLength;
   
     public static final class ElevatorConstants {
       public static final int ELEVATOR_LEFT_CAN_ID = 20;
@@ -45,6 +48,8 @@ public class Elevator extends SubsystemBase {
       public static final double ELEVATOR_GEAR_RATIO = 12.0;
       public static final double ELEVATOR_ANGLE = 0;
       public static final double ROTATIONS_PER_METER = 0;
+      public static final double MAX_EXT = 0;
+      public static final double MIN_EXT = 0;
   
       public static final double LEFT_KS = 0;
       public static final double LEFT_KV = 0;
@@ -92,6 +97,8 @@ public class Elevator extends SubsystemBase {
       elevatorRightConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       elevatorLeftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       elevatorRightConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+      elevatorLength = ElevatorConstants.MIN_EXT;
       
       //PID
       elevatorLeftConfig.Slot0.kS = ElevatorConstants.LEFT_KS;
@@ -122,17 +129,15 @@ public class Elevator extends SubsystemBase {
       elevatorProfile = new TrapezoidProfile(
         new TrapezoidProfile.Constraints(ElevatorConstants.MAX_VELOCITY_RPS, ElevatorConstants.MAX_ACCEL_RPS)
       );
-  
-      //Mechanism 2d
-      elevator2d = new Mechanism2d(6, 6);
-      elevatorRoot = elevator2d.getRoot("Base", 1, .5);
-      elevatorLigament = elevatorRoot.append(new MechanismLigament2d("Elevator", elevatorLength, ElevatorConstants.ELEVATOR_ANGLE));
       
       elevatorTab = Shuffleboard.getTab("Elevator");
       elevatorTab.add(this);
+      //Mechanism 2d
+      elevator2d = new Mechanism2d(1, 1);
+      elevatorRoot = elevator2d.getRoot("Base", .5, 0);
+      elevatorLigament = elevatorRoot.append(new MechanismLigament2d("ElevatorExt", elevatorLength, ElevatorConstants.ELEVATOR_ANGLE));
       elevatorTab.add("Elevator2d", elevator2d);
     }
-  
   
     /**Gets the current rotation of desired motor in rotations
      * @param rotations - the motor you want rotations of
@@ -178,12 +183,14 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
       elevatorLength = getElevatorRotations() * ElevatorConstants.ROTATIONS_PER_METER;
+      
   }
 
   @Override
   public void initSendable(SendableBuilder builder) {
       // TODO Auto-generated method stub
       super.initSendable(builder);
-      builder.addDoubleProperty("Elevator Position", this::getElevatorRotations, null);
+      builder.addDoubleProperty("Elevator Position Rot", this::getElevatorRotations, null);
+      builder.addDoubleProperty("Elevator Position Meters", () -> elevatorLength,  null);
   }
 }
