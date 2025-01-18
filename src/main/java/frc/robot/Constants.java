@@ -20,4 +20,24 @@ public final class Constants {
   public static class DriveConstants {
     public static final double DRIVE_SLEW_RATE = 10.0;
   }
+
+  public static class VisionConstants {
+    public static final double FL_OFFSETX_MET = 0;
+    public static final double FL_OFFSETY_MET = 0;
+    public static final double FL_OFFSETZ_MET = 0;
+    public static final double FL_PITCH = 0;
+    public static final double FL_YAW = 0;
+
+    public static final double FR_OFFSETX_MET = 0;
+    public static final double FR_OFFSETY_MET = 0;
+    public static final double FR_OFFSETZ_MET = 0;
+    public static final double FR_PITCH = 0;
+    public static final double FR_YAW = 0;
+
+    public static final double BACK_OFFSETX_MET = 0;
+    public static final double BACK_OFFSETY_MET = 0;
+    public static final double BACK_OFFSETZ_MET = 0;
+    public static final double BACK_PITCH = 0;
+    public static final double BACK_YAW = 0;
+  }
 }
