@@ -9,6 +9,7 @@ import com.revrobotics.sim.SparkAbsoluteEncoderSim;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
 
@@ -16,52 +17,65 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class IntakeSubsystem extends SubsystemBase {
-  private SparkMax intakeMotor;
-  private SparkMaxConfig intakeMotorConfig;
+  private SparkMax intakeMotor;//Motor Object
+  private SparkMaxConfig intakeMotorConfig;//Motor Object Config
 
-  private RelativeEncoder intakeEncoder; 
+  private RelativeEncoder intakeEncoder;//Encoder Object
   
   public static class IntakeConstants{
 
     public static final int INTAKE_MOTOR_ID = 40;
-
+    //Gear ratio
     public static final int INTAKE_GEAR_RATIO = 1;    
-
+    //Current limit
     public static final int INTAKE_CURRENT_LIMIT = 0;
-
+    //Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0;
-
+    //Reliable speed for ejecting the pieces 
     public static final double INTAKE_OUT_SPEED = 0;
   }
 
   /** Creates a new intakeSubsystem. */
   public IntakeSubsystem() {
+    //Identifies the motor object as a Spark Max Controller
     intakeMotor = new SparkMax(IntakeConstants.INTAKE_MOTOR_ID, MotorType.kBrushless);
     // intakeMotor.configure(null, SparkBase.ResetMode.kResetSafeParameters, null);
 
-    intakeMotorConfig = new SparkMaxConfig();
-    intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);
-    intakeMotorConfig.inverted(true);
+    intakeMotorConfig = new SparkMaxConfig();//Config of the motor
+    intakeMotorConfig.idleMode(IdleMode.kCoast);//Sets the motor to freely rotate
+    intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);//Setting current limit
+    intakeMotorConfig.inverted(true);//Inverts
 
-    intakeEncoder = intakeMotor.getEncoder();
-
+    intakeEncoder = intakeMotor.getEncoder();//Setting the built-in encoder of the motor to the encoder object
+    //Applies the configuration to the motor
     intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
   }
 
-    // Sets the intakeMotor outputs
-    public void setIntakeInSpeed(double value){
+    /**
+     * @breif   Sets the intake to the Intake In speed
+     */
+    public void setIntakeInSpeed(){
       intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED);
     }
-  
-    public void setIntakeOutSpeed(double value){
+
+    /**
+     * @breif   Sets the intake to the Intake Out speed
+     */
+    public void setIntakeOutSpeed(){
       intakeMotor.set(IntakeConstants.INTAKE_OUT_SPEED);
     }
   
-    public void setIntakeVoltage(double value){
-      intakeMotor.setVoltage(0);
+    /**
+     * @breif   Sets the intake voltage
+     * @param value   Voltage to set
+     */
+    public void setIntakeVoltage(double voltage){
+      intakeMotor.setVoltage(voltage);
     }
   
-    // stops intakeMotor
+    /**
+     * @breif   Stops the motor
+     */
     public void stopIntake(){
       intakeMotor.stopMotor();
     }
