@@ -4,30 +4,27 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.sim.SparkAbsoluteEncoderSim;
+
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class IntakeSubsystem extends SubsystemBase {
-  private SparkMax intakeMotor;//Motor Object
-  private SparkMaxConfig intakeMotorConfig;//Motor Object Config
-
-  private RelativeEncoder intakeEncoder;//Encoder Object
+  private SparkMax intakeMotor;
+  private SparkMaxConfig intakeMotorConfig;
   
   public static class IntakeConstants{
 
     public static final int INTAKE_MOTOR_ID = 40;
-    //Gear ratio
+   
     public static final int INTAKE_GEAR_RATIO = 1;    
-    //Current limit
+    
     public static final int INTAKE_CURRENT_LIMIT = 0;
     //Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0;
@@ -41,12 +38,11 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor = new SparkMax(IntakeConstants.INTAKE_MOTOR_ID, MotorType.kBrushless);
     // intakeMotor.configure(null, SparkBase.ResetMode.kResetSafeParameters, null);
 
-    intakeMotorConfig = new SparkMaxConfig();//Config of the motor
+    intakeMotorConfig = new SparkMaxConfig();
     intakeMotorConfig.idleMode(IdleMode.kCoast);//Sets the motor to freely rotate
     intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);//Setting current limit
     intakeMotorConfig.inverted(true);//Inverts
 
-    intakeEncoder = intakeMotor.getEncoder();//Setting the built-in encoder of the motor to the encoder object
     //Applies the configuration to the motor
     intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
   }
@@ -83,6 +79,12 @@ public class IntakeSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  public void intiSendable(SendableBuilder builder){
+    super.initSendable(builder);
+
+    builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
   }
 
 }
