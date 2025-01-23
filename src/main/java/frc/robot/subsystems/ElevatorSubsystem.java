@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -23,6 +24,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -37,8 +39,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ElevatorSubsystem extends SubsystemBase {
   // Creating the Motor Controller objects
-  private TalonFX elevatorLeftMotor;
-  private TalonFX elevatorRightMotor;
+  private final TalonFX elevatorLeftMotor;
+  private final TalonFX elevatorRightMotor;
 
   // Creating the Motor Controller Configuration objects
   private final TalonFXConfiguration elevatorLeftConfig;
@@ -47,13 +49,12 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   // Trapezoid Profile for the Elevator
   private TrapezoidProfile elevatorProfile;// Profile object
-  private TrapezoidProfile.State elevatorSetPoint;// Set point
+  private TrapezoidProfile.State currentElevatorState;// Set point
   private PositionVoltage elevatorRequest;// Voltage to maintian the set point
 
   private final Mechanism2d elevator2d;// Mechanism 2D object of the elevator
   private final MechanismRoot2d elevatorRoot;// Root for the Mechanism
   private final MechanismLigament2d elevatorLigament;// Ligament for the elevator
-  private double elevatorHeight;// Length of the Elevator
 
   private final SendableChooser<TrapezoidProfile.State> elevatorChooser;
 
@@ -68,8 +69,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // How many rotations are needed to make the elevator move 1 meter in any
     // direction
-    private static final double ROTATIONS_PER_METER = 1
-        / (ELEVATOR_GEAR_RATIO * ELEVATOR_SPROCKET_DIAMETER.magnitude());
+    private static final Distance METERS_PER_ROTATION = ELEVATOR_SPROCKET_DIAMETER.times(Math.PI).div(ELEVATOR_GEAR_RATIO);
 
     // Maximum and minimum extension of the elevator, in meters
     private static final Distance MAX_HEIGHT = Inches.of(0); // TODO get value
@@ -82,6 +82,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withSupplyCurrentLimit(CURRENT_LIMIT)
         .withStatorCurrentLimitEnable(true)
         .withSupplyCurrentLimitEnable(true);
+
+    private static final SoftwareLimitSwitchConfigs ELEVATOR_SOFT_LIMITS_CONFIG = new SoftwareLimitSwitchConfigs()
+    .withReverseSoftLimitThreshold(ElevatorConstants.MIN_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude())
+    .withReverseSoftLimitEnable(true)
+    .withForwardSoftLimitThreshold(ElevatorConstants.MAX_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude())
+    .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
     private static final double LEFT_KG = 0;
@@ -157,27 +163,26 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeftConfig = new TalonFXConfiguration()
         .withSlot0(ElevatorConstants.LEFT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
-        //.withSoftwareLimitSwitch(null) // TODO MAKE LIMITS
+        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG) // TODO MAKE LIMITS
         .withMotorOutput(ElevatorConstants.LEFT_MOTOR_CONFIGS);
 
     elevatorRightConfig = new TalonFXConfiguration()
         .withSlot0(ElevatorConstants.RIGHT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
-        //.withSoftwareLimitSwitch(null) // TODO MAKE LIMITS
+        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG) // TODO MAKE LIMITS
         .withMotorOutput(ElevatorConstants.RIGHT_MOTOR_CONFIGS);
 
     // Go to a position with an added voltage for Feed Forward Compensation
     elevatorRequest = new PositionVoltage(0).withSlot(0);
 
     // New Elevator Set point
-    elevatorSetPoint = new TrapezoidProfile.State();
-
-    // Setting the current Elevator length to the minimum extension
-    elevatorHeight = ElevatorConstants.MIN_HEIGHT.magnitude();
+    currentElevatorState = new TrapezoidProfile.State();
 
     // Applying the Configurators to their respective motors
     elevatorLeftMotor.getConfigurator().apply(elevatorLeftConfig);
     elevatorRightMotor.getConfigurator().apply(elevatorRightConfig);
+
+    elevatorLeftMotor.setPosition(Rotations.of(ElevatorConstants.MIN_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude()));
 
     // Creating and applying the Elevator Trapezoid profile
     elevatorProfile = new TrapezoidProfile(
@@ -189,7 +194,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorRoot = elevator2d.getRoot("Base", 0.5, 0);// Name of the root with a position of (0.5,0)
 
     // Appends a mechanism to the Elevator Ligament and creates a new Ligament 2D
-    elevatorLigament = elevatorRoot.append(new MechanismLigament2d("ElevatorExt", elevatorHeight, 90));
+    elevatorLigament = elevatorRoot.append(new MechanismLigament2d("ElevatorExt", 1, 90));
 
     elevatorChooser = new SendableChooser<TrapezoidProfile.State>();
     elevatorChooser.addOption("-----L4-----", ElevatorConstants.L4_GOAL);
@@ -203,7 +208,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putData("Elevator", this);
     SmartDashboard.putData("Elevator/Elevator2d", elevator2d);
     SmartDashboard.putData("Elevator/ElevatorChooser", elevatorChooser);
-    SmartDashboard.putString("Elevator/ElevatorSetPoint", elevatorSetPoint.toString());
+    SmartDashboard.putNumber("Elevator/ElevatorSetPoint", currentElevatorState.position);
   }
 
   /**
@@ -212,11 +217,27 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param rotations - the motor you want rotations of
    */
   /**
-   * @breif Gets the average rotation of the Elevator Motors
-   * @return The average of the Elevator Motors current rotations
+   * Gets the # rotations of the Elevator Motors
+   * @return The # Rotations
    */
   private Angle getElevatorRotations() {
-    return elevatorLeftMotor.getPosition().getValue();
+    return elevatorLeftMotor.getPosition().refresh().getValue();
+  }
+
+  private Distance getElevatorHeight() {
+    return ElevatorConstants.METERS_PER_ROTATION.times(getElevatorRotations().in(Rotations));
+  }
+
+  private LinearVelocity getElevatorVelocity() {
+    return MetersPerSecond.of(elevatorLeftMotor.getVelocity().refresh().getValueAsDouble() * ElevatorConstants.METERS_PER_ROTATION.magnitude());
+  }
+
+  private TrapezoidProfile.State getCurrentState() {
+    return new TrapezoidProfile.State(getElevatorHeight().magnitude(), getElevatorVelocity().magnitude());
+  }
+
+  public TrapezoidProfile.State getSelectedState() {
+    return elevatorChooser.getSelected();
   }
 
   /**
@@ -236,9 +257,9 @@ public class ElevatorSubsystem extends SubsystemBase {
    *             L1_GOAL, L2_GOAL, L3_GOAL, L4_Goal
    */
   public void applyElevatorProfile(TrapezoidProfile.State goal) {
-    elevatorSetPoint = elevatorProfile.calculate(.020, elevatorSetPoint, goal);
-    elevatorRequest.Position = elevatorSetPoint.position;
-    elevatorRequest.Velocity = elevatorSetPoint.velocity;
+    currentElevatorState = elevatorProfile.calculate(.020, currentElevatorState, goal);
+    elevatorRequest.Position = currentElevatorState.position;
+    elevatorRequest.Velocity = currentElevatorState.velocity;
 
     /// Applies the Position and Velocity to the motors
     elevatorLeftMotor.setControl(elevatorRequest);
@@ -258,19 +279,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeftMotor.setControl(elevatorRequest.withPosition(rotations));
   }
 
-  private Distance getElevatorHeight() {
-    return Meters.of(getElevatorRotations().magnitude() * ElevatorConstants.ROTATIONS_PER_METER);
-  }
-
-  public TrapezoidProfile.State getElevatorChooser() {
-    return elevatorChooser.getSelected();
-  }
-
-  public Command setElevatorPosition(TrapezoidProfile.State state) {
-
+  public Command setElevatorPositionCommand(TrapezoidProfile.State goalState) {
+    final double deltaTime = 0.02;
     final Timer timer = new Timer();
     
-    return this.run(timer::restart, );
+    return runOnce(timer::restart)
+    .andThen(run(() -> {
+      currentElevatorState = elevatorProfile.calculate(deltaTime, getCurrentState(), goalState);
+      elevatorLeftMotor.setControl(elevatorRequest.withPosition(currentElevatorState.position));}))
+      .until(() -> timer.hasElapsed(elevatorProfile.totalTime()));
   }
   @Override
   public void periodic() {}
@@ -278,7 +295,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    builder.addDoubleProperty("Elevator Position Rot", () -> getElevatorRotations().magnitude(), null);
-    builder.addDoubleProperty("Elevator Position Meters", () -> getElevatorHeight().magnitude(), null);
+    builder.addDoubleProperty("Elevator Current Position Rotations", () -> getElevatorRotations().magnitude(), null);
+    builder.addDoubleProperty("Elevator Current Position Meters", () -> getElevatorHeight().magnitude(), null);
+    builder.addDoubleProperty("Elevator Goal Position Meters", () -> getSelectedState().position, null);
   }
 }
