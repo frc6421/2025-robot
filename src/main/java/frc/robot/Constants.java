@@ -21,17 +21,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 public final class Constants {
   public static class AutoConstants {
     public static final double AUTO_MAX_VELOCITY_METERS_PER_SECOND = 4.0; // TODO update value
-    public static final double AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 2.0; // TODO update value
-    public static final double AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC = 4.0; // TODO update value
-    public static final double AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = 4.0; // TODO update value
+    public static final double AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 5.0; // TODO update value
+    public static final double AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC = 2 * Math.PI; // TODO update value
+    public static final double AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = 2 * Math.PI; // TODO update value
 
-    public static final double X_DRIVE_P = 0.1;
+    public static final double X_DRIVE_P = 2.32;
     public static final double X_DRIVE_I = 0;
-    public static final double X_DRIVE_D = 0;
+    public static final double X_DRIVE_D = 0.1;
 
-    public static final double Y_DRIVE_P = 0.1;
+    public static final double Y_DRIVE_P = 2.32;
     public static final double Y_DRIVE_I = 0;
-    public static final double Y_DRIVE_D = 0;
+    public static final double Y_DRIVE_D = 0.1;
 
     public static final double THETA_P = 5.0;
     public static final double THETA_I = 0;
@@ -82,7 +82,8 @@ public static final Pose2d BLUE_K = new Pose2d (new Translation2d(Inches.of(158.
 public static final Pose2d BLUE_L = new Pose2d (new Translation2d(Inches.of(147.261), Inches.of(196.57)), new Rotation2d(Degrees.of(120)));
 
 public static final Pose2d RED_RB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(75.4)), new Rotation2d(Degrees.of(180)));
-  
+public static final Pose2d RED_BB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(241.6)), new Rotation2d(Degrees.of(180)));
+
   }
 
   public static class OperatorConstants {

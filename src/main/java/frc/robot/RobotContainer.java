@@ -12,11 +12,14 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.autoCommands.RedJKLRB;
+import frc.robot.commands.autoCommands.RedEDCBBCommand;
+import frc.robot.commands.autoCommands.RedJKLRBCommand;
+import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -40,12 +43,25 @@ public class RobotContainer {
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
     private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 
-    private final RedJKLRB redJKLRB;
+    private final RedJKLRBCommand redJKLRB;
+    private final TestAutoCommand testAuto;
+    private final RedEDCBBCommand redEDCBB;
+
+    private SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         configureBindings();
 
-        redJKLRB = new RedJKLRB(drivetrain);
+        redJKLRB = new RedJKLRBCommand(drivetrain);
+        testAuto = new TestAutoCommand(drivetrain);
+        redEDCBB = new RedEDCBBCommand(drivetrain);
+
+
+        autoChooser = new SendableChooser<>();
+        autoChooser.addOption("Auto Test", testAuto);
+        autoChooser.addOption("Red JKL RB", redJKLRB);
+        autoChooser.addOption("Red EDC BB", redEDCBB);
+
     }
 
     private void configureBindings() {

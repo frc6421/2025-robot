@@ -29,7 +29,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RedJKLRB extends SequentialCommandGroup {
+public class RedEDCBBCommand extends SequentialCommandGroup {
   /** Creates a new RedHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
@@ -38,7 +38,7 @@ public class RedJKLRB extends SequentialCommandGroup {
 
   public SwerveDriveKinematics kinematics;
 
-  public RedJKLRB(CommandSwerveDrivetrain drive) {
+  public RedEDCBBCommand(CommandSwerveDrivetrain drive) {
     
     driveSubsystem = drive;
 
@@ -57,34 +57,34 @@ public class RedJKLRB extends SequentialCommandGroup {
         .setKinematics(kinematics)
         .setReversed(true);
 
-    Trajectory toJTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.RED_RB_START, 
-        TrajectoryConstants.RED_J), 
+    Trajectory toETrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.RED_BB_START, 
+        TrajectoryConstants.RED_E), 
         reverseConfig);
 
     Trajectory toCoral1Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.RED_J, 
-        TrajectoryConstants.R_HP_LEFT_OUT), 
+        TrajectoryConstants.RED_E, 
+        TrajectoryConstants.R_HP_RIGHT_OUT), 
         forwardConfig);
 
-    Trajectory toKTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.R_HP_LEFT_OUT, 
-        TrajectoryConstants.RED_K), 
+    Trajectory toDTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.R_HP_RIGHT_OUT, 
+        TrajectoryConstants.RED_D), 
         reverseConfig);
 
     Trajectory toCoral2Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.RED_K, 
-        TrajectoryConstants.R_HP_LEFT_OUT), 
+        TrajectoryConstants.RED_D, 
+        TrajectoryConstants.R_HP_RIGHT_OUT), 
         forwardConfig);
 
-    Trajectory toLTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.R_HP_LEFT_OUT, 
-        TrajectoryConstants.RED_L), 
+    Trajectory toCTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.R_HP_RIGHT_OUT, 
+        TrajectoryConstants.RED_C), 
         reverseConfig);
 
     Trajectory toCoral3Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.RED_L, 
-        TrajectoryConstants.R_HP_LEFT_OUT), 
+        TrajectoryConstants.RED_C, 
+        TrajectoryConstants.R_HP_RIGHT_OUT), 
         forwardConfig);
 
     
@@ -95,30 +95,16 @@ public class RedJKLRB extends SequentialCommandGroup {
      if (RobotBase.isSimulation()) {
         SmartDashboard.putData(field);
 
-        field.setRobotPose(toJTrajectory.getInitialPose());
+        field.setRobotPose(toETrajectory.getInitialPose());
       
-        field.getObject("first Trajectory").setTrajectory(toJTrajectory);
-        field.getObject("second Trajectory").setTrajectory(toCoral1Trajectory);
-        field.getObject("third Trajectory").setTrajectory(toKTrajectory);
-        field.getObject("fourth Trajectory").setTrajectory(toCoral2Trajectory);
-        field.getObject("fifth Trajectory").setTrajectory(toLTrajectory);
-        field.getObject("sixth Trajectory").setTrajectory(toCoral3Trajectory);
+        field.getObject("1 Trajectory").setTrajectory(toETrajectory);
+        field.getObject("2 Trajectory").setTrajectory(toCoral1Trajectory);
+        field.getObject("3 Trajectory").setTrajectory(toDTrajectory);
+        field.getObject("4 Trajectory").setTrajectory(toCoral2Trajectory);
+        field.getObject("5 Trajectory").setTrajectory(toCTrajectory);
+        field.getObject("6 Trajectory").setTrajectory(toCoral3Trajectory);
       }
-
-
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
-        new TrapezoidProfile.Constraints(AutoConstants.AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
-            AutoConstants.AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC));
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
-        // Position controllers
-        new PIDController(AutoConstants.X_DRIVE_P, AutoConstants.X_DRIVE_I, AutoConstants.X_DRIVE_D),
-        new PIDController(AutoConstants.Y_DRIVE_P, AutoConstants.Y_DRIVE_I, AutoConstants.Y_DRIVE_D),
-        thetaController);
-
-
+    // System.out.println("TIME: " + (toETrajectory.getTotalTimeSeconds() + toCoral1Trajectory.getTotalTimeSeconds() + toDTrajectory.getTotalTimeSeconds() + toCoral2Trajectory.getTotalTimeSeconds() + toCTrajectory.getTotalTimeSeconds() + toCoral3Trajectory.getTotalTimeSeconds()));
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
