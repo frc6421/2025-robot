@@ -6,6 +6,8 @@ package frc.robot.commands.autoCommands;
 
 import java.util.List;
 
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -20,6 +22,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
@@ -74,24 +77,13 @@ public class TestAutoCommand extends SequentialCommandGroup {
     //     field.getObject("1b Trajectory").setTrajectory(toReefTrajectory);
     //   }
 
-
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
-        new TrapezoidProfile.Constraints(AutoConstants.AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
-            AutoConstants.AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC));
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
-        new PIDController(AutoConstants.X_DRIVE_P, AutoConstants.X_DRIVE_I, AutoConstants.X_DRIVE_D),
-        new PIDController(AutoConstants.Y_DRIVE_P, AutoConstants.Y_DRIVE_I, AutoConstants.Y_DRIVE_D),
-        thetaController);
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        
-
-
+        Commands.runOnce(() -> driveSubsystem.resetPose(toReefTrajectory.getInitialPose()), driveSubsystem),
+        driveSubsystem.runTrajectoryCommand(toReefTrajectory),
+        Commands.runOnce(() -> driveSubsystem.applyRequest(() -> new ApplyRobotSpeeds()), driveSubsystem)
     );
   }
 }
