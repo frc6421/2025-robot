@@ -76,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final Distance MIN_HEIGHT = Inches.of(0); // TODO get value
 
     // Current limit of either motor
-    private static final Current CURRENT_LIMIT = Amps.of(0);
+    private static final Current CURRENT_LIMIT = Amps.of(60);
     private static final CurrentLimitsConfigs ELEVATOR_CURRENT_CONFIG = new CurrentLimitsConfigs()
         .withStatorCurrentLimit(CURRENT_LIMIT)
         .withSupplyCurrentLimit(CURRENT_LIMIT)
@@ -93,7 +93,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double LEFT_KG = 0;
     private static final double LEFT_KS = 0;
     private static final double LEFT_KV = 0;
-    private static final double LEFT_KP = 0;
+    private static final double LEFT_KP = 1;
     private static final double LEFT_KI = 0;
     private static final double LEFT_KD = 0;
     private static final Slot0Configs LEFT_SLOT_CONFIG = new Slot0Configs()
@@ -111,7 +111,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double RIGHT_KG = 0;
     private static final double RIGHT_KS = 0;
     private static final double RIGHT_KV = 0;
-    private static final double RIGHT_KP = 0;
+    private static final double RIGHT_KP = 1;
     private static final double RIGHT_KI = 0;
     private static final double RIGHT_KD = 0;
     private static final Slot0Configs RIGHT_SLOT_CONFIG = new Slot0Configs()
@@ -173,7 +173,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withMotorOutput(ElevatorConstants.RIGHT_MOTOR_CONFIGS);
 
     // Go to a position with an added voltage for Feed Forward Compensation
-    elevatorRequest = new PositionVoltage(0).withSlot(0);
+    elevatorRequest = new PositionVoltage(0).withSlot(0).withVelocity(.5);
+    
 
     // New Elevator Set point
     currentElevatorState = new TrapezoidProfile.State();
@@ -295,8 +296,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
-    builder.addDoubleProperty("Elevator Current Position Rotations", () -> getElevatorRotations().magnitude(), null);
-    builder.addDoubleProperty("Elevator Current Position Meters", () -> getElevatorHeight().magnitude(), null);
-    builder.addDoubleProperty("Elevator Goal Position Meters", () -> getSelectedState().position, null);
+    // builder.addDoubleProperty("Elevator Current Position Rotations", () -> getElevatorRotations().magnitude(), null);
+    // builder.addDoubleProperty("Elevator Current Position Meters", () -> getElevatorHeight().magnitude(), null);
+    // builder.addDoubleProperty("Elevator Goal Position Meters", () -> getSelectedState().position, null);
+    // builder.addDoubleProperty("Elevator Motor Velocity", () -> getElevatorVelocity().magnitude(), null);
   }
 }
