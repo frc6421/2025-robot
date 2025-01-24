@@ -40,6 +40,10 @@ public class RobotContainer {
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
     private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 
+    private final WarriorCamera warriorCamera1 = new WarriorCamera("Camera1", WarriorCamera.CameraConstants.CAM_1_OFFSET);
+    private final WarriorCamera warriorCamera3 = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
+    private final WarriorCamera warriorCamera5 = new WarriorCamera("Camera5", WarriorCamera.CameraConstants.CAM_5_OFFSET);
+
     public RobotContainer() {
         configureBindings();
     }
@@ -73,7 +77,6 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
