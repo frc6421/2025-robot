@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -14,74 +13,74 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-
 public class IntakeSubsystem extends SubsystemBase {
   private SparkMax intakeMotor;
   private SparkMaxConfig intakeMotorConfig;
-  
-  public static class IntakeConstants{
+
+  public static class IntakeConstants {
 
     public static final int INTAKE_MOTOR_ID = 40;
-   
-    public static final int INTAKE_GEAR_RATIO = 1;    
-    
+
+    public static final int INTAKE_GEAR_RATIO = 1;
+
     public static final int INTAKE_CURRENT_LIMIT = 0;
-    //Reliable speed for grabbing the pieces
+    // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0;
-    //Reliable speed for ejecting the pieces 
+    // Reliable speed for ejecting the pieces
     public static final double INTAKE_OUT_SPEED = 0;
   }
 
   /** Creates a new intakeSubsystem. */
   public IntakeSubsystem() {
-    //Identifies the motor object as a Spark Max Controller
+    // Identifies the motor object as a Spark Max Controller
     intakeMotor = new SparkMax(IntakeConstants.INTAKE_MOTOR_ID, MotorType.kBrushless);
     // intakeMotor.configure(null, SparkBase.ResetMode.kResetSafeParameters, null);
 
     intakeMotorConfig = new SparkMaxConfig();
-    intakeMotorConfig.idleMode(IdleMode.kCoast);//Sets the motor to freely rotate
-    intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);//Setting current limit
-    intakeMotorConfig.inverted(true);//Inverts
+    intakeMotorConfig.idleMode(IdleMode.kCoast);// Sets the motor to freely rotate
+    intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);// Setting current limit
+    intakeMotorConfig.inverted(true);// Inverts
 
-    //Applies the configuration to the motor
-    intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+    // Applies the configuration to the motor
+    intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kNoPersistParameters);
   }
 
-    /**
-     * @breif   Sets the intake to the Intake In speed
-     */
-    public void setIntakeInSpeed(){
-      intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED);
-    }
+  /**
+   * @breif Sets the intake to the Intake In speed
+   */
+  public void setIntakeInSpeed() {
+    intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED);
+  }
 
-    /**
-     * @breif   Sets the intake to the Intake Out speed
-     */
-    public void setIntakeOutSpeed(){
-      intakeMotor.set(IntakeConstants.INTAKE_OUT_SPEED);
-    }
-  
-    /**
-     * @breif   Sets the intake voltage
-     * @param value   Voltage to set
-     */
-    public void setIntakeVoltage(double voltage){
-      intakeMotor.setVoltage(voltage);
-    }
-  
-    /**
-     * @breif   Stops the motor
-     */
-    public void stopIntake(){
-      intakeMotor.stopMotor();
-    }
+  /**
+   * @breif Sets the intake to the Intake Out speed
+   */
+  public void setIntakeOutSpeed() {
+    intakeMotor.set(IntakeConstants.INTAKE_OUT_SPEED);
+  }
+
+  /**
+   * @breif Sets the intake voltage
+   * @param value Voltage to set
+   */
+  public void setIntakeVoltage(double voltage) {
+    intakeMotor.setVoltage(voltage);
+  }
+
+  /**
+   * @breif Stops the motor
+   */
+  public void stopIntake() {
+    intakeMotor.stopMotor();
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
 
-  public void intiSendable(SendableBuilder builder){
+  public void intiSendable(SendableBuilder builder) {
     super.initSendable(builder);
 
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
