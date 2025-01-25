@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -49,9 +50,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera1", WarriorCamera.CameraConstants.CAM_1_OFFSET);
-    public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
-    //public final WarriorCamera backCamera = new WarriorCamera("Camera5", WarriorCamera.CameraConstants.CAM_5_OFFSET);
+    public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
+    //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
+    public final WarriorCamera frontRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_6_OFFSET);
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(

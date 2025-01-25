@@ -85,7 +85,6 @@ public class WarriorCamera implements Sendable{
             offsets[3],
             offsets[4]
         };
-        refreshData();
 
         robotToCam = new Transform3d( 
             new Translation3d(cameraOffsets[0], cameraOffsets[1], cameraOffsets[2]),
@@ -93,6 +92,10 @@ public class WarriorCamera implements Sendable{
 
         poseEstimator = new PhotonPoseEstimator(
             CameraConstants.TAG_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
+        
+        refreshData();
+
+        
 
         SendableRegistry.add(this, camera.getName());
         SmartDashboard.putData(this);
@@ -149,7 +152,7 @@ public class WarriorCamera implements Sendable{
     //Is the robot in Teleop Enabled?
 
     if(!camera.isConnected()) {
-        DataLogManager.log("No Camera Connected");
+        //DataLogManager.log("No Camera Connected");
         return false;
       }
 
@@ -206,5 +209,6 @@ public class WarriorCamera implements Sendable{
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType(camera.getName());
         builder.addDoubleArrayProperty(camera.getName() + " Pose", () -> cameraPoseSendable, null);
+        builder.addBooleanProperty(camera.getName() + " has target?", () -> latestCameraResult.hasTargets(), null);
     }
 }
