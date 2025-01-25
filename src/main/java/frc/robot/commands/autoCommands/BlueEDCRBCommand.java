@@ -6,8 +6,6 @@ package frc.robot.commands.autoCommands;
 
 import java.util.List;
 
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -22,8 +20,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
@@ -33,8 +29,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class TestAutoCommand extends SequentialCommandGroup {
-  /** Creates a new RedHRB. */
+public class BlueEDCRBCommand extends SequentialCommandGroup {
+  /** Creates a new BLUEHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
 
@@ -42,7 +38,7 @@ public class TestAutoCommand extends SequentialCommandGroup {
 
   public SwerveDriveKinematics kinematics;
 
-  public TestAutoCommand(CommandSwerveDrivetrain drive) {
+  public BlueEDCRBCommand(CommandSwerveDrivetrain drive) {
     
     driveSubsystem = drive;
 
@@ -55,17 +51,43 @@ public class TestAutoCommand extends SequentialCommandGroup {
         AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
         .setKinematics(kinematics);
     
-   TrajectoryConfig reverseConfig = new TrajectoryConfig(
+    TrajectoryConfig reverseConfig = new TrajectoryConfig(
         AutoConstants.AUTO_MAX_VELOCITY_METERS_PER_SECOND,
         AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
         .setKinematics(kinematics)
         .setReversed(true);
 
-    Trajectory toReefTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.B_HP_LEFT_CENTER, 
-        TrajectoryConstants.BLUE_A), 
+    Trajectory toETrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.BLUE_RB_START, 
+        TrajectoryConstants.BLUE_E), 
         reverseConfig);
 
+    Trajectory toCoral1Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.BLUE_E, 
+        TrajectoryConstants.B_HP_RIGHT_OUT), 
+        forwardConfig);
+
+    Trajectory toDTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.B_HP_RIGHT_OUT, 
+        TrajectoryConstants.BLUE_D), 
+        reverseConfig);
+
+    Trajectory toCoral2Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.BLUE_D, 
+        TrajectoryConstants.B_HP_RIGHT_OUT), 
+        forwardConfig);
+
+    Trajectory toCTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.B_HP_RIGHT_OUT, 
+        TrajectoryConstants.BLUE_C), 
+        reverseConfig);
+
+    Trajectory toCoral3Trajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.BLUE_C, 
+        TrajectoryConstants.B_HP_RIGHT_OUT), 
+        forwardConfig);
+
+    
 
   // Simulation
     //  field = new Field2d();
@@ -73,19 +95,19 @@ public class TestAutoCommand extends SequentialCommandGroup {
     //  if (RobotBase.isSimulation()) {
     //     SmartDashboard.putData(field);
 
-    //     field.setRobotPose(toReefTrajectory.getInitialPose());
+    //     field.setRobotPose(toETrajectory.getInitialPose());
       
-    //     field.getObject("1b Trajectory").setTrajectory(toReefTrajectory);
+    //     field.getObject("1 Trajectory").setTrajectory(toETrajectory);
+    //     field.getObject("2 Trajectory").setTrajectory(toCoral1Trajectory);
+    //     field.getObject("3 Trajectory").setTrajectory(toDTrajectory);
+    //     field.getObject("4 Trajectory").setTrajectory(toCoral2Trajectory);
+    //     field.getObject("5 Trajectory").setTrajectory(toCTrajectory);
+    //     field.getObject("6 Trajectory").setTrajectory(toCoral3Trajectory);
     //   }
-
+    // System.out.println("TIME: " + (toETrajectory.getTotalTimeSeconds() + toCoral1Trajectory.getTotalTimeSeconds() + toDTrajectory.getTotalTimeSeconds() + toCoral2Trajectory.getTotalTimeSeconds() + toCTrajectory.getTotalTimeSeconds() + toCoral3Trajectory.getTotalTimeSeconds()));
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(
-        Commands.runOnce(() -> driveSubsystem.getPigeon2().setYaw(toReefTrajectory.getInitialPose().getRotation().getDegrees()), driveSubsystem),
-        Commands.runOnce(() -> driveSubsystem.resetPose(toReefTrajectory.getInitialPose()), driveSubsystem),
-        driveSubsystem.runTrajectoryCommand(toReefTrajectory),
-        Commands.runOnce(() -> driveSubsystem.applyRequest(() -> new ApplyRobotSpeeds()), driveSubsystem)
-    );
+    addCommands();
   }
 }

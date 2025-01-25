@@ -6,8 +6,6 @@ package frc.robot.commands.autoCommands;
 
 import java.util.List;
 
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -22,8 +20,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
@@ -33,7 +29,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class TestAutoCommand extends SequentialCommandGroup {
+public class BlueGRBCommand extends SequentialCommandGroup {
   /** Creates a new RedHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
@@ -42,30 +38,28 @@ public class TestAutoCommand extends SequentialCommandGroup {
 
   public SwerveDriveKinematics kinematics;
 
-  public TestAutoCommand(CommandSwerveDrivetrain drive) {
+  public BlueGRBCommand(CommandSwerveDrivetrain drive) {
     
     driveSubsystem = drive;
 
     kinematics = driveSubsystem.getKinematics();
-
-
 
     TrajectoryConfig forwardConfig = new TrajectoryConfig(
         AutoConstants.AUTO_MAX_VELOCITY_METERS_PER_SECOND,
         AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
         .setKinematics(kinematics);
     
-   TrajectoryConfig reverseConfig = new TrajectoryConfig(
+    TrajectoryConfig reverseConfig = new TrajectoryConfig(
         AutoConstants.AUTO_MAX_VELOCITY_METERS_PER_SECOND,
         AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
         .setKinematics(kinematics)
         .setReversed(true);
 
-    Trajectory toReefTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.B_HP_LEFT_CENTER, 
-        TrajectoryConstants.BLUE_A), 
+    Trajectory toGTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
+        TrajectoryConstants.BLUE_SINGLE_START, 
+        TrajectoryConstants.BLUE_G), 
         reverseConfig);
-
+    
 
   // Simulation
     //  field = new Field2d();
@@ -73,19 +67,14 @@ public class TestAutoCommand extends SequentialCommandGroup {
     //  if (RobotBase.isSimulation()) {
     //     SmartDashboard.putData(field);
 
-    //     field.setRobotPose(toReefTrajectory.getInitialPose());
+    //     field.setRobotPose(toGTrajectory.getInitialPose());
       
-    //     field.getObject("1b Trajectory").setTrajectory(toReefTrajectory);
+    //     field.getObject("1 Trajectory").setTrajectory(toGTrajectory);
     //   }
 
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(
-        Commands.runOnce(() -> driveSubsystem.getPigeon2().setYaw(toReefTrajectory.getInitialPose().getRotation().getDegrees()), driveSubsystem),
-        Commands.runOnce(() -> driveSubsystem.resetPose(toReefTrajectory.getInitialPose()), driveSubsystem),
-        driveSubsystem.runTrajectoryCommand(toReefTrajectory),
-        Commands.runOnce(() -> driveSubsystem.applyRequest(() -> new ApplyRobotSpeeds()), driveSubsystem)
-    );
+    addCommands();
   }
 }

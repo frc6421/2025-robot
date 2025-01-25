@@ -90,20 +90,20 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
     
 
   // Simulation
-     field = new Field2d();
+    //  field = new Field2d();
 
-     if (RobotBase.isSimulation()) {
-        SmartDashboard.putData(field);
+    //  if (RobotBase.isSimulation()) {
+    //     SmartDashboard.putData(field);
 
-        field.setRobotPose(toETrajectory.getInitialPose());
+    //     field.setRobotPose(toETrajectory.getInitialPose());
       
-        field.getObject("1 Trajectory").setTrajectory(toETrajectory);
-        field.getObject("2 Trajectory").setTrajectory(toCoral1Trajectory);
-        field.getObject("3 Trajectory").setTrajectory(toDTrajectory);
-        field.getObject("4 Trajectory").setTrajectory(toCoral2Trajectory);
-        field.getObject("5 Trajectory").setTrajectory(toCTrajectory);
-        field.getObject("6 Trajectory").setTrajectory(toCoral3Trajectory);
-      }
+    //     field.getObject("1 Trajectory").setTrajectory(toETrajectory);
+    //     field.getObject("2 Trajectory").setTrajectory(toCoral1Trajectory);
+    //     field.getObject("3 Trajectory").setTrajectory(toDTrajectory);
+    //     field.getObject("4 Trajectory").setTrajectory(toCoral2Trajectory);
+    //     field.getObject("5 Trajectory").setTrajectory(toCTrajectory);
+    //     field.getObject("6 Trajectory").setTrajectory(toCoral3Trajectory);
+    //   }
     // System.out.println("TIME: " + (toETrajectory.getTotalTimeSeconds() + toCoral1Trajectory.getTotalTimeSeconds() + toDTrajectory.getTotalTimeSeconds() + toCoral2Trajectory.getTotalTimeSeconds() + toCTrajectory.getTotalTimeSeconds() + toCoral3Trajectory.getTotalTimeSeconds()));
    
     // Add your commands in the addCommands() call, e.g.

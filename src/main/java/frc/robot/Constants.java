@@ -83,6 +83,10 @@ public static final Pose2d BLUE_L = new Pose2d (new Translation2d(Inches.of(147.
 
 public static final Pose2d RED_RB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(75.4)), new Rotation2d(Degrees.of(180)));
 public static final Pose2d RED_BB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(241.6)), new Rotation2d(Degrees.of(180)));
+public static final Pose2d BLUE_RB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(75.4)), new Rotation2d(Degrees.of(0)));
+public static final Pose2d BLUE_BB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(241.6)), new Rotation2d(Degrees.of(0)));
+public static final Pose2d RED_SINGLE_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(152)), new Rotation2d(Degrees.of(180)));
+public static final Pose2d BLUE_SINGLE_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(152)), new Rotation2d(Degrees.of(180)));
 
   }
 
