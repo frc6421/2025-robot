@@ -216,13 +216,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
-            Volts.of(.05).per(Second), // Use default ramp rate (1 V/s)
-            Volts.of(1), // Reduce dynamic step voltage to 4 V to prevent brownout
-            null, // Use default timeout (10 s)
+            Volts.of(1).per(Second),
+            Volts.of(4), 
+            Seconds.of(1), 
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdTranslation_State", state.toString())),
+            (state) -> SignalLogger.writeString("SysIdTranslation_State", state.toString())),
         new SysIdRoutine.Mechanism(
-            output -> elevatorLeftMotor.setControl(elevatorRequest.withFeedForward(output)),
+            output -> elevatorLeftMotor.setControl(voltageRequest.withOutput(output)),
             null,
             this));
 
@@ -318,6 +318,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return sysIdRoutine.quasistatic(Direction.kForward);
+  }
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.dynamic(Direction.kForward);
   }
 
   public Command setElevatorPositionCommand(TrapezoidProfile.State goalState) {
