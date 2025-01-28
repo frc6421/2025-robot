@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -19,24 +20,24 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public static class IntakeConstants {
 
-    public static final int INTAKE_MOTOR_ID = 40;
+    private static final int INTAKE_MOTOR_ID = 40;
 
-    public static final int INTAKE_GEAR_RATIO = 1;
+    private static final int INTAKE_CURRENT_LIMIT = 80;
 
-    public static final int INTAKE_CURRENT_LIMIT = 0;
+    private static final int INTAKE_STALL_LIMIT = 30;
     // Reliable speed for grabbing the pieces
-    public static final double INTAKE_IN_SPEED = 0;
+    public static final double INTAKE_IN_SPEED = 0.5;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = 0;
+    public static final double INTAKE_OUT_SPEED = -0.5; 
   }
 
   /** Creates a new intakeSubsystem. */
   public IntakeSubsystem() {
     // Identifies the motor object as a Spark Max Controller
     intakeMotor = new SparkMax(IntakeConstants.INTAKE_MOTOR_ID, MotorType.kBrushless);
-    // intakeMotor.configure(null, SparkBase.ResetMode.kResetSafeParameters, null);
 
     intakeMotorConfig = new SparkMaxConfig();
+    // TODO: Do we need Brake when have coral?
     intakeMotorConfig.idleMode(IdleMode.kCoast);// Sets the motor to freely rotate
     intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);// Setting current limit
     intakeMotorConfig.inverted(true);// Inverts
@@ -44,6 +45,8 @@ public class IntakeSubsystem extends SubsystemBase {
     // Applies the configuration to the motor
     intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
+
+    SmartDashboard.putData("Intake/Intake Speed", this);
   }
 
   /**
@@ -73,6 +76,10 @@ public class IntakeSubsystem extends SubsystemBase {
    */
   public void stopIntake() {
     intakeMotor.stopMotor();
+  }
+
+  public boolean haveCoral(){
+    return intakeMotor.getOutputCurrent()> IntakeConstants.INTAKE_STALL_LIMIT;
   }
 
   @Override

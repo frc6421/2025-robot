@@ -12,13 +12,18 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotStates;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Wristsubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -37,6 +42,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    public final Wristsubsystem wristSubsystem = new Wristsubsystem();
 
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
     private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -45,6 +52,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     private void configureBindings() {
@@ -78,11 +86,18 @@ public class RobotContainer {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+        joystick.y().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(-30))));
+        joystick.y().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())); 
+
+        joystick.x().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(30))));
+        joystick.x().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())); 
+
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
+
 
     public Command getAutonomousCommand() {
         return null;
