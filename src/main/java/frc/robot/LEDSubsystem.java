@@ -1,20 +1,32 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-
+/*
+//TODO: Various things to keep in mind:
+ * - Use the LEDs to display the auto that is currently selected
+ * - Alliance color, mostly for diagnosing at home
+ * - Planned Scoring position
+ * - Notice to Human Player for coral
+ * - More if anyone can think of them
+ */
 package frc.robot;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ElevatorSubsytem;
 
 public class LEDSubsystem extends SubsystemBase {
-
   public static class LEDConstants {
     public static int NUMBER_OF_LEDS = 100;
-                               // R   G   B
+    //TODO: add more colors     /*R   G   B
     public static int[] WHITE = {255,255,255},
                         RED   = {255, 0 , 0 },
                         GREEN = { 0 ,255, 0 },
@@ -23,20 +35,26 @@ public class LEDSubsystem extends SubsystemBase {
       RAINBOW,
       SLOW_FILL,
       RANDOM_FLICKER,
-      SNAKING_RAINBOW
+      SNAKING_RAINBOW,
+      HIGHLIGHT,
     }
-
+    //TODO: Set the desired color for the Elevator target
+    private static int[] ELEVATOR_TARGET_COLOR = {0,0,0};
   }
 
-  private static AddressableLED led;
-  private static AddressableLEDBuffer ledBuffer;
-  private int[] patternColor = {255,255,255};
-  private int[] backgroundColor = {0,0,0};
-  private int previousColorLimit;
-  private int previousSlowFillLED;
-  private int previousSnakingLED;
-  private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a longer trail
+  private static AddressableLED led;//Led Strip
+  private static AddressableLEDBuffer ledBuffer;//Buffer used before displaying to the strip
+  private int[] patternColor = {255,255,255};//Pattern color for use in the Highlight and Random
+  private int[] backgroundColor = {0,0,0};//Background color used in the Random
+  private int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
+  //previous position that the strip was at.
+  private int previousSlowFillLED;//Stores the LED that it was last used.
+  private int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
+  private double elevatorLowerPos;//Lower Elevator position as a percent of the strip
+  private double elevatorUpperPos;//Maximum Elevator position for a given scoring position as a percent
+  private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
+  private Distance setElevatorPosition;//Set point of the elevator
 
   /** Creates a new LEDSubsystem. */
   public LEDSubsystem() {
@@ -57,11 +75,11 @@ public class LEDSubsystem extends SubsystemBase {
    * @param color  The color to set to. 
    */
   public void setLED(int color[]){
-    for(int i = 0; i < ledBuffer.getLength(); i++){
-      ledBuffer.setRGB(i, color[0], color[1], color[2]);
-    }
+    //Creates a solid LED patern with the color given by the array, and applies it to the buffer
+    LEDPattern.solid(new Color(color[0],color[1],color[2])).applyTo(ledBuffer); 
     led.setData(ledBuffer);
   }
+
   /**
    * @breif   Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
    * This should be called in periodic, more realistically while disabled, since it can take away from the 
@@ -75,7 +93,7 @@ public class LEDSubsystem extends SubsystemBase {
         if(previousColorLimit > 255) previousColorLimit = 0;
         else previousColorLimit++;//Increment the color
         //Loops over the LEDs in the strip
-        for(int LEDNum = 0; LEDNum < ledBuffer.getLength(); LEDNum++){
+        for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
           //Creates a new color that gets from the rainbowCoor function, taking in the 
           //color limit and the current LED 
           int color[] = rainbowColor(previousColorLimit + LEDNum);
@@ -87,7 +105,7 @@ public class LEDSubsystem extends SubsystemBase {
       break;
 
       case SLOW_FILL: 
-        if(previousSlowFillLED > ledBuffer.getLength()) previousSlowFillLED = 0; 
+        if(previousSlowFillLED > LEDConstants.NUMBER_OF_LEDS) previousSlowFillLED = 0; 
         else previousSlowFillLED++;
         //Sets the current LED to the pattern color
         ledBuffer.setRGB(previousSlowFillLED, patternColor[0], patternColor[1], patternColor[2]);
@@ -96,30 +114,29 @@ public class LEDSubsystem extends SubsystemBase {
       break;
 
       case RANDOM_FLICKER: 
+        //Random Object
         Random random = new Random();
+        //Generating the Random LEDs to change
         int[] ledPosition = {
-          random.nextInt(ledBuffer.getLength()),
-          random.nextInt(ledBuffer.getLength()),
-          random.nextInt(ledBuffer.getLength()),
+          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
+          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
+          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
         };
-        for(int i = 0; i < ledBuffer.getLength(); i++){
-          //Checks if the three postions are what i is currently at
-          if(i == ledPosition[0] || i == ledPosition[1] || i == ledPosition[2]){
-            //If so, sets to the pattern color
-            ledBuffer.setRGB(i, patternColor[0], patternColor[1], patternColor[2]);
-          }else{
-            //If not, then set it to the background color. Also has the added benifit that it overwrites the previous pattern
-            ledBuffer.setRGB(i, backgroundColor[0], backgroundColor[1], backgroundColor[2]);
-          }
-          led.setData(ledBuffer);
-        }
+        //Clear the background
+        LEDPattern.solid(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2])).applyTo(ledBuffer);
+        //Updates the strip to the current ones
+        ledBuffer.setRGB(ledPosition[0], patternColor[0], patternColor[1], patternColor[2]);
+        ledBuffer.setRGB(ledPosition[1], patternColor[0], patternColor[1], patternColor[2]);
+        ledBuffer.setRGB(ledPosition[2], patternColor[0], patternColor[1], patternColor[2]);
+        //Update the string
+        led.setData(ledBuffer);
       break;
 
       case SNAKING_RAINBOW: 
         if(previousSnakingLED > 255) previousSnakingLED = 0;
         else previousSnakingLED++;
         //Loops over the LEDs in the strip
-        for(int LEDNum = 0; LEDNum < ledBuffer.getLength(); LEDNum++){
+        for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
           //Creates a new color that gets from the rainbowCoor function, taking in the 
           //color limit and the current LED 
           int color[] = rainbowColor(previousColorLimit + LEDNum);
@@ -135,6 +152,35 @@ public class LEDSubsystem extends SubsystemBase {
           ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
         }
         led.setData(ledBuffer);
+      break;
+
+      case HIGHLIGHT:
+        //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
+        LEDPattern.steps(Map.of(elevatorLowerPos, Color.kBlack, elevatorUpperPos, new Color(patternColor[0], patternColor[1], patternColor[2])))
+        .applyTo(ledBuffer);//Applying the pattern to the buffer
+        int upperLimit, lowerLimit;
+        //Calculating the range of LEDs to set to give the set point of the elevator
+        if(setElevatorPosition == ElevatorConstants.L1_POSITION){
+          upperLimit = LEDConstants.NUMBER_OF_LEDS * 5 / 5;
+          lowerLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+        }else if(setElevatorPosition == ElevatorConstants.L2_POSITION){
+          upperLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+          lowerLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+        }else if(setElevatorPosition == ElevatorConstants.STATION_POSITION){
+          upperLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+          lowerLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+        }else if(setElevatorPosition == ElevatorConstants.L3_POSITION){
+          upperLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+          lowerLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+        }else if(setElevatorPosition == ElevatorConstants.L4_POSITION){
+          upperLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+          lowerLimit = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
+        }
+        //Looping for the target LED colors
+        for(int i = upperLimit; i < lowerLimit; i++){
+          ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
+        }
+        led.setData(ledBuffer);//Update the strip
       break;
     }
   }
@@ -152,10 +198,28 @@ public class LEDSubsystem extends SubsystemBase {
   public void setBackgroundColor(int color[]){ backgroundColor = color; }
 
   /**
+   * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
+   * @param position  The Distance object of the Elevator position
+   * @param currentElevatorHeight  The current height of the elevator, given in meters
+   */
+  public void setElevatorLEDPosition(Distance setPosition, double currentElevatorHeight){
+    setElevatorPosition = setPosition;
+    //Calculating the maximum of which to light the strip at
+    elevatorUpperPos = (ElevatorConstants.MAX_HEIGHT - currentElevatorHeight) / ElevatorConstants.MAX_HEIGHT;
+    //Setting the lower position to be the next-lowest set scoring position
+    //L1 position, should be the lowest 
+    if(currentElevatorHeight <= ElevatorConstants.L1_POSITION) elevatorLowerPos = 0.00;
+    else if(currentElevatorHeight <= ElevatorConstants.L2_POSITION) elevatorLowerPos = 0.20;
+    else if(currentElevatorHeight <= ElevatorConstants.STATION_POSITION) elevatorLowerPos = 0.40;
+    else if(currentElevatorHeight <= ElevatorConstants.L3_POSITION) elevatorLowerPos = 0.60;
+    else if(currentElevatorHeight <= ElevatorConstants.L4_POSITION) elevatorLowerPos = 0.80;
+  }
+
+  /**
    * @breif   Turns the LEDs off
    */
   public void off(){
-    for(int i = 0; i < ledBuffer.getLength(); i++) ledBuffer.setRGB(i,0,0,0);
+    LEDPattern.solid(Color.kBlack).applyTo(ledBuffer);
     led.setData(ledBuffer);
   }
 
