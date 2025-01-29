@@ -26,11 +26,10 @@ import frc.robot.subsystems.ElevatorSubsytem;
 public class LEDSubsystem extends SubsystemBase {
   public static class LEDConstants {
     public static int NUMBER_OF_LEDS = 100;
-    //TODO: add more colors     /*R   G   B
-    public static int[] WHITE = {255,255,255},
-                        RED   = {255, 0 , 0 },
-                        GREEN = { 0 ,255, 0 },
-                        BLUE  = { 0 , 0 ,255};
+    public static int[] WHITE = {255,255,255}, 
+    PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
+    RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
+    ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
     public static enum LED_MODES{
       RAINBOW,
       SLOW_FILL,
@@ -52,9 +51,9 @@ public class LEDSubsystem extends SubsystemBase {
   private int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
   private double elevatorLowerPos;//Lower Elevator position as a percent of the strip
   private double elevatorUpperPos;//Maximum Elevator position for a given scoring position as a percent
+  private Distance setElevatorPosition;//Set point of the elevator
   private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
-  private Distance setElevatorPosition;//Set point of the elevator
 
   /** Creates a new LEDSubsystem. */
   public LEDSubsystem() {
