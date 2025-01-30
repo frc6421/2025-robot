@@ -15,15 +15,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotStates;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CageIntakeSubsystem;
+import frc.robot.subsystems.CilmbSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.Wristsubsystem;
-import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
+import frc.robot.subsystems.WristSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -43,7 +43,9 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    public final Wristsubsystem wristSubsystem = new Wristsubsystem();
+    public final WristSubsystem wristSubsystem = new WristSubsystem();
+    public final CilmbSubsystem cilmbSubsystem = new CilmbSubsystem();
+    public final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
     private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -86,10 +88,10 @@ public class RobotContainer {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        joystick.y().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(-30))));
+        joystick.y().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(-45))));
         joystick.y().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())); 
 
-        joystick.x().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(30))));
+        joystick.x().whileTrue((wristSubsystem.run(()->wristSubsystem.setAngle(45))));
         joystick.x().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())); 
 
         // reset the field-centric heading on left bumper press
