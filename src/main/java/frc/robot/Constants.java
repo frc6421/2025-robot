@@ -40,53 +40,53 @@ public final class Constants {
 
   public static class TrajectoryConstants {
   
-public static final Pose2d R_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(648.553), Inches.of(37.935)), new Rotation2d(Degrees.of(306)));
-public static final Pose2d R_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(648.553), Inches.of(279.065)), new Rotation2d(Degrees.of(414)));
-public static final Pose2d B_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(42.327), Inches.of(37.935)), new Rotation2d(Degrees.of(234)));
-public static final Pose2d B_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(42.327), Inches.of(279.065)), new Rotation2d(Degrees.of(486)));
-
-public static final Pose2d R_HP_LEFT_OUT = new Pose2d (new Translation2d(Inches.of(630.755), Inches.of(25.004)), new Rotation2d(Degrees.of(306)));
-public static final Pose2d R_HP_RIGHT_OUT = new Pose2d (new Translation2d(Inches.of(630.755), Inches.of(291.996)), new Rotation2d(Degrees.of(414)));
-public static final Pose2d B_HP_RIGHT_OUT = new Pose2d (new Translation2d(Inches.of(60.125), Inches.of(25.004)), new Rotation2d(Degrees.of(234)));
-public static final Pose2d B_HP_LEFT_OUT = new Pose2d (new Translation2d(Inches.of(60.125), Inches.of(291.996)), new Rotation2d(Degrees.of(486)));
-
-public static final Pose2d R_HP_LEFT_IN = new Pose2d (new Translation2d(Inches.of(666.351), Inches.of(50.866)), new Rotation2d(Degrees.of(306)));
-public static final Pose2d R_HP_RIGHT_IN = new Pose2d (new Translation2d(Inches.of(666.351), Inches.of(266.134)), new Rotation2d(Degrees.of(414)));
-public static final Pose2d B_HP_RIGHT_IN = new Pose2d (new Translation2d(Inches.of(24.529), Inches.of(50.866)), new Rotation2d(Degrees.of(234)));
-public static final Pose2d B_HP_LEFT_IN = new Pose2d (new Translation2d(Inches.of(24.529), Inches.of(266.134)), new Rotation2d(Degrees.of(486)));
-
-public static final Pose2d RED_A = new Pose2d (new Translation2d(Inches.of(561.87), Inches.of(152)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d RED_B = new Pose2d (new Translation2d(Inches.of(561.87), Inches.of(165)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d RED_C = new Pose2d (new Translation2d(Inches.of(543.619), Inches.of(196.57)), new Rotation2d(Degrees.of(60)));
-public static final Pose2d RED_D = new Pose2d (new Translation2d(Inches.of(532.361), Inches.of(203.07)), new Rotation2d(Degrees.of(60)));
-public static final Pose2d RED_E = new Pose2d (new Translation2d(Inches.of(495.899), Inches.of(203.07)), new Rotation2d(Degrees.of(120)));
-public static final Pose2d RED_F = new Pose2d (new Translation2d(Inches.of(484.641), Inches.of(196.57)), new Rotation2d(Degrees.of(120)));
-public static final Pose2d RED_G = new Pose2d (new Translation2d(Inches.of(466.39), Inches.of(165)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d RED_H = new Pose2d (new Translation2d(Inches.of(466.39), Inches.of(152)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d RED_I = new Pose2d (new Translation2d(Inches.of(484.641), Inches.of(120.43)), new Rotation2d(Degrees.of(240)));
-public static final Pose2d RED_J = new Pose2d (new Translation2d(Inches.of(495.899), Inches.of(113.93)), new Rotation2d(Degrees.of(240)));
-public static final Pose2d RED_K = new Pose2d (new Translation2d(Inches.of(532.361), Inches.of(113.93)), new Rotation2d(Degrees.of(300)));
-public static final Pose2d RED_L = new Pose2d (new Translation2d(Inches.of(543.619), Inches.of(120.43)), new Rotation2d(Degrees.of(300)));
-
-public static final Pose2d BLUE_A = new Pose2d (new Translation2d(Inches.of(129), Inches.of(165)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d BLUE_B = new Pose2d (new Translation2d(Inches.of(129), Inches.of(152)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d BLUE_C = new Pose2d (new Translation2d(Inches.of(147.261), Inches.of(120.43)), new Rotation2d(Degrees.of(240)));
-public static final Pose2d BLUE_D = new Pose2d (new Translation2d(Inches.of(158.519), Inches.of(113.93)), new Rotation2d(Degrees.of(240)));
-public static final Pose2d BLUE_E = new Pose2d (new Translation2d(Inches.of(194.971), Inches.of(113.93)), new Rotation2d(Degrees.of(300)));
-public static final Pose2d BLUE_F = new Pose2d (new Translation2d(Inches.of(206.229), Inches.of(120.43)), new Rotation2d(Degrees.of(300)));
-public static final Pose2d BLUE_G = new Pose2d (new Translation2d(Inches.of(224.49), Inches.of(152)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d BLUE_H = new Pose2d (new Translation2d(Inches.of(224.49), Inches.of(165)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d BLUE_I = new Pose2d (new Translation2d(Inches.of(206.229), Inches.of(196.57)), new Rotation2d(Degrees.of(60)));
-public static final Pose2d BLUE_J = new Pose2d (new Translation2d(Inches.of(194.971), Inches.of(203.07)), new Rotation2d(Degrees.of(60)));
-public static final Pose2d BLUE_K = new Pose2d (new Translation2d(Inches.of(158.519), Inches.of(203.07)), new Rotation2d(Degrees.of(120)));
-public static final Pose2d BLUE_L = new Pose2d (new Translation2d(Inches.of(147.261), Inches.of(196.57)), new Rotation2d(Degrees.of(120)));
-
-public static final Pose2d RED_RB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(75.4)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d RED_BB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(241.6)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d BLUE_RB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(75.4)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d BLUE_BB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(241.6)), new Rotation2d(Degrees.of(0)));
-public static final Pose2d RED_SINGLE_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(152)), new Rotation2d(Degrees.of(180)));
-public static final Pose2d BLUE_SINGLE_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(152)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d R_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(647.378), Inches.of(39.553)), new Rotation2d(Degrees.of(306)));
+    public static final Pose2d R_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(647.378), Inches.of(277.447)), new Rotation2d(Degrees.of(414)));
+    public static final Pose2d B_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(43.502), Inches.of(39.553)), new Rotation2d(Degrees.of(234)));
+    public static final Pose2d B_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(43.502), Inches.of(277.447)), new Rotation2d(Degrees.of(486)));
+    
+    public static final Pose2d R_HP_LEFT_OUT = new Pose2d (new Translation2d(Inches.of(629.58), Inches.of(26.622)), new Rotation2d(Degrees.of(306)));
+    public static final Pose2d R_HP_RIGHT_OUT = new Pose2d (new Translation2d(Inches.of(629.58), Inches.of(290.378)), new Rotation2d(Degrees.of(414)));
+    public static final Pose2d B_HP_RIGHT_OUT = new Pose2d (new Translation2d(Inches.of(61.3), Inches.of(26.622)), new Rotation2d(Degrees.of(234)));
+    public static final Pose2d B_HP_LEFT_OUT = new Pose2d (new Translation2d(Inches.of(61.3), Inches.of(290.378)), new Rotation2d(Degrees.of(486)));
+    
+    public static final Pose2d R_HP_LEFT_IN = new Pose2d (new Translation2d(Inches.of(665.176), Inches.of(52.484)), new Rotation2d(Degrees.of(306)));
+    public static final Pose2d R_HP_RIGHT_IN = new Pose2d (new Translation2d(Inches.of(665.176), Inches.of(264.516)), new Rotation2d(Degrees.of(414)));
+    public static final Pose2d B_HP_RIGHT_IN = new Pose2d (new Translation2d(Inches.of(25.704), Inches.of(52.484)), new Rotation2d(Degrees.of(234)));
+    public static final Pose2d B_HP_LEFT_IN = new Pose2d (new Translation2d(Inches.of(25.704), Inches.of(264.516)), new Rotation2d(Degrees.of(486)));
+    
+    public static final Pose2d RED_A = new Pose2d (new Translation2d(Inches.of(563.87), Inches.of(152)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d RED_B = new Pose2d (new Translation2d(Inches.of(563.87), Inches.of(165)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d RED_C = new Pose2d (new Translation2d(Inches.of(544.619), Inches.of(198.302)), new Rotation2d(Degrees.of(60)));
+    public static final Pose2d RED_D = new Pose2d (new Translation2d(Inches.of(533.361), Inches.of(204.802)), new Rotation2d(Degrees.of(60)));
+    public static final Pose2d RED_E = new Pose2d (new Translation2d(Inches.of(494.899), Inches.of(204.802)), new Rotation2d(Degrees.of(120)));
+    public static final Pose2d RED_F = new Pose2d (new Translation2d(Inches.of(483.641), Inches.of(198.302)), new Rotation2d(Degrees.of(120)));
+    public static final Pose2d RED_G = new Pose2d (new Translation2d(Inches.of(464.39), Inches.of(165)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d RED_H = new Pose2d (new Translation2d(Inches.of(464.39), Inches.of(152)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d RED_I = new Pose2d (new Translation2d(Inches.of(483.641), Inches.of(118.698)), new Rotation2d(Degrees.of(240)));
+    public static final Pose2d RED_J = new Pose2d (new Translation2d(Inches.of(494.899), Inches.of(112.198)), new Rotation2d(Degrees.of(240)));
+    public static final Pose2d RED_K = new Pose2d (new Translation2d(Inches.of(533.361), Inches.of(112.198)), new Rotation2d(Degrees.of(300)));
+    public static final Pose2d RED_L = new Pose2d (new Translation2d(Inches.of(544.619), Inches.of(118.698)), new Rotation2d(Degrees.of(300)));
+    
+    public static final Pose2d BLUE_A = new Pose2d (new Translation2d(Inches.of(127), Inches.of(165)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d BLUE_B = new Pose2d (new Translation2d(Inches.of(127), Inches.of(152)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d BLUE_C = new Pose2d (new Translation2d(Inches.of(146.261), Inches.of(118.698)), new Rotation2d(Degrees.of(240)));
+    public static final Pose2d BLUE_D = new Pose2d (new Translation2d(Inches.of(157.519), Inches.of(112.198)), new Rotation2d(Degrees.of(240)));
+    public static final Pose2d BLUE_E = new Pose2d (new Translation2d(Inches.of(195.971), Inches.of(112.198)), new Rotation2d(Degrees.of(300)));
+    public static final Pose2d BLUE_F = new Pose2d (new Translation2d(Inches.of(207.229), Inches.of(118.698)), new Rotation2d(Degrees.of(300)));
+    public static final Pose2d BLUE_G = new Pose2d (new Translation2d(Inches.of(226.49), Inches.of(152)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d BLUE_H = new Pose2d (new Translation2d(Inches.of(226.49), Inches.of(165)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d BLUE_I = new Pose2d (new Translation2d(Inches.of(207.229), Inches.of(198.302)), new Rotation2d(Degrees.of(60)));
+    public static final Pose2d BLUE_J = new Pose2d (new Translation2d(Inches.of(195.971), Inches.of(204.802)), new Rotation2d(Degrees.of(60)));
+    public static final Pose2d BLUE_K = new Pose2d (new Translation2d(Inches.of(157.519), Inches.of(204.802)), new Rotation2d(Degrees.of(120)));
+    public static final Pose2d BLUE_L = new Pose2d (new Translation2d(Inches.of(146.261), Inches.of(198.302)), new Rotation2d(Degrees.of(120)));
+        
+    public static final Pose2d RED_RB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(75.4)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d RED_BB_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(241.6)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d BLUE_RB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(75.4)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d BLUE_BB_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(241.6)), new Rotation2d(Degrees.of(0)));
+    public static final Pose2d RED_SINGLE_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(152)), new Rotation2d(Degrees.of(180)));
+    public static final Pose2d BLUE_SINGLE_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(152)), new Rotation2d(Degrees.of(180)));
 
   }
 
