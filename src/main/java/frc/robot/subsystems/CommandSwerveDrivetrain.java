@@ -8,15 +8,24 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,14 +36,15 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.WarriorCamera;
+import frc.robot.Constants.AutoConstants;import frc.robot.WarriorCamera;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
  */
-public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {    
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -54,6 +64,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     //public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
     //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
     public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
+
+    private final ProfiledPIDController thetaController = new ProfiledPIDController(
+      AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
+      new TrapezoidProfile.Constraints(AutoConstants.AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
+          AutoConstants.AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC));
+
+    private final HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
+      // Position controllers
+      new PIDController(AutoConstants.X_DRIVE_P, AutoConstants.X_DRIVE_I, AutoConstants.X_DRIVE_D),
+      new PIDController(AutoConstants.Y_DRIVE_P, AutoConstants.Y_DRIVE_I, AutoConstants.Y_DRIVE_D),
+      thetaController);
+
+    private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
+      .withDriveRequestType(DriveRequestType.Velocity);
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -278,4 +302,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+
+    public Command runTrajectoryCommand(Trajectory trajectory) {
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        final Timer timer = new Timer();
+        return runOnce(timer::restart).andThen(applyRequest(() -> {
+        double curTime = timer.get();
+        var desiredState = trajectory.sample(curTime);
+        ChassisSpeeds targetRobotSpeeds = holonomicDriveController.calculate(
+            getState().Pose, desiredState,
+            desiredState.poseMeters.getRotation());
+        targetRobotSpeeds = ChassisSpeeds.discretize(targetRobotSpeeds, 0.020);
+        return autoApplyRobotSpeeds.withSpeeds(targetRobotSpeeds);
+        }))
+            .until(() -> timer.hasElapsed(trajectory.getTotalTimeSeconds()));
+  }
+
 }
