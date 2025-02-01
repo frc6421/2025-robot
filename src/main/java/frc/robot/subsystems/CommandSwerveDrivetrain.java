@@ -85,12 +85,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final ProfiledPIDController xController = new ProfiledPIDController(AutoConstants.X_DRIVE_P,
         AutoConstants.X_DRIVE_I,
         AutoConstants.X_DRIVE_D,
-        new TrapezoidProfile.Constraints(1,1));
+        new TrapezoidProfile.Constraints(.1,.1));
     
     private final ProfiledPIDController yController = new ProfiledPIDController(AutoConstants.Y_DRIVE_P,
         AutoConstants.Y_DRIVE_I,
         AutoConstants.Y_DRIVE_D,
-        new TrapezoidProfile.Constraints(1,1));
+        new TrapezoidProfile.Constraints(.1,.1));
 
     private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -282,12 +282,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         xController.setTolerance(.01, .001);
         yController.setTolerance(.01, .001);
-        return run(() ->  { 
+        return applyRequest(() ->  { 
+          System.out.println(targetPose.getRotation());
           Pose2d currentPose = getState().Pose;
+          System.out.println(currentPose.getX());
           double xVelocity = xController.calculate(currentPose.getX(), targetPose.getX());
+          System.out.println(xVelocity);
           double yVelocity = yController.calculate(currentPose.getY(), targetPose.getY());
-          alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atGoal() && yController.atGoal());
+          return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(0).withVelocityY(0);
+        }).until(() -> xController.atGoal() && yController.atGoal() && alignAngleRequest.HeadingController.atSetpoint());
     }
 
     @Override

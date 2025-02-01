@@ -197,7 +197,6 @@ public class WarriorCamera implements Sendable {
 
         if (isTagReliable() && cameraEstimatedPose.get().targetsUsed.size() >= 2) {
             standardDeviation = CameraConstants.LOW_SD;
-            System.out.println("Low SD");
         } else {
             standardDeviation = CameraConstants.HIGH_SD;
         }
