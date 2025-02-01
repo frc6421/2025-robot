@@ -12,6 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -36,7 +37,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.AutoConstants;import frc.robot.WarriorCamera;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants;
+import frc.robot.WarriorCamera;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -61,9 +64,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
+    private final SwerveRequest.FieldCentricFacingAngle alignAngleRequest = new FieldCentricFacingAngle();
+
     //public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
     //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
-    public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
+    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_RIGHT_TRANSFORM3D);
 
     private final ProfiledPIDController thetaController = new ProfiledPIDController(
       AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
@@ -75,6 +80,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new PIDController(AutoConstants.X_DRIVE_P, AutoConstants.X_DRIVE_I, AutoConstants.X_DRIVE_D),
       new PIDController(AutoConstants.Y_DRIVE_P, AutoConstants.Y_DRIVE_I, AutoConstants.Y_DRIVE_D),
       thetaController);
+
+    //Align PID Controllers
+    private final ProfiledPIDController xController = new ProfiledPIDController(AutoConstants.X_DRIVE_P,
+        AutoConstants.X_DRIVE_I,
+        AutoConstants.X_DRIVE_D,
+        new TrapezoidProfile.Constraints(1,1));
+    
+    private final ProfiledPIDController yController = new ProfiledPIDController(AutoConstants.Y_DRIVE_P,
+        AutoConstants.Y_DRIVE_I,
+        AutoConstants.Y_DRIVE_D,
+        new TrapezoidProfile.Constraints(1,1));
 
     private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -261,11 +277,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
     }
 
+    public Command reefAlignCommand(Pose2d targetPose) {
+
+        alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
+        xController.setTolerance(.01, .001);
+        yController.setTolerance(.01, .001);
+        return run(() ->  { 
+          Pose2d currentPose = getState().Pose;
+          double xVelocity = xController.calculate(currentPose.getX(), targetPose.getX());
+          double yVelocity = yController.calculate(currentPose.getY(), targetPose.getY());
+          alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+        }).until(() -> xController.atGoal() && yController.atGoal());
+    }
+
     @Override
     public void periodic() {
         if(!DriverStation.isAutonomous()) {
             //updatePose(frontLeftCamera);
-            updatePose(frontLeftCamera);
+            updatePose(backRightCamera);
             //updatePose(backCamera);
         
         }

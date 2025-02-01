@@ -76,9 +76,10 @@ public class WarriorCamera implements Sendable {
         public final static double[] CAM_5_OFFSET = { 0, 0, 0, 0, 0 };
         public final static double[] CAM_6_OFFSET = { 0.28, .26, 0.23, Units.degreesToRadians(0),
                 Units.degreesToRadians(-23.24), Units.degreesToRadians(-25.8) };
-        public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.28, .26, 0.23),
+
+        public final static Transform3d BACK_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(-0.28, -.26, 0.23),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-23.24),
-                        Units.degreesToRadians(-25.8)));
+                        Units.degreesToRadians(-25.8 + 180.0)));
         private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
                 .loadField(AprilTagFields.k2025Reefscape);
         private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
