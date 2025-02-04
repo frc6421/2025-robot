@@ -33,7 +33,6 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
 
     public static final int CAGE_INTAKE_IN_SPEED = 0; // TODO: Update Numbers
-    public static final int CAGE_INTAKE_OUT_SPEED = 0; // TODO: Update Numbers
 
   }
 
@@ -64,10 +63,6 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
   public void cageIntakeInSpeed() {
     cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_IN_SPEED);
-  }
-
-  public void cageIntakeOutSpeed() {
-    cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_OUT_SPEED);
   }
 
   public void stopCageIntakeMotor() {

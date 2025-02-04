@@ -12,15 +12,22 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.RobotStates;
+import frc.robot.commands.autoCommands.BlueEDCRBCommand;
+import frc.robot.commands.autoCommands.BlueGRBCommand;
+import frc.robot.commands.autoCommands.BlueJKLBBCommand;
+import frc.robot.commands.autoCommands.RedEDCBBCommand;
+import frc.robot.commands.autoCommands.RedHRBCommand;
+import frc.robot.commands.autoCommands.RedJKLRBCommand;
+import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CageIntakeSubsystem;
-import frc.robot.subsystems.CilmbSubsystem;
+import frc.robot.subsystems.CilmbPivotSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -44,17 +51,44 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public final WristSubsystem wristSubsystem = new WristSubsystem();
-    public final CilmbSubsystem cilmbSubsystem = new CilmbSubsystem();
+    public final CilmbPivotSubsystem cilmbSubsystem = new CilmbPivotSubsystem();
     public final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
     private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 
-    public static RobotStates robotStates;
+    private final TestAutoCommand testAuto;
+    private final RedJKLRBCommand redJKLRB;
+    private final RedEDCBBCommand redEDCBB;
+    private final RedHRBCommand redHRB;
+    private final BlueJKLBBCommand blueJKLBB;
+    private final BlueEDCRBCommand blueEDCRB;
+    private final BlueGRBCommand blueGRB;
+
+    private SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         configureBindings();
-        DriverStation.silenceJoystickConnectionWarning(true);
+
+        testAuto = new TestAutoCommand(drivetrain);
+        redJKLRB = new RedJKLRBCommand(drivetrain);
+        redEDCBB = new RedEDCBBCommand(drivetrain);
+        redHRB = new RedHRBCommand(drivetrain);
+        blueJKLBB = new BlueJKLBBCommand(drivetrain);
+        blueEDCRB = new BlueEDCRBCommand(drivetrain);
+        blueGRB = new BlueGRBCommand(drivetrain);
+
+        autoChooser = new SendableChooser<>();
+        autoChooser.addOption("Auto Test", testAuto);
+        autoChooser.addOption("Red JKL RB", redJKLRB);
+        autoChooser.addOption("Red EDC BB", redEDCBB);
+        autoChooser.addOption("Red H RB", redHRB);
+        autoChooser.addOption("Blue JKL BB", blueJKLBB);
+        autoChooser.addOption("Blue EDC RB", blueEDCRB);
+        autoChooser.addOption("Blue G RB", blueGRB);
+
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
     }
 
     private void configureBindings() {
@@ -102,6 +136,6 @@ public class RobotContainer {
 
 
     public Command getAutonomousCommand() {
-        return null;
+        return autoChooser.getSelected();
     }
 }
