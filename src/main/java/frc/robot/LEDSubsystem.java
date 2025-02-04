@@ -28,12 +28,13 @@ public class LEDSubsystem extends SubsystemBase {
     public static int NUMBER_OF_LEDS = 100;
     public static int[] WHITE = {255,255,255}, 
     PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
-    RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
+    RED = {255,0,0}, GREEN = {0,255,0}, VISION_BLUE = {0,0,255},
     ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
     public static enum LED_MODES{
       RAINBOW,
       SLOW_FILL,
       RANDOM_FLICKER,
+      FLICKER,
       SNAKING_RAINBOW,
       HIGHLIGHT,
     }
@@ -54,6 +55,8 @@ public class LEDSubsystem extends SubsystemBase {
   private Distance setElevatorPosition;//Set point of the elevator
   private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
+  private int delayRobotCycles = 0;//The amount of robot cycles to wait for
+  private int currentRobotCycle;//Current amount of waited robot cycles
 
   /** Creates a new LEDSubsystem. */
   public LEDSubsystem() {
@@ -153,6 +156,18 @@ public class LEDSubsystem extends SubsystemBase {
         led.setData(ledBuffer);
       break;
 
+      case FLICKER:
+        if(currentRobotCycle == delayRobotCycles){
+          LEDPattern.solid(new Color(patternColor[0], patternColor[1], patternColor[2])).applyTo(ledBuffer);
+          led.setData(ledBuffer);
+          currentRobotCycle = 0;
+        }else{
+          LEDPattern.solid(new Color(0,0,0)).applyTo(ledBuffer);
+          led.setData(ledBuffer);
+          currentRobotCycle++;
+        }
+      break;
+
       case HIGHLIGHT:
         //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
         LEDPattern.steps(Map.of(elevatorLowerPos, Color.kBlack, elevatorUpperPos, new Color(patternColor[0], patternColor[1], patternColor[2])))
@@ -220,6 +235,24 @@ public class LEDSubsystem extends SubsystemBase {
   public void off(){
     LEDPattern.solid(Color.kBlack).applyTo(ledBuffer);
     led.setData(ledBuffer);
+  }
+
+
+  /**
+   * @breif  Sets the delay for the Random Flicker and Flicker Effects in number of Robot cycles. For instance, a 
+   * value of 1 will mean that every other robot cycle, it will flicker
+   * @param delay   The number of Robot Periodic Cycles to wait for
+   */
+  public void setPeriodicDelay(int delay){
+    delayRobotCycles = delay;
+  }
+
+  /**
+   * @breif  Gets the current delay of Robot Periodic Cycles
+   * @return  The number of Cycles
+   */
+  public int getPeriodicDelay(){
+    return delayRobotCycles;
   }
 
   //Used for determine the color to be assigned to an LED based on its position on the strip
