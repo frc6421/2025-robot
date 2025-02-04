@@ -13,7 +13,9 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -27,10 +29,12 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
@@ -64,7 +68,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    private final SwerveRequest.FieldCentricFacingAngle alignAngleRequest = new FieldCentricFacingAngle();
+    private final SwerveRequest.FieldCentricFacingAngle alignAngleRequest = new FieldCentricFacingAngle()
+    .withDriveRequestType(DriveRequestType.Velocity)
+    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
 
     //public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
     //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
@@ -85,12 +91,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final ProfiledPIDController xController = new ProfiledPIDController(AutoConstants.X_DRIVE_P,
         AutoConstants.X_DRIVE_I,
         AutoConstants.X_DRIVE_D,
-        new TrapezoidProfile.Constraints(.1,.1));
+        new TrapezoidProfile.Constraints(2.5, 2.5));
     
     private final ProfiledPIDController yController = new ProfiledPIDController(AutoConstants.Y_DRIVE_P,
         AutoConstants.Y_DRIVE_I,
         AutoConstants.Y_DRIVE_D,
-        new TrapezoidProfile.Constraints(.1,.1));
+        new TrapezoidProfile.Constraints(2.5, 2.5));
 
     private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -278,18 +284,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Command reefAlignCommand(Pose2d targetPose) {
-
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
-        xController.setTolerance(.01, .001);
-        yController.setTolerance(.01, .001);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5)); // TODO Set value
+        xController.setTolerance(.15, .1);
+        yController.setTolerance(.09, .1);
+        xController.setGoal(targetPose.getX());
+        yController.setGoal(targetPose.getY());
+        SmartDashboard.putNumber("Goal", yController.getGoal().position);
         return applyRequest(() ->  { 
-          System.out.println(targetPose.getRotation());
           Pose2d currentPose = getState().Pose;
-          System.out.println(currentPose.getX());
-          double xVelocity = xController.calculate(currentPose.getX(), targetPose.getX());
-          System.out.println(xVelocity);
-          double yVelocity = yController.calculate(currentPose.getY(), targetPose.getY());
-          return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(0).withVelocityY(0);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX()), -2, 2);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY()), -2, 2);
+
+          SmartDashboard.putNumber("Error", yController.getPositionError());
+          SmartDashboard.putNumber("setpoint", yController.getSetpoint().position);
+          SmartDashboard.putNumber("yVelocity", yVelocity);
+          return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atGoal() && yController.atGoal() && alignAngleRequest.HeadingController.atSetpoint());
     }
 

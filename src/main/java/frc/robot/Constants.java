@@ -33,7 +33,7 @@ public final class Constants {
     public static final double Y_DRIVE_I = 0;
     public static final double Y_DRIVE_D = 0.1;
 
-    public static final double THETA_P = 5.0;
+    public static final double THETA_P = 10.0;
     public static final double THETA_I = 0;
     public static final double THETA_D = 0;
   }
@@ -116,5 +116,9 @@ public final class Constants {
     public static final double BACK_OFFSETZ_MET = 0;
     public static final double BACK_PITCH = 0;
     public static final double BACK_YAW = 0;
+  }
+
+  public static class ReefAlignConstants {
+    public static final double THETA_P = 0;
   }
 }
