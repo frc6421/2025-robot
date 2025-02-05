@@ -12,22 +12,16 @@ import static edu.wpi.first.units.Units.Radians;
 import java.util.List;
 import java.util.Optional;
 
-import javax.xml.crypto.Data;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,7 +37,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.*;
-import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -51,47 +44,31 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 
 /** Add your docs here. */
 public class WarriorCamera implements Sendable {
 
     private final PhotonCamera camera;
-    private double[] cameraOffsets; // XYZ, PITCH, YAW
-    private double yaw = 0;
-    private double pitch = 0;
     private Pose2d cameraPose2d = new Pose2d();
     private List<PhotonPipelineResult> cameraResult;
     private PhotonPipelineResult latestCameraResult = new PhotonPipelineResult();
-    private Transform3d robotToCam;
     private final PhotonPoseEstimator poseEstimator;
     Optional<EstimatedRobotPose> cameraEstimatedPose;
     private Matrix<N3, N1> standardDeviation;
 
     public final static class CameraConstants {
-        public final static double[] CAM_1_OFFSET = { .26, -.19, 0, .2613, .4363 }; // X, Y, Z, ROLL, PITCH, YAW
-        public final static double[] CAM_2_OFFSET = { 0, 0, 0, 0, 0 };
-        public final static double[] CAM_3_OFFSET = { 0, 0, 0, 0, 0 };
-        public final static double[] CAM_4_OFFSET = { 0, 0, 0, 0, 0 };
-        public final static double[] CAM_5_OFFSET = { 0, 0, 0, 0, 0 };
-        public final static double[] CAM_6_OFFSET = { 0.28, .26, 0.23, Units.degreesToRadians(0),
-                Units.degreesToRadians(-23.24), Units.degreesToRadians(-25.8) };
-
         public final static Transform3d BACK_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(-0.28, -.26, 0.23),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-23.24),
                         Units.degreesToRadians(-25.8 + 180.0)));
         private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
                 .loadField(AprilTagFields.k2025Reefscape);
+
         private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
         private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
         private final static double APRILTAG_LIMIT_METERS = 5;
         private final static double MAXIMUM_AMBIGUITY = 100;
-        private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10)); // TODO Why
-                                                                                                            // is this
-                                                                                                            // 10?
-        private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10)); // TODO Why
-                                                                                                             // is this
-                                                                                                             // 10?
+        private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10));
+        private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10));
         public static final Transform2d ODOMETRY_BLUE_OFFSET = new Transform2d(Inches.of(0.0).magnitude(),
                 Inches.of(0.0).magnitude(), new Rotation2d());
         public static final Transform2d ODOMETRY_RED_OFFSET = new Transform2d(Inches.of(0.0).magnitude(),
@@ -176,9 +153,7 @@ public class WarriorCamera implements Sendable {
     }
 
     public boolean filterOdometry() {
-        // Refresh cam values before filtering
         refreshData();
-        // Is the robot in Teleop Enabled?
 
         if (!camera.isConnected()) {
             return false;

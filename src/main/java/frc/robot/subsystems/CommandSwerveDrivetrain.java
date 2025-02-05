@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
+import javax.xml.stream.util.XMLEventConsumer;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -88,16 +90,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       thetaController);
 
     //Align PID Controllers
-    private final ProfiledPIDController xController = new ProfiledPIDController(AutoConstants.X_DRIVE_P,
+    private final PIDController xController = new PIDController(AutoConstants.X_DRIVE_P,
         AutoConstants.X_DRIVE_I,
-        AutoConstants.X_DRIVE_D,
-        new TrapezoidProfile.Constraints(2.5, 2.5));
-    
-    private final ProfiledPIDController yController = new ProfiledPIDController(AutoConstants.Y_DRIVE_P,
+        AutoConstants.X_DRIVE_D);
+    private final PIDController yController = new PIDController(AutoConstants.Y_DRIVE_P,
         AutoConstants.Y_DRIVE_I,
-        AutoConstants.Y_DRIVE_D,
-        new TrapezoidProfile.Constraints(2.5, 2.5));
-
+        AutoConstants.Y_DRIVE_D);
+    
     private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity);
 
@@ -288,19 +287,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5)); // TODO Set value
         xController.setTolerance(.15, .1);
         yController.setTolerance(.09, .1);
-        xController.setGoal(targetPose.getX());
-        yController.setGoal(targetPose.getY());
-        SmartDashboard.putNumber("Goal", yController.getGoal().position);
+        // xController.setGoal(targetPose.getX());
+        // yController.setGoal(targetPose.getY());
+        // xController.reset(getState().Pose.getX());
+        // yController.reset(getState().Pose.getY());
+        //SmartDashboard.putNumber("Goal", yController.getGoal().position);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX()), -2, 2);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY()), -2, 2);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.getX()), -4.4, 4.4);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.getY()), -4.4, 4.4);
 
           SmartDashboard.putNumber("Error", yController.getPositionError());
-          SmartDashboard.putNumber("setpoint", yController.getSetpoint().position);
+          //SmartDashboard.putNumber("setpoint", yController.getSetpoint().position);
           SmartDashboard.putNumber("yVelocity", yVelocity);
           return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atGoal() && yController.atGoal() && alignAngleRequest.HeadingController.atSetpoint());
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
     }
 
     @Override
