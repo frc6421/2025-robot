@@ -27,7 +27,7 @@ import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CageIntakeSubsystem;
-import frc.robot.subsystems.CilmbPivotSubsystem;
+import frc.robot.subsystems.ClimbPivotSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -51,7 +51,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public final WristSubsystem wristSubsystem = new WristSubsystem();
-    public final CilmbPivotSubsystem cilmbSubsystem = new CilmbPivotSubsystem();
+    public final ClimbPivotSubsystem cilmbSubsystem = new ClimbPivotSubsystem();
     public final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
     private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);

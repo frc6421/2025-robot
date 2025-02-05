@@ -10,8 +10,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CageIntakeSubsystem extends SubsystemBase {
@@ -22,17 +21,11 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
   public static class CageIntakeConstants {
 
-
     private static final int CAGE_INTAKE_MOTOR_ID = 52;
 
-    private static final int CAGE_INTAKE_CURRENT_LIMIT = 0; // TODO: Update Numbers
+    private static final int CAGE_INTAKE_CURRENT_LIMIT = 80; // TODO: Update Numbers
 
-    // soft limits
-    private static double CAGE_INTAKE_FORWARD_SOFT_LIMIT = 0; // TODO: Update Numbers
-    private static double CAGE_INTAKE_REVERSE_SOFT_LIMIT = 0; // TODO: Update Numbers
-
-
-    public static final int CAGE_INTAKE_IN_SPEED = 0; // TODO: Update Numbers
+    public static final double CAGE_INTAKE_SPEED = 0.5; // TODO: Update Numbers
 
   }
 
@@ -45,15 +38,8 @@ public class CageIntakeSubsystem extends SubsystemBase {
         .smartCurrentLimit(CageIntakeConstants.CAGE_INTAKE_CURRENT_LIMIT)
         .inverted(true);
 
-    cageIntakeMotorConfig.softLimit.forwardSoftLimit(CageIntakeConstants.CAGE_INTAKE_FORWARD_SOFT_LIMIT)
-        .forwardSoftLimitEnabled(true);
-    cageIntakeMotorConfig.softLimit.reverseSoftLimit(CageIntakeConstants.CAGE_INTAKE_REVERSE_SOFT_LIMIT)
-        .forwardSoftLimitEnabled(true);
-
     cageIntakeMotor.configure(cageIntakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
-
-        SmartDashboard.putData("Cage Intake", this);
   }
 
   @Override
@@ -61,18 +47,12 @@ public class CageIntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void cageIntakeInSpeed() {
-    cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_IN_SPEED);
+  public Command cageIntakeInSpeedCommand() {
+    return this.run(() -> cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_SPEED));
   }
 
-  public void stopCageIntakeMotor() {
-    cageIntakeMotor.stopMotor();
-  }
-
-  public void intiSendable(SendableBuilder builder){
-    super.initSendable(builder);
-
-    builder.addDoubleProperty("Cage Intake Speed", () -> cageIntakeMotor.get(),null);
+  public Command stopCageIntakeMotorCommand() {
+    return this.runOnce(() -> cageIntakeMotor.stopMotor());
   }
 
 }
