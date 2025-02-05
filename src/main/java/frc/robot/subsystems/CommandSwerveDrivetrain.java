@@ -273,7 +273,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void updatePose(WarriorCamera camera) {
         if(camera.filterOdometry()) {
-                addVisionMeasurement( //TODO what does addvisionmeasurement connect to?
+                addVisionMeasurement(
                 new Pose2d(camera.getPose2d().getX(),
                 camera.getPose2d().getY(),
                 getPigeon2().getRotation2d()),
@@ -284,22 +284,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command reefAlignCommand(Pose2d targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
-        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5)); // TODO Set value
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
         xController.setTolerance(.15, .1);
         yController.setTolerance(.09, .1);
-        // xController.setGoal(targetPose.getX());
-        // yController.setGoal(targetPose.getY());
-        // xController.reset(getState().Pose.getX());
-        // yController.reset(getState().Pose.getY());
-        //SmartDashboard.putNumber("Goal", yController.getGoal().position);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.getX()), -4.4, 4.4);
           double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.getY()), -4.4, 4.4);
 
-          SmartDashboard.putNumber("Error", yController.getPositionError());
-          //SmartDashboard.putNumber("setpoint", yController.getSetpoint().position);
-          SmartDashboard.putNumber("yVelocity", yVelocity);
           return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
     }

@@ -107,10 +107,6 @@ public class WarriorCamera implements Sendable {
         }
     }
 
-    public final Object[] getPipeline() {
-        return cameraResult.toArray();
-    }
-
     public boolean hasTarget() {
         return latestCameraResult.hasTargets();
     }
