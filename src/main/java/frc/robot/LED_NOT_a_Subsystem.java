@@ -18,18 +18,19 @@ import java.util.Random;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ElevatorSubsytem;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static class LEDConstants {
     public static int NUMBER_OF_LEDS = 100;
     public static int[] WHITE = {255,255,255}, 
     PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
-    RED = {255,0,0}, GREEN = {0,255,0}, VISION_BLUE = {0,0,255},
-    ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
+    RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
+    VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
     public static enum LED_MODES{
       RAINBOW,
       SLOW_FILL,
@@ -44,22 +45,22 @@ public class LEDSubsystem extends SubsystemBase {
 
   private static AddressableLED led;//Led Strip
   private static AddressableLEDBuffer ledBuffer;//Buffer used before displaying to the strip
-  private int[] patternColor = {255,255,255};//Pattern color for use in the Highlight and Random
-  private int[] backgroundColor = {0,0,0};//Background color used in the Random
-  private int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
+  private static int[] patternColor = {255,255,255};//Pattern color for use in the Highlight and Random
+  private static int[] backgroundColor = {0,0,0};//Background color used in the Random
+  private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
-  private int previousSlowFillLED;//Stores the LED that it was last used.
-  private int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
-  private double elevatorLowerPos;//Lower Elevator position as a percent of the strip
-  private double elevatorUpperPos;//Maximum Elevator position for a given scoring position as a percent
-  private Distance setElevatorPosition;//Set point of the elevator
+  private static int previousSlowFillLED;//Stores the LED that it was last used.
+  private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
+  private static double elevatorLowerPos;//Lower Elevator position as a percent of the strip
+  private static double elevatorUpperPos;//Maximum Elevator position for a given scoring position as a percent
+  private static Distance setElevatorPosition;//Set point of the elevator
   private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
-  private int delayRobotCycles = 0;//The amount of robot cycles to wait for
-  private int currentRobotCycle;//Current amount of waited robot cycles
+  private static int delayRobotCycles = 0;//The amount of robot cycles to wait for
+  private static int currentRobotCycle;//Current amount of waited robot cycles
 
   /** Creates a new LEDSubsystem. */
-  public LEDSubsystem() {
+  public LED_NOT_a_Subsystem() {
     //Setting the pin of the Rio that the LED strip is on
     led = new AddressableLED(RIO_PIN);
     //Creating the buffer that is used for setting the data
@@ -88,72 +89,84 @@ public class LEDSubsystem extends SubsystemBase {
    * Rio processing.
    * @param mode  The LED mode to set to
    */
-  public void setLED(frc.robot.LEDSubsystem.LEDConstants.LED_MODES mode){
+  public static void setLED(frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES mode){
     switch(mode){
       case RAINBOW: 
-        //"Overflow" that sets the color limit to 0
-        if(previousColorLimit > 255) previousColorLimit = 0;
-        else previousColorLimit++;//Increment the color
-        //Loops over the LEDs in the strip
-        for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
-          //Creates a new color that gets from the rainbowCoor function, taking in the 
-          //color limit and the current LED 
-          int color[] = rainbowColor(previousColorLimit + LEDNum);
-          //Update buffer
-          ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
-        }
-        //Display the color
-        led.setData(ledBuffer);
+        if(currentRobotCycle == delayRobotCycles){
+          //"Overflow" that sets the color limit to 0
+          if(previousColorLimit > 255) previousColorLimit = 0;
+          else previousColorLimit++;//Increment the color
+          //Loops over the LEDs in the strip
+          for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
+            //Creates a new color that gets from the rainbowCoor function, taking in the 
+            //color limit and the current LED 
+            int color[] = rainbowColor(previousColorLimit + LEDNum);
+            //Update buffer
+            ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
+          }
+          //Display the color
+          led.setData(ledBuffer);
+          currentRobotCycle = 0;
+        }else currentRobotCycle++;
       break;
 
       case SLOW_FILL: 
-        if(previousSlowFillLED > LEDConstants.NUMBER_OF_LEDS) previousSlowFillLED = 0; 
-        else previousSlowFillLED++;
-        //Sets the current LED to the pattern color
-        ledBuffer.setRGB(previousSlowFillLED, patternColor[0], patternColor[1], patternColor[2]);
-        //Updates the LED strand
-        led.setData(ledBuffer);
+        if(currentRobotCycle == delayRobotCycles){
+          if(previousSlowFillLED > LEDConstants.NUMBER_OF_LEDS) previousSlowFillLED = 0; 
+          else previousSlowFillLED++;
+          //Sets the current LED to the pattern color
+          ledBuffer.setRGB(previousSlowFillLED, patternColor[0], patternColor[1], patternColor[2]);
+          //Updates the LED strand
+          led.setData(ledBuffer);
+          currentRobotCycle = 0;
+        }else currentRobotCycle++;
       break;
 
       case RANDOM_FLICKER: 
-        //Random Object
-        Random random = new Random();
-        //Generating the Random LEDs to change
-        int[] ledPosition = {
-          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
-          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
-          random.nextInt(LEDConstants.NUMBER_OF_LEDS),
-        };
-        //Clear the background
-        LEDPattern.solid(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2])).applyTo(ledBuffer);
-        //Updates the strip to the current ones
-        ledBuffer.setRGB(ledPosition[0], patternColor[0], patternColor[1], patternColor[2]);
-        ledBuffer.setRGB(ledPosition[1], patternColor[0], patternColor[1], patternColor[2]);
-        ledBuffer.setRGB(ledPosition[2], patternColor[0], patternColor[1], patternColor[2]);
-        //Update the string
-        led.setData(ledBuffer);
+        if(currentRobotCycle == delayRobotCycles){
+          //Random Object
+          Random random = new Random();
+          //Generating the Random LEDs to change
+          int[] ledPosition = {
+            random.nextInt(LEDConstants.NUMBER_OF_LEDS),
+            random.nextInt(LEDConstants.NUMBER_OF_LEDS),
+            random.nextInt(LEDConstants.NUMBER_OF_LEDS),
+          };
+          //Clear the background
+          LEDPattern.solid(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2])).applyTo(ledBuffer);
+          //Updates the strip to the current ones
+          ledBuffer.setRGB(ledPosition[0], patternColor[0], patternColor[1], patternColor[2]);
+          ledBuffer.setRGB(ledPosition[1], patternColor[0], patternColor[1], patternColor[2]);
+          ledBuffer.setRGB(ledPosition[2], patternColor[0], patternColor[1], patternColor[2]);
+          //Update the string
+          led.setData(ledBuffer);
+          currentRobotCycle = 0;
+        }else currentRobotCycle++;
       break;
 
       case SNAKING_RAINBOW: 
-        if(previousSnakingLED > 255) previousSnakingLED = 0;
-        else previousSnakingLED++;
-        //Loops over the LEDs in the strip
-        for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
-          //Creates a new color that gets from the rainbowCoor function, taking in the 
-          //color limit and the current LED 
-          int color[] = rainbowColor(previousColorLimit + LEDNum);
-          //Adding the tail by decreasing the "brightness" by 10 for each LED
-          color[0] -= previousSnakingLED * TRAILING_BRIGHTNESS;
-          color[1] -= previousSnakingLED * TRAILING_BRIGHTNESS;
-          color[2] -= previousSnakingLED * TRAILING_BRIGHTNESS;
-          //Verify that it is not negative. If so, make it 0
-          if(color[0] < 0) color[0] = 0;
-          if(color[1] < 0) color[1] = 0;
-          if(color[2] < 0) color[2] = 0;
-          //Update buffer
-          ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
-        }
-        led.setData(ledBuffer);
+        if(currentRobotCycle == delayRobotCycles){
+          if(previousSnakingLED > 255) previousSnakingLED = 0;
+          else previousSnakingLED++;
+          //Loops over the LEDs in the strip
+          for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
+            //Creates a new color that gets from the rainbowCoor function, taking in the 
+            //color limit and the current LED 
+            int color[] = rainbowColor(previousColorLimit + LEDNum);
+            //Adding the tail by decreasing the "brightness" by 10 for each LED
+            color[0] -= previousSnakingLED * TRAILING_BRIGHTNESS;
+            color[1] -= previousSnakingLED * TRAILING_BRIGHTNESS;
+            color[2] -= previousSnakingLED * TRAILING_BRIGHTNESS;
+            //Verify that it is not negative. If so, make it 0
+            if(color[0] < 0) color[0] = 0;
+            if(color[1] < 0) color[1] = 0;
+            if(color[2] < 0) color[2] = 0;
+            //Update buffer
+            ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
+            currentRobotCycle = 0;
+          }
+          led.setData(ledBuffer);
+        }else currentRobotCycle++;
       break;
 
       case FLICKER:
@@ -203,13 +216,13 @@ public class LEDSubsystem extends SubsystemBase {
    * @breif   Sets the color of the pattern
    * @param color   The color to set to
    */
-  public void setPatternColor(int color[]){ patternColor = color; }
+  public static void setPatternColor(int color[]){ patternColor = color; }
 
   /**
    * @breif   Sets the color of the background when using the random flicker
    * @param color   The color to set to
    */
-  public void setBackgroundColor(int color[]){ backgroundColor = color; }
+  public static void setBackgroundColor(int color[]){ backgroundColor = color; }
 
   /**
    * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
@@ -243,21 +256,11 @@ public class LEDSubsystem extends SubsystemBase {
    * value of 1 will mean that every other robot cycle, it will flicker
    * @param delay   The number of Robot Periodic Cycles to wait for
    */
-  public void setPeriodicDelay(int delay){
-    delayRobotCycles = delay;
-  }
-
-  /**
-   * @breif  Gets the current delay of Robot Periodic Cycles
-   * @return  The number of Cycles
-   */
-  public int getPeriodicDelay(){
-    return delayRobotCycles;
-  }
+  public static void setPeriodicDelay(int delay){ delayRobotCycles = delay; }
 
   //Used for determine the color to be assigned to an LED based on its position on the strip
   //and the current color limit
-  private int[] rainbowColor(int wheelPos){
+  private static int[] rainbowColor(int wheelPos){
     int r, g, b;
     if(wheelPos < 85) {
       r = wheelPos * 3;
@@ -282,7 +285,7 @@ public class LEDSubsystem extends SubsystemBase {
   
   @Override
   public void periodic() {
-    //Nothing in here, for now...
+    //Nothing in here...
   }
 }
 
