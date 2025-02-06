@@ -12,6 +12,8 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,6 +21,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimbPivotSubsystem extends SubsystemBase {
@@ -29,6 +32,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   private final TalonFXConfiguration leftPivotMotorConfig;
   private final TalonFXConfiguration rightPivotMotorConfig;
 
+  private final VoltageOut voltageRequest;
   public static class ClimbPivotConstants {
 
     private static final int LEFT_PIVOT_MOTOR_ID = 50;
@@ -44,19 +48,11 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withSupplyCurrentLimitEnable(true);
 
     // soft limits
-    private static final double LEFT_PIVOT_FORWARD_SOFT_LIMIT = 120; // TODO: Update Numbers
-    private static final double LEFT_PIVOT_REVERSE_SOFT_LIMIT = 0; // TODO: Update Numbers
-    private static final double RIGHT_PIVOT_FORWARD_SOFT_LIMIT = 120; // TODO: Update Numbers
-    private static final double RIGHT_PIVOT_REVERSE_SOFT_LIMIT = 0; // TODO: Update Numbers
+    public static final double RIGHT_PIVOT_FORWARD_SOFT_LIMIT = 75; // TODO: Update Numbers
+    public static final double RIGHT_PIVOT_REVERSE_SOFT_LIMIT = 0; // TODO: Update Numbers
 
     private static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS = new FeedbackConfigs()
         .withSensorToMechanismRatio(ClimbPivotConstants.CLIMB_GEAR_RATIO);
-
-    private static final SoftwareLimitSwitchConfigs LEFT_PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
-        .withForwardSoftLimitThreshold(ClimbPivotConstants.LEFT_PIVOT_FORWARD_SOFT_LIMIT)
-        .withForwardSoftLimitEnable(true)
-        .withReverseSoftLimitThreshold(ClimbPivotConstants.LEFT_PIVOT_REVERSE_SOFT_LIMIT)
-        .withReverseSoftLimitEnable(true);
 
     private static final SoftwareLimitSwitchConfigs RIGHT_PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitThreshold(ClimbPivotConstants.RIGHT_PIVOT_FORWARD_SOFT_LIMIT)
@@ -82,7 +78,6 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     leftPivotMotorConfig = new TalonFXConfiguration()
         .withCurrentLimits(ClimbPivotConstants.PIVOT_CURRENT_CONFIGS)
         .withMotorOutput(ClimbPivotConstants.LEFT_PIVOT_MOTOR_CONFIGS)
-        .withSoftwareLimitSwitch(ClimbPivotConstants.LEFT_PIVOT_SOFT_LIMIT_CONFIGS)
         .withFeedback(ClimbPivotConstants.CLIMB_FEEDBACK_CONFIGS);
 
     rightPivotMotorConfig = new TalonFXConfiguration()
@@ -97,6 +92,8 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     Follower follower = new Follower(rightPivotMotor.getDeviceID(), true);
     leftPivotMotor.setControl(follower);
 
+    voltageRequest = new VoltageOut(0);
+
     SmartDashboard.putData("Climb Pivots", this);
   }
 
@@ -105,9 +102,16 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void setPosition(double position) {
-    leftPivotMotor.setPosition(ClimbPivotConstants.LEFT_PIVOT_REVERSE_SOFT_LIMIT);
-    rightPivotMotor.setPosition(ClimbPivotConstants.RIGHT_PIVOT_REVERSE_SOFT_LIMIT);
+  public Command setVoltageCommand(double voltage) {
+    return this.run(() -> rightPivotMotor.setControl(voltageRequest.withOutput(voltage)));
+  }
+
+  public boolean isInPosition(){
+    return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.RIGHT_PIVOT_FORWARD_SOFT_LIMIT;
+  }
+
+  public boolean isOutPosition(){
+    return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.RIGHT_PIVOT_REVERSE_SOFT_LIMIT;
   }
 
   public void stopPivotMotors() {

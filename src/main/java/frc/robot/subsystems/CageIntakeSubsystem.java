@@ -10,8 +10,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 
 public class CageIntakeSubsystem extends SubsystemBase {
 
@@ -27,6 +29,8 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
     public static final double CAGE_INTAKE_SPEED = 0.5; // TODO: Update Numbers
 
+    public static final double CAGE_STALL_LIMIT = 50;
+
   }
 
   /** Creates a new CilmbSubsystem. */
@@ -40,6 +44,8 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
     cageIntakeMotor.configure(cageIntakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
+
+    SmartDashboard.putNumber("Current", cageIntakeMotor.getOutputCurrent());
   }
 
   @Override
@@ -51,6 +57,10 @@ public class CageIntakeSubsystem extends SubsystemBase {
     return this.run(() -> cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_SPEED));
   }
 
+    public boolean haveCage(){
+    return cageIntakeMotor.getOutputCurrent()> CageIntakeConstants.CAGE_STALL_LIMIT;
+  }
+ 
   public Command stopCageIntakeMotorCommand() {
     return this.runOnce(() -> cageIntakeMotor.stopMotor());
   }
