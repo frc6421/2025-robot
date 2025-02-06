@@ -242,9 +242,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorChooser.addOption("Coral Station", ElevatorConstants.STATION_GOAL);
 
     SmartDashboard.putData("Elevator", this);
-    SmartDashboard.putData("Elevator/Elevator2d", elevator2d);
+    // SmartDashboard.putData("Elevator/Elevator2d", elevator2d);
     SmartDashboard.putData("Elevator/ElevatorChooser", elevatorChooser);
     SmartDashboard.putNumber("Elevator/ElevatorSetPoint", currentElevatorState.position);
+    SmartDashboard.putNumber("Elevator/ElevatorStatorCurrent", elevatorLeftMotor.getStatorCurrent().getValueAsDouble());
   }
 
   /**
@@ -333,6 +334,12 @@ public class ElevatorSubsystem extends SubsystemBase {
           elevatorLeftMotor.setControl(elevatorRequest.withPosition(currentElevatorState.position));
         }))
         .until(() -> timer.hasElapsed(elevatorProfile.totalTime()));
+  }
+
+  public Command setElevatorVoltage(double voltage) {
+    return run(() -> {
+      elevatorLeftMotor.setVoltage(voltage);
+    });
   }
 
   @Override
