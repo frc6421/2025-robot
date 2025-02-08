@@ -108,6 +108,12 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_E),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_D), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_C)
+    );
   }
 }

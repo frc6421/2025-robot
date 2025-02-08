@@ -108,6 +108,12 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_E),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_D), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_C)
+    );
   }
 }

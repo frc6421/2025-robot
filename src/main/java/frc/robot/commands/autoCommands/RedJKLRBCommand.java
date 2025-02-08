@@ -106,6 +106,12 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_K), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_L)
+    );
   }
 }
