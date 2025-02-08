@@ -13,7 +13,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 
 public class CageIntakeSubsystem extends SubsystemBase {
 
@@ -45,7 +44,7 @@ public class CageIntakeSubsystem extends SubsystemBase {
     cageIntakeMotor.configure(cageIntakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
 
-    SmartDashboard.putNumber("Current", cageIntakeMotor.getOutputCurrent());
+    SmartDashboard.putNumber("CageMotor/Current", cageIntakeMotor.getOutputCurrent());
   }
 
   @Override
@@ -53,14 +52,26 @@ public class CageIntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
+  /**
+   * Run Intake at set duty cycle.
+   * </p>
+   * 02/07/2025: Set to 0.5 or 50%.
+   */
   public Command cageIntakeInSpeedCommand() {
     return this.run(() -> cageIntakeMotor.set(CageIntakeConstants.CAGE_INTAKE_SPEED));
   }
 
-    public boolean haveCage(){
-    return cageIntakeMotor.getOutputCurrent()> CageIntakeConstants.CAGE_STALL_LIMIT;
+  /**
+   * Determine if we have the cage in the intake based on the motors output
+   * current</p>
+   * TODO: Should there be a filter in case of spikes in current? 
+   * 
+   * @return true if current greater than stall limit.
+   */
+  public boolean haveCage() {
+    return cageIntakeMotor.getOutputCurrent() > CageIntakeConstants.CAGE_STALL_LIMIT;
   }
- 
+
   public Command stopCageIntakeMotorCommand() {
     return this.runOnce(() -> cageIntakeMotor.stopMotor());
   }
