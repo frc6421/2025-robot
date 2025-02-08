@@ -4,11 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
-import javax.xml.stream.util.XMLEventConsumer;
-
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -22,18 +19,14 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,8 +36,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants;
 import frc.robot.WarriorCamera;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -90,10 +83,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       thetaController);
 
     //Align PID Controllers
-    private final PIDController xController = new PIDController(AutoConstants.X_DRIVE_P,
+    private final PIDController xController = new PIDController(AlignConstants.ALIGN_P,
         AutoConstants.X_DRIVE_I,
         AutoConstants.X_DRIVE_D);
-    private final PIDController yController = new PIDController(AutoConstants.Y_DRIVE_P,
+    private final PIDController yController = new PIDController(AlignConstants.ALIGN_P,
         AutoConstants.Y_DRIVE_I,
         AutoConstants.Y_DRIVE_D);
     
@@ -180,6 +173,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        SmartDashboard.putData("Reset Gyro", resetGyro());
         
     }
 
@@ -282,18 +276,36 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
     }
 
-    public Command reefAlignCommand(Pose2d targetPose) {
+    public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
         xController.setTolerance(.15, .1);
         yController.setTolerance(.09, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.getX()), -4.4, 4.4);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.getY()), -4.4, 4.4);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
 
-          return alignAngleRequest.withTargetDirection(targetPose.getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+          return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+    }
+
+    public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
+        alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
+        xController.setTolerance(.15, .1);
+        yController.setTolerance(.09, .1);
+        return applyRequest(() ->  { 
+          Pose2d currentPose = getState().Pose;
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
+
+          return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+    }
+
+    public Command resetGyro() {
+        return runOnce(() -> getPigeon2().reset());
     }
 
     @Override

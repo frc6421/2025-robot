@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
@@ -58,9 +60,10 @@ public class RobotContainer {
     private final BlueGRBCommand blueGRB;
 
     private SendableChooser<Command> autoChooser;
+    private SendableChooser<Pose2d> redPositionChooser;
+    private SendableChooser<Pose2d> redSourceChooser;
 
     public RobotContainer() {
-        configureBindings();
 
         testAuto = new TestAutoCommand(drivetrain);
         redJKLRB = new RedJKLRBCommand(drivetrain);
@@ -79,14 +82,40 @@ public class RobotContainer {
         autoChooser.addOption("Blue EDC RB", blueEDCRB);
         autoChooser.addOption("Blue G RB", blueGRB);
 
+        redPositionChooser = new SendableChooser<>();
+        redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
+        redPositionChooser.addOption("B", TrajectoryConstants.RED_B);
+        redPositionChooser.addOption("C", TrajectoryConstants.RED_C);
+        redPositionChooser.addOption("D", TrajectoryConstants.RED_D);
+        redPositionChooser.addOption("E", TrajectoryConstants.RED_E);
+        redPositionChooser.addOption("F", TrajectoryConstants.RED_F);
+        redPositionChooser.addOption("G", TrajectoryConstants.RED_G);
+        redPositionChooser.addOption("H", TrajectoryConstants.RED_H);
+        redPositionChooser.addOption("I", TrajectoryConstants.RED_I);
+        redPositionChooser.addOption("J", TrajectoryConstants.RED_J);
+        redPositionChooser.addOption("K", TrajectoryConstants.RED_K);
+        redPositionChooser.addOption("L", TrajectoryConstants.RED_L);
+
+        redSourceChooser = new SendableChooser<>();
+        redSourceChooser.setDefaultOption("1", TrajectoryConstants.R_HP_LEFT_OUT);
+        redSourceChooser.addOption("2", TrajectoryConstants.R_HP_LEFT_CENTER);
+        redSourceChooser.addOption("3", TrajectoryConstants.R_HP_LEFT_IN);
+        redSourceChooser.addOption("4", TrajectoryConstants.R_HP_RIGHT_IN);
+        redSourceChooser.addOption("5", TrajectoryConstants.R_HP_RIGHT_CENTER);
+        redSourceChooser.addOption("6", TrajectoryConstants.R_HP_RIGHT_OUT);
+
         SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putData("Position Chooser", redPositionChooser);
+        SmartDashboard.putData("Source Chooser", redSourceChooser);
         SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
+
+        configureBindings();
     }
 
     private void configureBindings() {
 
-        joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
-        joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
+        // joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
+        // joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -98,10 +127,10 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -110,14 +139,23 @@ public class RobotContainer {
         // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(Constants.TrajectoryConstants.RED_F));
+        joystick.rightBumper().onTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+        joystick.leftBumper().onTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        //joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
+    }
+
+    public Pose2d getSelectedPoseCommand() {
+        return redPositionChooser.getSelected();
+    }
+
+    public Pose2d getSelectedSource() {
+        return redSourceChooser.getSelected();
     }
 }

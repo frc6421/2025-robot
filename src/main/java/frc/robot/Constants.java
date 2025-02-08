@@ -38,6 +38,10 @@ public final class Constants {
     public static final double THETA_D = 0;
   }
 
+  public static class AlignConstants {
+    public static final double ALIGN_P = 4;
+  }
+
   public static class TrajectoryConstants {
   
     public static final Pose2d R_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(647.378), Inches.of(39.553)), new Rotation2d(Degrees.of(306)));
