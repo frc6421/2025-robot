@@ -20,18 +20,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,15 +46,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   private PositionVoltage elevatorRequest;// Voltage to maintian the set point
   private VoltageOut voltageRequest;
 
-  private final Mechanism2d elevator2d;// Mechanism 2D object of the elevator
-  private final MechanismRoot2d elevatorRoot;// Root for the Mechanism
-  private final MechanismLigament2d elevatorLigament;// Ligament for the elevator
-
   private final SendableChooser<TrapezoidProfile.State> elevatorChooser;
 
   private final SysIdRoutine sysIdRoutine;
 
-  private static final class ElevatorConstants {
+  public static final class ElevatorConstants {
     // CAN ID's
     private static final int ELEVATOR_LEFT_CAN_ID = 20;
     private static final int ELEVATOR_RIGHT_CAN_ID = 21;
@@ -72,14 +59,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double ELEVATOR_GEAR_RATIO = 12.0;
     private static final Distance ELEVATOR_SPROCKET_DIAMETER = Inches.of(1.5); // TODO confirm this
 
-    // How many rotations are needed to make the elevator move 1 meter in any
-    // direction
     private static final Distance METERS_PER_ROTATION = ELEVATOR_SPROCKET_DIAMETER.times(Math.PI)
         .div(ELEVATOR_GEAR_RATIO);
 
     // Maximum and minimum extension of the elevator, in meters
     private static final Distance MAX_HEIGHT = Inches.of(82); // TODO get value
     private static final Distance MIN_HEIGHT = Inches.of(0); // TODO get value
+    // Maximum and minimum extension of the elevator, in rotations
+    private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT.magnitude() / METERS_PER_ROTATION.magnitude();
+    private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT.magnitude() / METERS_PER_ROTATION.magnitude();
 
     // Current limit of either motor
     private static final Current CURRENT_LIMIT = Amps.of(60);
@@ -90,11 +78,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withSupplyCurrentLimitEnable(true);
 
     private static final SoftwareLimitSwitchConfigs ELEVATOR_SOFT_LIMITS_CONFIG = new SoftwareLimitSwitchConfigs()
-        .withReverseSoftLimitThreshold(
-            ElevatorConstants.MIN_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude())
+        .withReverseSoftLimitThreshold(ElevatorConstants.MIN_HEIGHT_ROTATIONS)
         .withReverseSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(
-            ElevatorConstants.MAX_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude())
+        .withForwardSoftLimitThreshold(ElevatorConstants.MAX_HEIGHT_ROTATIONS)
         .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
@@ -136,32 +122,33 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Positions of the different Coral Branches in relation to the robot
 
-    private static final Distance STATION_POSITION = Inches.of(0);
+    private static final Distance STATION_POSITION = Inches.of(25);
     private static final Distance L1_POSITION = Inches.of(0);
     private static final Distance L2_POSITION = Inches.of(0);
     private static final Distance L3_POSITION = Inches.of(0);
     private static final Distance L4_POSITION = Inches.of(0);
 
-    // Maximum velocity of the Motors, in Rotations per Second
-    private static final double MAX_VELOCITY_RPS = 0;
+    // For trapezoid profile constrants.
+    /** Maximum velocity of the Motors, in Rotations per second */
+    private static final double MAX_VELOCITY_RPS = 10;
 
-    // Maximum acceleration of the Motors, in Rotations per Second
-    private static final double MAX_ACCEL_RPS = 0;
+    /** Maximum acceleration of the Motors, in Rotations per second per second */
+    private static final double MAX_ACCEL_RPS = 10;
 
-    private static final Voltage MAX_VOLTS = Volts.of(8);
-
+    
     // Creates new set states for the Trapezoid Profile
-    private static final TrapezoidProfile.State BOTTOM_GOAL = new TrapezoidProfile.State(MIN_HEIGHT.magnitude(), 0);
-    private static final TrapezoidProfile.State STATION_GOAL = new TrapezoidProfile.State(STATION_POSITION.magnitude(),
-        0);
-    private static final TrapezoidProfile.State L1_GOAL = new TrapezoidProfile.State(L1_POSITION.magnitude(), 0);
+    public static final TrapezoidProfile.State BOTTOM_GOAL = new TrapezoidProfile.State(MIN_HEIGHT_ROTATIONS, 0);
+    private static final TrapezoidProfile.State STATION_GOAL = new TrapezoidProfile.State(STATION_POSITION.magnitude() / METERS_PER_ROTATION.magnitude(),
+    0);
+    public static final TrapezoidProfile.State L1_GOAL = new TrapezoidProfile.State(L1_POSITION.magnitude(), 0);
     private static final TrapezoidProfile.State L2_GOAL = new TrapezoidProfile.State(L2_POSITION.magnitude(), 0);
     private static final TrapezoidProfile.State L3_GOAL = new TrapezoidProfile.State(L3_POSITION.magnitude(), 0);
     private static final TrapezoidProfile.State L4_GOAL = new TrapezoidProfile.State(L4_POSITION.magnitude(), 0);
     // TODO do we need algae states?
+    
+    private static final Voltage MAX_VOLTS = Volts.of(11);
   }
 
-  // SysID
 
   /** Creates a new Elevator. */
   public ElevatorSubsystem() {
@@ -169,6 +156,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeftMotor = new TalonFX(ElevatorConstants.ELEVATOR_LEFT_CAN_ID);
     elevatorRightMotor = new TalonFX(ElevatorConstants.ELEVATOR_RIGHT_CAN_ID);
 
+    // Set controller to default.
     elevatorLeftMotor.getConfigurator().apply(new TalonFXConfiguration());
     elevatorRightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
@@ -217,21 +205,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
             Volts.of(1).per(Second),
-            Volts.of(4), 
-            Seconds.of(1), 
+            Volts.of(4),
+            Seconds.of(1),
             // Log state with SignalLogger class
             (state) -> SignalLogger.writeString("SysIdTranslation_State", state.toString())),
         new SysIdRoutine.Mechanism(
             output -> elevatorLeftMotor.setControl(voltageRequest.withOutput(output)),
             null,
             this));
-
-    // Mechanism 2d
-    elevator2d = new Mechanism2d(1, 1);// Creates a canvase of width 1 and height 1
-    elevatorRoot = elevator2d.getRoot("Base", 0.5, 0);// Name of the root with a position of (0.5,0)
-
-    // Appends a mechanism to the Elevator Ligament and creates a new Ligament 2D
-    elevatorLigament = elevatorRoot.append(new MechanismLigament2d("ElevatorExt", 1, 90));
 
     elevatorChooser = new SendableChooser<TrapezoidProfile.State>();
     elevatorChooser.addOption("-----L4-----", ElevatorConstants.L4_GOAL);
@@ -242,21 +223,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorChooser.addOption("Coral Station", ElevatorConstants.STATION_GOAL);
 
     SmartDashboard.putData("Elevator", this);
-    // SmartDashboard.putData("Elevator/Elevator2d", elevator2d);
     SmartDashboard.putData("Elevator/ElevatorChooser", elevatorChooser);
-    SmartDashboard.putNumber("Elevator/ElevatorSetPoint", currentElevatorState.position);
-    SmartDashboard.putNumber("Elevator/ElevatorStatorCurrent", elevatorLeftMotor.getStatorCurrent().getValueAsDouble());
   }
+
+  // Get methods \\
 
   /**
    * Gets the current rotation of desired motor in rotations
    * 
    * @param rotations - the motor you want rotations of
-   */
-  /**
-   * Gets the # rotations of the Elevator Motors
-   * 
-   * @return The # Rotations
    */
   private Angle getElevatorRotations() {
     return elevatorLeftMotor.getPosition().refresh().getValue();
@@ -279,16 +254,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     return elevatorChooser.getSelected();
   }
 
+  // Set methods \\
+
   /**
-   * @breif Stops the elevator from moving
+   * Stops the elevator from moving
    */
   public void stopElevator() {
     elevatorLeftMotor.stopMotor();
   }
 
   /**
-   * @breif Sets the position, rotation, and velocity of the Elevator's Trapezoid
-   *        Profile
+   * Sets the position, rotation, and velocity of the Elevator's Trapezoid Profile
+   * 
    * @param goal The goal for the Trapezoid Profile. Given from the
    *             TrapezoidProfile.State, where the possible options are
    *             STATION_GOAL, BOTTOM
@@ -306,20 +283,16 @@ public class ElevatorSubsystem extends SubsystemBase {
   /**
    * Set the elevator position in rotations
    * 
-   * @param rotations - number of {@code}rotations{@code} you want the elevator to
-   *                  go
-   */
-  /**
-   * @breif Sets the elevator position, in rotations
-   * @param rotations Number of rotations to move the Elevator by
+   * @param rotations number of rotations you want the elevator to go
    */
   public void setElevatorPosition(double rotations) {
-    elevatorLeftMotor.setControl(elevatorRequest.withPosition(rotations).withVelocity(.01));
+    elevatorLeftMotor.setControl(elevatorRequest.withPosition(rotations).withVelocity(0.1));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return sysIdRoutine.quasistatic(Direction.kForward);
   }
+
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysIdRoutine.dynamic(Direction.kForward);
   }
@@ -348,14 +321,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    super.initSendable(builder);
-    // builder.addDoubleProperty("Elevator Current Position Rotations", () ->
-    // getElevatorRotations().magnitude(), null);
-    // builder.addDoubleProperty("Elevator Current Position Meters", () ->
-    // getElevatorHeight().magnitude(), null);
-    // builder.addDoubleProperty("Elevator Goal Position Meters", () ->
-    // getSelectedState().position, null);
-    // builder.addDoubleProperty("Elevator Motor Velocity", () ->
-    // getElevatorVelocity().magnitude(), null);
+    builder.addDoubleProperty("Elevator Current Position Rotations", () ->
+    getElevatorRotations().magnitude(), null);
+    builder.addDoubleProperty("Elevator Current Position Meters", () ->
+    getElevatorHeight().magnitude(), null);
+    builder.addDoubleProperty("Elevator Goal Position Meters", () ->
+    getSelectedState().position, null);
+    builder.addDoubleProperty("Elevator SetPoint", () -> currentElevatorState.position, null);
+    builder.addDoubleProperty("Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
   }
 }

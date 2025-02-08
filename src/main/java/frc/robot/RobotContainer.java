@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -64,10 +65,10 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -86,6 +87,9 @@ public class RobotContainer {
 
         joystick.y().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
         joystick.y().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+
+        joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
+        joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
