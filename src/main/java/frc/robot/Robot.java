@@ -14,6 +14,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private final LED_NOT_a_Subsystem leds = new LED_NOT_a_Subsystem();
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -25,16 +26,16 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
   }
-/***********LEDs IN PERIODIC************/
+  
   @Override
   public void disabledInit() {
-    LED_NOT_a_Subsystem.setDisabledPattern();
+    leds.setDisabledPattern();
   }
 
   @Override
   public void disabledPeriodic() {
     //Updates the strip(s). And by that I mean it runs the method and changes the colors on the strip.
-    LED_NOT_a_Subsystem.setLED(LED_NOT_a_Subsystem.getDisabledPattern());
+    leds.setLED(leds.getDisabledPattern());
   }
 
   @Override
