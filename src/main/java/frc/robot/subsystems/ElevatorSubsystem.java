@@ -20,9 +20,11 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,17 +59,18 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Gear ratio
     private static final double ELEVATOR_GEAR_RATIO = 12.0;
-    private static final Distance ELEVATOR_SPROCKET_DIAMETER = Inches.of(1.5); // TODO confirm this
+    private static final double ELEVATOR_SPROCKET_DIAMETER = 1.504;
+    private static final double ELEVATOR_STAGE_RATIO = 3.0;
+    private static final double ELEVATOR_INCHES_PER_ROTATION = (ELEVATOR_SPROCKET_DIAMETER * Math.PI * ELEVATOR_STAGE_RATIO) / ELEVATOR_GEAR_RATIO;
 
-    private static final Distance METERS_PER_ROTATION = ELEVATOR_SPROCKET_DIAMETER.times(Math.PI)
-        .div(ELEVATOR_GEAR_RATIO);
+    private static final double METERS_PER_ROTATION = Units.inchesToMeters(ELEVATOR_INCHES_PER_ROTATION);
 
     // Maximum and minimum extension of the elevator, in meters
-    private static final Distance MAX_HEIGHT = Inches.of(82); // TODO get value
-    private static final Distance MIN_HEIGHT = Inches.of(0); // TODO get value
+    private static final double MAX_HEIGHT = Units.inchesToMeters(36); // TODO get value
+    private static final double MIN_HEIGHT = Units.inchesToMeters(0); // TODO get value
     // Maximum and minimum extension of the elevator, in rotations
-    private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT.magnitude() / METERS_PER_ROTATION.magnitude();
-    private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT.magnitude() / METERS_PER_ROTATION.magnitude();
+    private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT / METERS_PER_ROTATION;
+    private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT / METERS_PER_ROTATION;
 
     // Current limit of either motor
     private static final Current CURRENT_LIMIT = Amps.of(60);
@@ -87,37 +90,41 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double LEFT_KG = 0;
     private static final double LEFT_KS = 0;
     private static final double LEFT_KV = 0;
-    private static final double LEFT_KP = .1;
+    private static final double LEFT_KA = 0;
+    private static final double LEFT_KP = 0.5;
     private static final double LEFT_KI = 0;
     private static final double LEFT_KD = 0;
     private static final Slot0Configs LEFT_SLOT_CONFIG = new Slot0Configs()
         .withKG(LEFT_KG)
         .withKS(LEFT_KS)
         .withKV(LEFT_KV)
+        .withKA(LEFT_KA)
         .withKP(LEFT_KP)
         .withKI(LEFT_KI)
         .withKD(LEFT_KD);
 
     private static final MotorOutputConfigs LEFT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
+        .withInverted(InvertedValue.CounterClockwise_Positive)
         .withNeutralMode(NeutralModeValue.Brake);
 
-    private static final double RIGHT_KG = 0;
-    private static final double RIGHT_KS = 0;
-    private static final double RIGHT_KV = 0;
-    private static final double RIGHT_KP = .1;
-    private static final double RIGHT_KI = 0;
-    private static final double RIGHT_KD = 0;
+    private static final double RIGHT_KG = LEFT_KG;
+    private static final double RIGHT_KS = LEFT_KS;
+    private static final double RIGHT_KV = LEFT_KV;
+    private static final double RIGHT_KA = LEFT_KA;
+    private static final double RIGHT_KP = LEFT_KP;
+    private static final double RIGHT_KI = LEFT_KI;
+    private static final double RIGHT_KD = LEFT_KD;
     private static final Slot0Configs RIGHT_SLOT_CONFIG = new Slot0Configs()
         .withKG(RIGHT_KG)
         .withKS(RIGHT_KS)
         .withKV(RIGHT_KV)
+        .withKA(RIGHT_KA)
         .withKP(RIGHT_KP)
         .withKI(RIGHT_KI)
         .withKD(RIGHT_KD);
 
     private static final MotorOutputConfigs RIGHT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Brake);
 
     // Positions of the different Coral Branches in relation to the robot
@@ -138,7 +145,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     // Creates new set states for the Trapezoid Profile
     public static final TrapezoidProfile.State BOTTOM_GOAL = new TrapezoidProfile.State(MIN_HEIGHT_ROTATIONS, 0);
-    private static final TrapezoidProfile.State STATION_GOAL = new TrapezoidProfile.State(STATION_POSITION.magnitude() / METERS_PER_ROTATION.magnitude(),
+    private static final TrapezoidProfile.State STATION_GOAL = new TrapezoidProfile.State(STATION_POSITION.magnitude() / METERS_PER_ROTATION,
     0);
     public static final TrapezoidProfile.State L1_GOAL = new TrapezoidProfile.State(L1_POSITION.magnitude(), 0);
     private static final TrapezoidProfile.State L2_GOAL = new TrapezoidProfile.State(L2_POSITION.magnitude(), 0);
@@ -183,7 +190,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withPeakReverseVoltage(ElevatorConstants.MAX_VOLTS.magnitude());
 
     // Go to a position with an added voltage for Feed Forward Compensation
-    elevatorRequest = new PositionVoltage(0).withSlot(0);
+    elevatorRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(false);
     voltageRequest = new VoltageOut(Volts.of(0));
 
     // New Elevator Set point
@@ -194,9 +201,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorRightMotor.getConfigurator().apply(elevatorRightConfig);
 
     elevatorLeftMotor.setPosition(
-        Rotations.of(ElevatorConstants.MIN_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude()));
+        Rotations.of(ElevatorConstants.MIN_HEIGHT / ElevatorConstants.METERS_PER_ROTATION));
     elevatorRightMotor.setPosition(
-        Rotations.of(ElevatorConstants.MIN_HEIGHT.magnitude() / ElevatorConstants.METERS_PER_ROTATION.magnitude()));
+        Rotations.of(ElevatorConstants.MIN_HEIGHT / ElevatorConstants.METERS_PER_ROTATION));
 
     // Creating and applying the Elevator Trapezoid profile
     elevatorProfile = new TrapezoidProfile(
@@ -206,9 +213,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         new SysIdRoutine.Config(
             Volts.of(1).per(Second),
             Volts.of(4),
-            Seconds.of(1),
+            Seconds.of(5),
             // Log state with SignalLogger class
-            (state) -> SignalLogger.writeString("SysIdTranslation_State", state.toString())),
+            (state) -> SignalLogger.writeString("SysIdTranslation_StateElevator", state.toString())),
         new SysIdRoutine.Mechanism(
             output -> elevatorLeftMotor.setControl(voltageRequest.withOutput(output)),
             null,
@@ -233,21 +240,21 @@ public class ElevatorSubsystem extends SubsystemBase {
    * 
    * @param rotations - the motor you want rotations of
    */
-  private Angle getElevatorRotations() {
-    return elevatorLeftMotor.getPosition().refresh().getValue();
+  private double getElevatorRotations(TalonFX motor) {
+    return motor.getPosition().refresh().getValue().magnitude();
   }
 
-  private Distance getElevatorHeight() {
-    return ElevatorConstants.METERS_PER_ROTATION.times(getElevatorRotations().in(Rotations));
+  private double getElevatorHeight(TalonFX motor) {
+    return (ElevatorConstants.METERS_PER_ROTATION * getElevatorRotations(motor));
   }
 
   private LinearVelocity getElevatorVelocity() {
     return MetersPerSecond.of(elevatorLeftMotor.getVelocity().refresh().getValueAsDouble()
-        * ElevatorConstants.METERS_PER_ROTATION.magnitude());
+        * ElevatorConstants.METERS_PER_ROTATION);
   }
 
   private TrapezoidProfile.State getCurrentState() {
-    return new TrapezoidProfile.State(getElevatorHeight().magnitude(), getElevatorVelocity().magnitude());
+    return new TrapezoidProfile.State(getElevatorHeight(elevatorLeftMotor), getElevatorVelocity().magnitude());
   }
 
   public TrapezoidProfile.State getSelectedState() {
@@ -283,18 +290,18 @@ public class ElevatorSubsystem extends SubsystemBase {
   /**
    * Set the elevator position in rotations
    * 
-   * @param rotations number of rotations you want the elevator to go
+   * @param position number of inches to go
    */
-  public void setElevatorPosition(double rotations) {
-    elevatorLeftMotor.setControl(elevatorRequest.withPosition(rotations).withVelocity(0.1));
+  public void setElevatorPosition(double position) {
+    elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION).withVelocity(.1));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return sysIdRoutine.quasistatic(Direction.kForward);
+    return sysIdRoutine.quasistatic(direction);
   }
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return sysIdRoutine.dynamic(Direction.kForward);
+    return sysIdRoutine.dynamic(direction);
   }
 
   public Command setElevatorPositionCommand(TrapezoidProfile.State goalState) {
@@ -321,12 +328,21 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("Elevator Current Position Rotations", () ->
-    getElevatorRotations().magnitude(), null);
-    builder.addDoubleProperty("Elevator Current Position Meters", () ->
-    getElevatorHeight().magnitude(), null);
+    builder.addDoubleProperty("L Elevator Current Position Rotations", () ->
+    getElevatorRotations(elevatorLeftMotor), null);
+
+    builder.addDoubleProperty("R Elevator Current Position Rotations", () ->
+    getElevatorRotations(elevatorRightMotor), null);
+
+    builder.addDoubleProperty("L Elevator Current Position Inches", () ->
+    Units.metersToInches(getElevatorHeight(elevatorLeftMotor)), null);
+
+    builder.addDoubleProperty("R Elevator Current Position Inches", () ->
+    Units.metersToInches(getElevatorHeight(elevatorRightMotor)), null);
+
     builder.addDoubleProperty("Elevator Goal Position Meters", () ->
     getSelectedState().position, null);
+
     builder.addDoubleProperty("Elevator SetPoint", () -> currentElevatorState.position, null);
     builder.addDoubleProperty("Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
   }
