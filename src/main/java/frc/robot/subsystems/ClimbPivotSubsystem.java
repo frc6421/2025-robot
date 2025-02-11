@@ -47,7 +47,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     private static final double CLIMB_TOTAL_RATIO = CLIMB_MOTOR_GEAR_RATIO * CLIMB_MOTOR_PULLEY_RATIO;
     private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 360 / CLIMB_TOTAL_RATIO;
 
-    private static final Current PIVOT_CURRENT_LIMIT = Amps.of(80); // TODO: Update Numbers
+    private static final Current PIVOT_CURRENT_LIMIT = Amps.of(250); // TODO: Update Numbers
 
     private static final CurrentLimitsConfigs PIVOT_CURRENT_CONFIGS = new CurrentLimitsConfigs()
         .withStatorCurrentLimit(PIVOT_CURRENT_LIMIT)
@@ -68,12 +68,12 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withReverseSoftLimitEnable(true);
 
     private static final MotorOutputConfigs LEFT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Brake);
+        .withInverted(InvertedValue.Clockwise_Positive)
+        .withNeutralMode(NeutralModeValue.Coast);
 
     private static final MotorOutputConfigs RIGHT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Brake);
+        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withNeutralMode(NeutralModeValue.Coast);
 
   }
 

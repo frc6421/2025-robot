@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ClimbCommand;
@@ -125,14 +126,24 @@ public class RobotContainer {
 		// () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(),
 		// -joystick.getLeftX()))));
 
-		joystick.y().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(-45))));
-		joystick.y().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+		// joystick.y().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(-45))));
+		// joystick.y().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
 
-		joystick.x().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(45))));
-		joystick.x().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+		// joystick.x().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(45))));
+		// joystick.x().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
 
 		// Climb buttons
 		joystick.a().whileTrue(climbCommand);
+
+        joystick.x().whileTrue( cageIntakeSubsystem.cageIntakeInSpeedCommand());
+        joystick.x().onFalse(cageIntakeSubsystem.stopCageIntakeMotorCommand());
+
+        joystick.y().whileTrue(climbSubsystem.setVoltageCommand(5));
+        joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+
+        joystick.b().whileTrue(climbSubsystem.setVoltageCommand(-1));
+        joystick.b().onFalse(climbSubsystem.setVoltageCommand(0));
+
 
 		// joystick.a().whileTrue(climbSubsystem.setVoltageCommand(2)
 		// 		.until(climbSubsystem::isOutPosition)
@@ -140,8 +151,8 @@ public class RobotContainer {
 		// 		.until(() -> cageIntakeSubsystem.haveCage())
 		// 		.finallyDo(() -> climbSubsystem.setVoltageCommand(-2).until(climbSubsystem::isInPosition)));
 
-		joystick.b().onFalse(climbSubsystem.stopPivotMotors()
-				.alongWith(cageIntakeSubsystem.cageIntakeInSpeedCommand()));
+		// joystick.b().onFalse(climbSubsystem.stopPivotMotors()
+		// 		.alongWith(cageIntakeSubsystem.cageIntakeInSpeedCommand()));
 
 		// reset the field-centric heading on left bumper press
 		joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));

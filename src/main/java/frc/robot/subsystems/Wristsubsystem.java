@@ -141,7 +141,7 @@ public class WristSubsystem extends SubsystemBase {
    * @return Curerent position, in degrees
    */
   public double getWristEncoderPosition() {
-    System.out.println(wristEncoder.getPosition());
+    // System.out.println(wristEncoder.getPosition());
     return wristEncoder.getPosition();
   }
 

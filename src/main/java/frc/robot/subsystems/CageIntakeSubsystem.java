@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,9 +25,9 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
     private static final int CAGE_INTAKE_MOTOR_ID = 52;
 
-    private static final int CAGE_INTAKE_CURRENT_LIMIT = 80; // TODO: Update Numbers
+    private static final int CAGE_INTAKE_CURRENT_LIMIT = 150; // TODO: Update Numbers
 
-    public static final double CAGE_INTAKE_SPEED = 0.5; // TODO: Update Numbers
+    public static final double CAGE_INTAKE_SPEED = 1; // TODO: Update Numbers
 
     public static final double CAGE_STALL_LIMIT = 50;
 
@@ -44,7 +45,7 @@ public class CageIntakeSubsystem extends SubsystemBase {
     cageIntakeMotor.configure(cageIntakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
 
-    SmartDashboard.putNumber("CageMotor/Current", cageIntakeMotor.getOutputCurrent());
+    SmartDashboard.putData(this);
   }
 
   @Override
@@ -76,4 +77,8 @@ public class CageIntakeSubsystem extends SubsystemBase {
     return this.runOnce(() -> cageIntakeMotor.stopMotor());
   }
 
+  @Override
+  public void initSendable(SendableBuilder builder) {
+      builder.addDoubleProperty("Current", () -> cageIntakeMotor.getOutputCurrent(), null);
+  }
 }
