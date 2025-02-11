@@ -29,13 +29,13 @@ public class Robot extends TimedRobot {
   
   @Override
   public void disabledInit() {
-    leds.setDisabledPattern();
+    LED_NOT_a_Subsystem.setDisabledPattern();
   }
 
   @Override
   public void disabledPeriodic() {
     //Updates the strip(s). And by that I mean it runs the method and changes the colors on the strip.
-    leds.setLED(leds.getDisabledPattern());
+    LED_NOT_a_Subsystem.setLED(LED_NOT_a_Subsystem.getDisabledPattern());
   }
 
   @Override

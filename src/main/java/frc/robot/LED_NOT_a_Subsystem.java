@@ -11,14 +11,11 @@
  */
 package frc.robot;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,7 +32,6 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
     public static enum LED_MODES{
       RAINBOW,
-      SLOW_FILL,
       FLICKER,
       SNAKING_RAINBOW,
       HIGHLIGHT,
@@ -53,7 +49,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
 
   private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
-  private static int[] previousSlowFillLED = {LEDConstants.NUMBER_OF_LEDS - 1,0};//Stores the LED that it was last used.
+  private static int[] previousSlowFillLED = {LEDConstants.NUMBER_OF_LEDS,0};//Stores the LED that it was last used.
   private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
 
   private static double elevatorLowerPos;//Lower Elevator position as a percent of the strip
@@ -63,6 +59,8 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
 
   private static int currentRobotCycle;//Current amount of waited robot cycles
+
+  private static int snakingOverflow;
 
   private static LED_MODES selectedDisabledPattern;
 
@@ -119,43 +117,27 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
             currentRobotCycle = 0;
           }else currentRobotCycle++;
         break;
-  
-        //TODO: Get the slow fill to not chrash the moment that it gets to the end of the strip
-        case SLOW_FILL: 
-          ledBuffer.setRGB(15,patternColor[0], patternColor[1], patternColor[2]);
-          led.setData(ledBuffer);
-          if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
-            if(previousSlowFillLED[1] == LEDConstants.NUMBER_OF_LEDS) LEDPattern.solid(new Color(0,0,0)).applyTo(ledBuffer);
-            else{
-              ledBuffer.setRGB(previousSlowFillLED[0], patternColor[0], patternColor[1], patternColor[2]);
-              if(previousSlowFillLED[0] + 1 <= LEDConstants.NUMBER_OF_LEDS) ledBuffer.setRGB(previousSlowFillLED[1] + 1, 0,0,0);
-              //Checking if it is at the LED
-              if(previousSlowFillLED[0] == previousSlowFillLED[1]){ 
-                previousSlowFillLED[0] = LEDConstants.NUMBER_OF_LEDS;//Set to top
-                previousSlowFillLED[1]++;//Increment the bottom LED
-              }
-              if(previousSlowFillLED[0] < LEDConstants.NUMBER_OF_LEDS) previousSlowFillLED[0]--;
-            }
-          }else currentRobotCycle++;
-        break;
-        //TODO: Find out how to do the Snaking rainbow patter, since the example they give does not work.
-        
+
         case SNAKING_RAINBOW:
           if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
             if(previousColorLimit == 255) previousColorLimit = 0;
-            else previousColorLimit++;
+            if(previousSnakingLED == LEDConstants.NUMBER_OF_LEDS + (LEDConstants.NUMBER_OF_LEDS * (LEDConstants.TRAILING_BRIGHTNESS / 100))){
+              previousSnakingLED = 0;
+              snakingOverflow++;
+            }
+            int color[] = rainbowColor(previousColorLimit + previousSnakingLED);
+            ledBuffer.setRGB(previousSnakingLED, color[0], color[1], color[2]);
             for(int LEDNum = 0; LEDNum < previousSnakingLED; LEDNum++){
-              int color[] = rainbowColor(LEDNum + previousColorLimit);
+              int wheelPos = previousColorLimit + LEDNum;
+              color = rainbowColor(wheelPos);
               for(int i = 0; i < 3; i++){
-                
-                if(color[i] - LEDConstants.TRAILING_BRIGHTNESS * (previousSnakingLED - LEDNum) < 0) color[i] = 0;
-                else color[i] -= LEDConstants.TRAILING_BRIGHTNESS * (previousSnakingLED - LEDNum);
+                color[i] = (color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS) < 0 ? 0 : color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS));
               }
               ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
             }
-            led.setData(ledBuffer);
-            currentRobotCycle = 0;
+            previousColorLimit++;
             previousSnakingLED++;
+            led.setData(ledBuffer);
           }else currentRobotCycle++;
         break;
 
@@ -169,7 +151,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
               //Creates a new color that gets from the rainbowColor function, taking in the 
               //color limit and the current LED 
               int color[] = rainbowColor(wheelPos);
-              int trailing = previousSnakingLED * LEDConstants.TRAILING_BRIGHTNESS;
+              int trailing = previousSnakingLED * (LEDConstants.TRAILING_BRIGHTNESS);
               //Adding the tail by decreasing the "brightness"
               color[0] = (trailing < 0 ? 0 : color[0] - trailing);
               color[1] = (trailing < 0 ? 0 : color[1] - trailing);
@@ -224,6 +206,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
           }
           led.setData(ledBuffer);//Update the strip*/
         break;
+        default: break;
       }
     }
   
@@ -265,24 +248,12 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     //Random Object
     Random random = new Random();
     //There are six different patterns
-    switch(random.nextInt(2)){
+    switch(random.nextInt(3)){
       case 0: selectedDisabledPattern = LED_MODES.RAINBOW; break;
-      //case 1: selectedDisabledPattern = LED_MODES.SNAKING_RAINBOW; break;
-      //case 1: selectedDisabledPattern = LED_MODES.SLOW_FILL; break;
-      case 1: selectedDisabledPattern = LED_MODES.COLLISION; break;
+      case 1: selectedDisabledPattern = LED_MODES.SNAKING_RAINBOW; break;
+      case 2: selectedDisabledPattern = LED_MODES.COLLISION; break;
     }
     LED_NOT_a_Subsystem.setLED(selectedDisabledPattern);
-    if(selectedDisabledPattern == LED_MODES.SLOW_FILL){
-      switch(random.nextInt(7)){
-        case 0: LED_NOT_a_Subsystem.patternColor = LEDConstants.WHITE; break;
-        case 1: LED_NOT_a_Subsystem.patternColor = LEDConstants.PINK; break;
-        case 2: LED_NOT_a_Subsystem.patternColor = LEDConstants.CORAL; break;
-        case 3: LED_NOT_a_Subsystem.patternColor = LEDConstants.HOT_PINK; break;
-        case 4: LED_NOT_a_Subsystem.patternColor = LEDConstants.RED; break;
-        case 5: LED_NOT_a_Subsystem.patternColor = LEDConstants.GREEN; break;
-        case 6: LED_NOT_a_Subsystem.patternColor = LEDConstants.BLUE; break;
-      }
-    }  
   }
 
 
