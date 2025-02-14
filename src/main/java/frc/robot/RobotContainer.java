@@ -20,11 +20,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-<<<<<<< HEAD
-import edu.wpi.first.wpilibj.DriverStation;
-=======
 import edu.wpi.first.wpilibj.DataLogManager;
->>>>>>> 2953351ec2eea1903faa5db29b2cbe05f4dc968c
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -115,12 +111,6 @@ public class RobotContainer {
         autoChooser.addOption("Blue EDC RB", blueEDCRB);
         autoChooser.addOption("Blue G RB", blueGRB);
 
-<<<<<<< HEAD
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
-        DriverStation.silenceJoystickConnectionWarning(true);
-    }
-=======
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
         redPositionChooser.addOption("B", TrajectoryConstants.RED_B);
@@ -134,7 +124,6 @@ public class RobotContainer {
         redPositionChooser.addOption("J", TrajectoryConstants.RED_J);
         redPositionChooser.addOption("K", TrajectoryConstants.RED_K);
         redPositionChooser.addOption("L", TrajectoryConstants.RED_L);
->>>>>>> 2953351ec2eea1903faa5db29b2cbe05f4dc968c
 
         redSourceChooser = new SendableChooser<>();
         redSourceChooser.setDefaultOption("1", TrajectoryConstants.R_HP_LEFT_OUT);
