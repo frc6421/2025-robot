@@ -11,27 +11,34 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.WarriorCamera;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -56,6 +63,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
+    private final SwerveRequest.FieldCentricFacingAngle alignAngleRequest = new FieldCentricFacingAngle()
+    .withDriveRequestType(DriveRequestType.Velocity)
+    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
+
+    //public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
+    //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
+    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_RIGHT_TRANSFORM3D);
+
     private final ProfiledPIDController thetaController = new ProfiledPIDController(
       AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
       new TrapezoidProfile.Constraints(AutoConstants.AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
@@ -67,6 +82,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       new PIDController(AutoConstants.Y_DRIVE_P, AutoConstants.Y_DRIVE_I, AutoConstants.Y_DRIVE_D),
       thetaController);
 
+    //Align PID Controllers
+    private final PIDController xController = new PIDController(AlignConstants.ALIGN_P,
+        AutoConstants.X_DRIVE_I,
+        AutoConstants.X_DRIVE_D);
+    private final PIDController yController = new PIDController(AlignConstants.ALIGN_P,
+        AutoConstants.Y_DRIVE_I,
+        AutoConstants.Y_DRIVE_D);
+    
     private final ApplyRobotSpeeds autoApplyRobotSpeeds = new ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity);
 
@@ -150,6 +173,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        SmartDashboard.putData("Reset Gyro", resetGyro());
         
     }
 
@@ -241,8 +265,57 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return m_sysIdRoutineToApply.dynamic(direction);
     }
 
+    public void updatePose(WarriorCamera camera) {
+        if(camera.filterOdometry()) {
+                addVisionMeasurement(
+                new Pose2d(camera.getPose2d().getX(),
+                camera.getPose2d().getY(),
+                getPigeon2().getRotation2d()),
+                Utils.fpgaToCurrentTime(camera.getTimer()),
+                camera.getStandardDeviation());
+            }
+    }
+
+    public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
+        alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
+        xController.setTolerance(.15, .1);
+        yController.setTolerance(.09, .1);
+        return applyRequest(() ->  { 
+          Pose2d currentPose = getState().Pose;
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
+
+          return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+    }
+
+    public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
+        alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
+        xController.setTolerance(.15, .1);
+        yController.setTolerance(.09, .1);
+        return applyRequest(() ->  { 
+          Pose2d currentPose = getState().Pose;
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
+
+          return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+    }
+
+    public Command resetGyro() {
+        return runOnce(() -> getPigeon2().reset());
+    }
+
     @Override
     public void periodic() {
+        
+            //updatePose(frontLeftCamera);
+            updatePose(backRightCamera);
+            //updatePose(backCamera);
+        
+        
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

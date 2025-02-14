@@ -109,14 +109,11 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        Commands.runOnce(() -> driveSubsystem.getPigeon2().setYaw(toJTrajectory.getInitialPose().getRotation().getDegrees()), driveSubsystem),
-        Commands.runOnce(() -> driveSubsystem.resetPose(toJTrajectory.getInitialPose()), driveSubsystem),
-        driveSubsystem.runTrajectoryCommand(toJTrajectory),
-        driveSubsystem.runTrajectoryCommand(toCoral1Trajectory),
-        driveSubsystem.runTrajectoryCommand(toKTrajectory),
-        driveSubsystem.runTrajectoryCommand(toCoral2Trajectory),
-        driveSubsystem.runTrajectoryCommand(toLTrajectory),
-        driveSubsystem.runTrajectoryCommand(toCoral3Trajectory)
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_J),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_K), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT), 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_L)
     );
   }
 }
