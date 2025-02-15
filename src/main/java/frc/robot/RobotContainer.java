@@ -83,10 +83,10 @@ public class RobotContainer {
         //joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         //joystick.x().onTrue(elevatorSubsystem.setElevatorPositionCommand(elevatorSubsystem.getSelectedState()));
-        joystick.a().whileTrue(new RunCommand (()  -> elevatorSubsystem.setElevatorPosition(24)));
+        joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271 + 36));
         joystick.a().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
-        joystick.b().whileTrue(new RunCommand(() -> elevatorSubsystem.setElevatorPosition(0)));
+        joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271));
         joystick.b().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
         joystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(1));

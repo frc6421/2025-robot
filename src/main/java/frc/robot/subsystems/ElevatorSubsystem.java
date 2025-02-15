@@ -13,6 +13,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -45,7 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   // Trapezoid Profile for the Elevator
   private TrapezoidProfile elevatorProfile;// Profile object
   private TrapezoidProfile.State currentElevatorState;// Set point
-  private PositionVoltage elevatorRequest;// Voltage to maintian the set point
+  private MotionMagicVoltage elevatorRequest;// Voltage to maintian the set point
   private VoltageOut voltageRequest;
 
   private final SendableChooser<TrapezoidProfile.State> elevatorChooser;
@@ -64,16 +65,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double ELEVATOR_INCHES_PER_ROTATION = (ELEVATOR_SPROCKET_DIAMETER * Math.PI * ELEVATOR_STAGE_RATIO) / ELEVATOR_GEAR_RATIO;
 
     private static final double METERS_PER_ROTATION = Units.inchesToMeters(ELEVATOR_INCHES_PER_ROTATION);
+    private static final double MAX_ERROR_MOTION = 1.02;
 
     // Maximum and minimum extension of the elevator, in meters
-    private static final double MAX_HEIGHT = Units.inchesToMeters(36); // TODO get value
-    private static final double MIN_HEIGHT = Units.inchesToMeters(0); // TODO get value
+    private static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
+    private static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT / METERS_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT / METERS_PER_ROTATION;
 
     // Current limit of either motor
-    private static final Current CURRENT_LIMIT = Amps.of(60);
+    private static final Current CURRENT_LIMIT = Amps.of(80);
     private static final CurrentLimitsConfigs ELEVATOR_CURRENT_CONFIG = new CurrentLimitsConfigs()
         .withStatorCurrentLimit(CURRENT_LIMIT)
         .withSupplyCurrentLimit(CURRENT_LIMIT)
@@ -87,11 +89,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
-    private static final double LEFT_KG = 0;
+    private static final double LEFT_KG = 0.29;
     private static final double LEFT_KS = 0;
-    private static final double LEFT_KV = 0;
+    private static final double LEFT_KV = 0.1 * ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION;
     private static final double LEFT_KA = 0;
-    private static final double LEFT_KP = 0.5;
+    private static final double LEFT_KP = 16.0;
     private static final double LEFT_KI = 0;
     private static final double LEFT_KD = 0;
     private static final Slot0Configs LEFT_SLOT_CONFIG = new Slot0Configs()
@@ -104,7 +106,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withKD(LEFT_KD);
 
     private static final MotorOutputConfigs LEFT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Brake);
 
     private static final double RIGHT_KG = LEFT_KG;
@@ -124,25 +126,25 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withKD(RIGHT_KD);
 
     private static final MotorOutputConfigs RIGHT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
+        .withInverted(InvertedValue.CounterClockwise_Positive)
         .withNeutralMode(NeutralModeValue.Brake);
 
     // Positions of the different Coral Branches in relation to the robot
 
-    private static final Distance STATION_POSITION = Inches.of(25);
-    private static final Distance L1_POSITION = Inches.of(0);
-    private static final Distance L2_POSITION = Inches.of(0);
-    private static final Distance L3_POSITION = Inches.of(0);
-    private static final Distance L4_POSITION = Inches.of(0);
+    private static final Distance STATION_POSITION = Inches.of(32);
+    private static final Distance L1_POSITION = Inches.of(34);
+    private static final Distance L2_POSITION = Inches.of(36);
+    private static final Distance L3_POSITION = Inches.of(38);
+    private static final Distance L4_POSITION = Inches.of(40);
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
-    private static final double MAX_VELOCITY_RPS = 10;
+    private static final double MAX_VELOCITY_RPS = 90;
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
-    private static final double MAX_ACCEL_RPS = 10;
+    private static final double MAX_ACCEL = 85;
+    private static final double MAX_JERK = 200;
 
-    
     // Creates new set states for the Trapezoid Profile
     public static final TrapezoidProfile.State BOTTOM_GOAL = new TrapezoidProfile.State(MIN_HEIGHT_ROTATIONS, 0);
     private static final TrapezoidProfile.State STATION_GOAL = new TrapezoidProfile.State(STATION_POSITION.magnitude() / METERS_PER_ROTATION,
@@ -168,14 +170,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorRightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
     elevatorFollower = new Follower(elevatorLeftMotor.getDeviceID(), true);
-    elevatorRightMotor.setControl(elevatorFollower); // TODO does a follower need to apply confis, verify in CTRE
+    elevatorRightMotor.setControl(elevatorFollower);
 
     // Sets the configuration of the motors
     elevatorLeftConfig = new TalonFXConfiguration()
         .withSlot0(ElevatorConstants.LEFT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
-        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG) // TODO MAKE LIMITS
+        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG)
         .withMotorOutput(ElevatorConstants.LEFT_MOTOR_CONFIGS);
+    
+    elevatorLeftConfig.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MAX_VELOCITY_RPS;
+    elevatorLeftConfig.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL;
+    elevatorLeftConfig.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
 
     elevatorLeftConfig.Voltage.withPeakForwardVoltage(ElevatorConstants.MAX_VOLTS.magnitude())
         .withPeakReverseVoltage(ElevatorConstants.MAX_VOLTS.magnitude());
@@ -183,14 +189,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorRightConfig = new TalonFXConfiguration()
         .withSlot0(ElevatorConstants.RIGHT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
-        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG) // TODO MAKE LIMITS
+        .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG)
         .withMotorOutput(ElevatorConstants.RIGHT_MOTOR_CONFIGS);
+
+    elevatorRightConfig.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MAX_VELOCITY_RPS;
+    elevatorRightConfig.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL;
+    elevatorRightConfig.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
 
     elevatorRightConfig.Voltage.withPeakForwardVoltage(ElevatorConstants.MAX_VOLTS.magnitude())
         .withPeakReverseVoltage(ElevatorConstants.MAX_VOLTS.magnitude());
 
     // Go to a position with an added voltage for Feed Forward Compensation
-    elevatorRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(false);
+    elevatorRequest = new MotionMagicVoltage(0);
     voltageRequest = new VoltageOut(Volts.of(0));
 
     // New Elevator Set point
@@ -207,7 +217,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Creating and applying the Elevator Trapezoid profile
     elevatorProfile = new TrapezoidProfile(
-        new TrapezoidProfile.Constraints(ElevatorConstants.MAX_VELOCITY_RPS, ElevatorConstants.MAX_ACCEL_RPS));
+        new TrapezoidProfile.Constraints(ElevatorConstants.MAX_VELOCITY_RPS, 0));
 
     sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -253,10 +263,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         * ElevatorConstants.METERS_PER_ROTATION);
   }
 
-  private TrapezoidProfile.State getCurrentState() {
-    return new TrapezoidProfile.State(getElevatorHeight(elevatorLeftMotor), getElevatorVelocity().magnitude());
-  }
-
   public TrapezoidProfile.State getSelectedState() {
     return elevatorChooser.getSelected();
   }
@@ -271,29 +277,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   /**
-   * Sets the position, rotation, and velocity of the Elevator's Trapezoid Profile
-   * 
-   * @param goal The goal for the Trapezoid Profile. Given from the
-   *             TrapezoidProfile.State, where the possible options are
-   *             STATION_GOAL, BOTTOM
-   *             L1_GOAL, L2_GOAL, L3_GOAL, L4_Goal
-   */
-  public void applyElevatorProfile(TrapezoidProfile.State goal) {
-    currentElevatorState = elevatorProfile.calculate(.020, currentElevatorState, goal);
-    elevatorRequest.Position = currentElevatorState.position;
-    elevatorRequest.Velocity = currentElevatorState.velocity;
-
-    /// Applies the Position and Velocity to the motors
-    elevatorLeftMotor.setControl(elevatorRequest);
-  }
-
-  /**
    * Set the elevator position in rotations
    * 
    * @param position number of inches to go
    */
   public void setElevatorPosition(double position) {
-    elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION).withVelocity(.1));
+    //elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION).withVelocity(.1));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -304,16 +293,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     return sysIdRoutine.dynamic(direction);
   }
 
-  public Command setElevatorPositionCommand(TrapezoidProfile.State goalState) {
-    final double deltaTime = 0.02;
-    final Timer timer = new Timer();
+  public void setMagicMotion(double position) {
+    elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION));
+  }
 
-    return runOnce(timer::restart)
-        .andThen(run(() -> {
-          currentElevatorState = elevatorProfile.calculate(deltaTime, getCurrentState(), goalState);
-          elevatorLeftMotor.setControl(elevatorRequest.withPosition(currentElevatorState.position));
-        }))
-        .until(() -> timer.hasElapsed(elevatorProfile.totalTime()));
+  public Command setElevatorPositionCommand(double position ) {
+
+    return run(() -> {
+      setMagicMotion(position);
+        })
+        .until(() -> getElevatorHeight(elevatorLeftMotor) < position * ElevatorConstants.MAX_ERROR_MOTION && 
+        getElevatorHeight(elevatorLeftMotor) * ElevatorConstants.MAX_ERROR_MOTION > position);
   }
 
   public Command setElevatorVoltage(double voltage) {
