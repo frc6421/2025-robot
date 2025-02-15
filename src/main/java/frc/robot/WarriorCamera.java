@@ -58,7 +58,7 @@ public class WarriorCamera implements Sendable {
         new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-23.24),
             Units.degreesToRadians(-25.8 + 180.0)));
     private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
-        .loadField(AprilTagFields.k2025Reefscape);
+        .loadField(AprilTagFields.k2025ReefscapeWelded);
 
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();

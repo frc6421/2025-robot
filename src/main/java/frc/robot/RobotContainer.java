@@ -23,8 +23,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.AutoConstants;
@@ -43,11 +46,14 @@ import frc.robot.subsystems.ClimbPivotSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
 	private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
 																																										// max angular velocity
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 
 	/* Setting up bindings for necessary control of the swerve drive platform */
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -142,6 +148,7 @@ public class RobotContainer {
 	}
 
 	private void configureBindings() {
+        DriverStation.silenceJoystickConnectionWarning(true);
 
 		// Uncomment for running sysid routines
 		// sysIdButtonBindings();
@@ -193,7 +200,23 @@ public class RobotContainer {
 		// 		.alongWith(cageIntakeSubsystem.cageIntakeInSpeedCommand()));
 
 		// reset the field-centric heading on left bumper press
-		joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+		//joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        //joystick.x().onTrue(elevatorSubsystem.setElevatorPositionCommand(elevatorSubsystem.getSelectedState()));
+        joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271 + 36));
+        joystick.a().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+
+        joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271));
+        joystick.b().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+
+        joystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(1));
+        joystick.x().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+
+        joystick.y().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
+        joystick.y().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+
+        // joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
+        // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
