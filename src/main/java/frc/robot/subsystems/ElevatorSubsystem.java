@@ -68,8 +68,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double MAX_ERROR_MOTION = 1.02;
 
     // Maximum and minimum extension of the elevator, in meters
-    private static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
-    private static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
+    public static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
+    public static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT / METERS_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT / METERS_PER_ROTATION;
@@ -131,11 +131,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Positions of the different Coral Branches in relation to the robot
 
-    private static final Distance STATION_POSITION = Inches.of(32);
-    private static final Distance L1_POSITION = Inches.of(34);
-    private static final Distance L2_POSITION = Inches.of(36);
-    private static final Distance L3_POSITION = Inches.of(38);
-    private static final Distance L4_POSITION = Inches.of(40);
+    public static final Distance STATION_POSITION = Inches.of(32);
+    public static final Distance L1_POSITION = Inches.of(34);
+    public static final Distance L2_POSITION = Inches.of(36);
+    public static final Distance L3_POSITION = Inches.of(38);
+    public static final Distance L4_POSITION = Inches.of(40);
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */

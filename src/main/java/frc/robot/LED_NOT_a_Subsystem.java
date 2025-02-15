@@ -11,6 +11,9 @@
  */
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+
+import java.util.Map;
 import java.util.Random;
 
 import edu.wpi.first.units.measure.Distance;
@@ -20,7 +23,7 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
-//import frc.robot.subsystems.ElevatorSubsytem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static class LEDConstants {
@@ -49,7 +52,6 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
 
   private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
-  private static int[] previousSlowFillLED = {LEDConstants.NUMBER_OF_LEDS,0};//Stores the LED that it was last used.
   private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
 
   private static double elevatorLowerPos;//Lower Elevator position as a percent of the strip
@@ -60,18 +62,16 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
 
   private static int currentRobotCycle;//Current amount of waited robot cycles
 
-  private static int snakingOverflow;
-
   private static LED_MODES selectedDisabledPattern;
 
+  private static int upperLEDLimit, lowerLEDLimit;
 
-  
     /** Creates a new LEDSubsystem. */
     public LED_NOT_a_Subsystem() {
       //Setting the pin of the Rio that the LED strip is on
       led = new AddressableLED(RIO_PIN);
-      //Creating the buffer that is used for setting the data
-      ledBuffer = new AddressableLEDBuffer(LEDConstants.NUMBER_OF_LEDS);
+      //Creating the buffer that is used for setting the data, with the number of LED's, plus the trailing brightness
+      ledBuffer = new AddressableLEDBuffer(LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS);
       ledBuffer.setRGB(0,0,0,0);
       //Setting the length of the LED strip
       led.setLength(ledBuffer.getLength());
@@ -119,22 +119,32 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
         break;
 
         case SNAKING_RAINBOW:
+          //Checking if it is at the number of delay cycles
           if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
+            //Reseting Color Limit to pervent overflow
             if(previousColorLimit == 255) previousColorLimit = 0;
+            //Resets the previous snaking LED
             if(previousSnakingLED == LEDConstants.NUMBER_OF_LEDS + (LEDConstants.NUMBER_OF_LEDS * (LEDConstants.TRAILING_BRIGHTNESS / 100))){
               previousSnakingLED = 0;
-              snakingOverflow++;
             }
+            //Gets the color, taking in the Previous Color Limit and the Previous Snaking LED
             int color[] = rainbowColor(previousColorLimit + previousSnakingLED);
+            //Updating the buffer with the color for the head LED
             ledBuffer.setRGB(previousSnakingLED, color[0], color[1], color[2]);
+            //Creating the tail
             for(int LEDNum = 0; LEDNum < previousSnakingLED; LEDNum++){
+              //Makes a varaible to hold the values for getting the color, only if modificatios want to be made
               int wheelPos = previousColorLimit + LEDNum;
+              //Getting the trailing color
               color = rainbowColor(wheelPos);
+              //Decreasing the brightness of the color, looping over each part of it.
               for(int i = 0; i < 3; i++){
                 color[i] = (color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS) < 0 ? 0 : color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS));
               }
+              //Setting that brightness change
               ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
             }
+            //Increment the color limit, snaking LED, and sets the data to the strip.
             previousColorLimit++;
             previousSnakingLED++;
             led.setData(ledBuffer);
@@ -178,33 +188,31 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
         break;
   
         case HIGHLIGHT:
-        /* 
           //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
           LEDPattern.steps(Map.of(elevatorLowerPos, Color.kBlack, elevatorUpperPos, new Color(patternColor[0], patternColor[1], patternColor[2])))
           .applyTo(ledBuffer);//Applying the pattern to the buffer
-          int upperLimit, lowerLimit;
           //Calculating the range of LEDs to set to give the set point of the elevator
           if(setElevatorPosition == ElevatorConstants.L1_POSITION){
-            upperLimit = LEDConstants.NUMBER_OF_LEDS * 5 / 5;
-            lowerLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+            upperLEDLimit = LEDConstants.NUMBER_OF_LEDS * 5 / 5;
+            lowerLEDLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
           }else if(setElevatorPosition == ElevatorConstants.L2_POSITION){
-            upperLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
-            lowerLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+            upperLEDLimit = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+            lowerLEDLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
           }else if(setElevatorPosition == ElevatorConstants.STATION_POSITION){
-            upperLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
-            lowerLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+            upperLEDLimit = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+            lowerLEDLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
           }else if(setElevatorPosition == ElevatorConstants.L3_POSITION){
-            upperLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
-            lowerLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+            upperLEDLimit = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+            lowerLEDLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
           }else if(setElevatorPosition == ElevatorConstants.L4_POSITION){
-            upperLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
-            lowerLimit = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
+            upperLEDLimit = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+            lowerLEDLimit = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
           }
           //Looping for the target LED colors
-          for(int i = upperLimit; i < lowerLimit; i++){
+          for(int i = lowerLEDLimit; i < upperLEDLimit; i++){
             ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
           }
-          led.setData(ledBuffer);//Update the strip*/
+          led.setData(ledBuffer);//Update the strip
         break;
         default: break;
       }
@@ -214,19 +222,20 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
      * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
      * @param position  The Distance object of the Elevator position
      * @param currentElevatorHeight  The current height of the elevator, given in meters
-     *//* 
+     */
     public void setElevatorLEDPosition(Distance setPosition, double currentElevatorHeight){
+      Distance currentHeight = Inches.of(currentElevatorHeight);
       setElevatorPosition = setPosition;
       //Calculating the maximum of which to light the strip at
       elevatorUpperPos = (ElevatorConstants.MAX_HEIGHT - currentElevatorHeight) / ElevatorConstants.MAX_HEIGHT;
       //Setting the lower position to be the next-lowest set scoring position
       //L1 position, should be the lowest 
-      if(currentElevatorHeight <= ElevatorConstants.L1_POSITION) elevatorLowerPos = 0.00;
-      else if(currentElevatorHeight <= ElevatorConstants.L2_POSITION) elevatorLowerPos = 0.20;
-      else if(currentElevatorHeight <= ElevatorConstants.STATION_POSITION) elevatorLowerPos = 0.40;
-      else if(currentElevatorHeight <= ElevatorConstants.L3_POSITION) elevatorLowerPos = 0.60;
-      else if(currentElevatorHeight <= ElevatorConstants.L4_POSITION) elevatorLowerPos = 0.80;
-    }*/
+      if(currentHeight.in(Inches) <= ElevatorConstants.L1_POSITION.in(Inches)) elevatorLowerPos = 0.00;
+      else if(currentHeight.in(Inches) <= ElevatorConstants.L2_POSITION.in(Inches)) elevatorLowerPos = 0.20;
+      else if(currentHeight.in(Inches) <= ElevatorConstants.STATION_POSITION.in(Inches)) elevatorLowerPos = 0.40;
+      else if(currentHeight.in(Inches) <= ElevatorConstants.L3_POSITION.in(Inches)) elevatorLowerPos = 0.60;
+      else if(currentHeight.in(Inches) <= ElevatorConstants.L4_POSITION.in(Inches)) elevatorLowerPos = 0.80;
+    }
   
     /**
      * @breif   Turns the LEDs off
