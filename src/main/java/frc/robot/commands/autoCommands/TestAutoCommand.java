@@ -62,9 +62,9 @@ public class TestAutoCommand extends SequentialCommandGroup {
         .setReversed(true);
 
     Trajectory toReefTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.B_HP_LEFT_CENTER, 
-        TrajectoryConstants.BLUE_A), 
-        reverseConfig);
+        new Pose2d(0,0,new Rotation2d(0)), 
+        new Pose2d(3,0,new Rotation2d(0))), 
+        forwardConfig);
 
 
   // Simulation

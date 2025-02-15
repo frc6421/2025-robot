@@ -26,9 +26,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final int INTAKE_STALL_LIMIT = 30;
     // Reliable speed for grabbing the pieces
-    public static final double INTAKE_IN_SPEED = 0.5;
+    public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = -0.5; 
+    public static final double INTAKE_OUT_SPEED = -0.6; 
   }
 
   /** Creates a new intakeSubsystem. */

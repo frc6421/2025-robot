@@ -29,11 +29,11 @@ public final class Constants {
     public static final double AUTO_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC = 2 * Math.PI; // TODO update value
     public static final double AUTO_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = 2 * Math.PI; // TODO update value
 
-    public static final double X_DRIVE_P = 2.32;
+    public static final double X_DRIVE_P = 2.05;
     public static final double X_DRIVE_I = 0;
     public static final double X_DRIVE_D = 0.1;
 
-    public static final double Y_DRIVE_P = 2.32;
+    public static final double Y_DRIVE_P = 2.05;
     public static final double Y_DRIVE_I = 0;
     public static final double Y_DRIVE_D = 0.1;
 

@@ -33,12 +33,12 @@ public class WristSubsystem extends SubsystemBase {
 
     // Gearbox reductions
     private static final double WRIST_GEARBOX_RATIO = 48;
-    private static final double WRIST_SPROCKET_RATIO = 64/24;
+    private static final double WRIST_SPROCKET_RATIO = 73/24;
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
-    private static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(45);
-    private static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-45);
+    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(172);
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12);
 
     // PID constants
     private static final double WRIST_KP = 0.03;
@@ -51,8 +51,8 @@ public class WristSubsystem extends SubsystemBase {
     private static final double WRIST_MAX_VELOCITY = 45;
     
 
-    private static final Angle WRIST_SCORE_POSITION = Degrees.of(0); // TODO: possibly add different scoring positions
-    private static final Angle WRIST_INTAKE_POSITION = Degrees.of(0);
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(150); // TODO: possibly add different scoring positions
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
   }
 
   private SparkFlex wristMotor;// Motor Objet
@@ -115,7 +115,7 @@ public class WristSubsystem extends SubsystemBase {
     wristMotor.configure(wristMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
 
-    wristEncoder.setPosition(0);
+    wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude());
 
     SmartDashboard.putData("Wrist" , this);
   }
