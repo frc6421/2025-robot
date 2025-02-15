@@ -1,4 +1,12 @@
 {
+<<<<<<< HEAD
+=======
+  "Joysticks": {
+    "window": {
+      "visible": false
+    }
+  },
+>>>>>>> 84a33e8e6e3f2bbcd4278222aa14074012df570d
   "keyboardJoysticks": [
     {
       "axisConfig": [
