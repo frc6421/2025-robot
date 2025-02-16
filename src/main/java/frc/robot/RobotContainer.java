@@ -36,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.ClimbCommand;
+import frc.robot.commands.IntakeSequenceCommand;
+import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
@@ -87,14 +89,27 @@ public class RobotContainer {
 	private final RedHRBCommand redHRB;
 	private final BlueJKLBBCommand blueJKLBB;
 	private final BlueEDCRBCommand blueEDCRB;
-	//private final BlueGRBCommand blueGRB;
+	private final BlueGRBCommand blueGRB;
 
 	private SendableChooser<Command> autoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
-		//private SendableChooser<Double> elevatorPositionChooser;
+		private SendableChooser<Double> elevatorPositionChooser;
+
+	private final ScoreSequenceCommand scoreSequenceCommand;
+	private final IntakeSequenceCommand intakeSequenceCommand;
 
 	public RobotContainer() {
+
+		elevatorPositionChooser = new SendableChooser<>();
+				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+
+				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+
 
 		testAuto = new TestAutoCommand(drivetrain);
 		redJKLRB = new RedJKLRBCommand(drivetrain);
@@ -102,7 +117,7 @@ public class RobotContainer {
 		redHRB = new RedHRBCommand(drivetrain);
 		blueJKLBB = new BlueJKLBBCommand(drivetrain);
 		blueEDCRB = new BlueEDCRBCommand(drivetrain);
-		//blueGRB = new BlueGRBCommand(drivetrain);
+		blueGRB = new BlueGRBCommand(drivetrain);
 
 		autoChooser = new SendableChooser<>();
 		autoChooser.addOption("Auto Test", testAuto);
@@ -111,7 +126,7 @@ public class RobotContainer {
 		autoChooser.addOption("Red H RB", redHRB);
 		autoChooser.addOption("Blue JKL BB", blueJKLBB);
 		autoChooser.addOption("Blue EDC RB", blueEDCRB);
-		//autoChooser.addOption("Blue G RB", blueGRB);
+		autoChooser.addOption("Blue G RB", blueGRB);
         autoChooser = new SendableChooser<>();
         autoChooser.addOption("Auto Test", testAuto);
         autoChooser.addOption("Red JKL RB", redJKLRB);
@@ -119,7 +134,7 @@ public class RobotContainer {
         autoChooser.addOption("Red H RB", redHRB);
         autoChooser.addOption("Blue JKL BB", blueJKLBB);
         autoChooser.addOption("Blue EDC RB", blueEDCRB);
-        //autoChooser.addOption("Blue G RB", blueGRB);
+        autoChooser.addOption("Blue G RB", blueGRB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -143,16 +158,10 @@ public class RobotContainer {
         redSourceChooser.addOption("5", TrajectoryConstants.R_HP_RIGHT_CENTER);
         redSourceChooser.addOption("6", TrajectoryConstants.R_HP_RIGHT_OUT);
 
-				// elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-				// elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
-				// elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				// elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
-
-
 		SmartDashboard.putData("Auto Chooser", autoChooser);
     SmartDashboard.putData("Position Chooser", redPositionChooser);
     SmartDashboard.putData("Source Chooser", redSourceChooser);
-		//SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
+		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
     configureBindings();
@@ -163,18 +172,7 @@ public class RobotContainer {
 
 		// Uncomment for running sysid routines
 
-		joystick.back().and(joystick.y()).whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(1)
-		.withVelocityY(0)
-		.withRotationalRate(0)));
-		joystick.back().and(joystick.x()).whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(-1)
-		.withVelocityY(0)
-		.withRotationalRate(0)));
-		joystick.start().and(joystick.y()).whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(3)
-		.withVelocityY(0)
-		.withRotationalRate(0)));
-		joystick.start().and(joystick.x()).whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(-3)
-		.withVelocityY(0)
-		.withRotationalRate(0)));
+		joystick.x().onTrue(drivetrain.resetGyro());
 		//  joystick.a().onTrue(new InstantCommand(() -> SignalLogger.start()));
 		//  joystick.b().onTrue(new InstantCommand(() -> SignalLogger.stop()));
 		//  joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
@@ -241,9 +239,11 @@ public class RobotContainer {
         // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
 
 				joystick.rightBumper().onTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-				joystick.leftBumper().onTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+				//joystick.leftBumper().onTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 				//joystick.rightTrigger().whileTrue(scoreSequenceCommand());
-				joystick.leftTrigger().whileTrue(intakeSequenceCommand());
+				joystick.leftTrigger().onTrue(intakeSequenceCommand);
+
+				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
@@ -260,9 +260,9 @@ public class RobotContainer {
         return redSourceChooser.getSelected();
     }
 
-		// public Double getElevatorPosition() {
-		// 	return elevatorPositionChooser.getSelected();
-		// }
+		public Double getElevatorPosition() {
+			return elevatorPositionChooser.getSelected();
+		}
 
     public static void applyTalonConfigs(TalonFX motor, TalonFXConfiguration config) {
 		StatusCode status = StatusCode.StatusCodeNotInitialized;
@@ -276,26 +276,4 @@ public class RobotContainer {
 		}
 	}
 
-	// private Command scoreSequenceCommand() {
-	// 	return new SequentialCommandGroup(
-	// 		new ParallelCommandGroup(
-	// 			elevatorSubsystem.run(() -> elevatorSubsystem.setMagicMotion(getElevatorPosition())),
-	// 			new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())))),
-	// 		intakeSubsystem.run(() -> intakeSubsystem.setIntakeOutSpeed()),
-	// 		new WaitCommand(1),
-	// 		intakeSubsystem.run(() -> intakeSubsystem.stopIntake()),
-	// 		new ParallelCommandGroup(
-	// 			wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude())),
-	// 			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.run(() -> elevatorSubsystem.setMagicMotion(ElevatorConstants.MIN_HEIGHT)))));
-	// }
-
-	private Command intakeSequenceCommand() {
-		return new SequentialCommandGroup(
-			elevatorSubsystem.run(() -> elevatorSubsystem.setMagicMotion(ElevatorConstants.MIN_HEIGHT)), 
-			wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude())), 
-			intakeSubsystem.run(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(0.5),
-			intakeSubsystem.run(() -> intakeSubsystem.stopIntake())
-		);
-	}
 }

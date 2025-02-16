@@ -19,6 +19,7 @@ import com.revrobotics.spark.SparkFlex;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class WristSubsystem extends SubsystemBase {
@@ -37,7 +38,7 @@ public class WristSubsystem extends SubsystemBase {
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
-    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(172);
+    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
     public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12);
 
     // PID constants
@@ -48,10 +49,10 @@ public class WristSubsystem extends SubsystemBase {
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1;
     private static final double WRIST_MAX_ACCELERATION = 60;
-    private static final double WRIST_MAX_VELOCITY = 45;
+    private static final double WRIST_MAX_VELOCITY = 60;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(150); // TODO: possibly add different scoring positions
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // TODO: possibly add different scoring positions
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
   }
 
@@ -131,8 +132,9 @@ public class WristSubsystem extends SubsystemBase {
    *        PID Control Loop
    * @param position The position percentage to set
    */
-  public void setAngle(double angle) {
-    wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl); 
+  public Command setAngle(double angle) {
+    return run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
+    .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < 1);
   }
 
   /**

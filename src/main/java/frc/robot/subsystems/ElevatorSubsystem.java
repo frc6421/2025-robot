@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -89,9 +91,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
-    private static final double LEFT_KG = 0.29;
+    private static final double LEFT_KG = 0.60;
     private static final double LEFT_KS = 0;
-    private static final double LEFT_KV = 0.1 * ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION;
+    private static final double LEFT_KV = 0.0;
     private static final double LEFT_KA = 0;
     private static final double LEFT_KP = 16.0;
     private static final double LEFT_KI = 0;
@@ -132,18 +134,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Positions of the different Coral Branches in relation to the robot
 
     public static final Distance STATION_POSITION = Inches.of(32);
-    public static final Distance L1_POSITION = Inches.of(34);
-    public static final Distance L2_POSITION = Inches.of(36);
-    public static final Distance L3_POSITION = Inches.of(38);
-    public static final Distance L4_POSITION = Inches.of(40);
+    public static final Distance L1_POSITION = Inches.of(37);
+    public static final Distance L2_POSITION = Inches.of(42);
+    public static final Distance L3_POSITION = Inches.of(57);
+    public static final Distance L4_POSITION = Inches.of(57);
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
-    private static final double MAX_VELOCITY_RPS = 90;
+    private static final double MAX_VELOCITY_RPS = 70;
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
-    private static final double MAX_ACCEL = 85;
-    private static final double MAX_JERK = 200;
+    private static final double MAX_ACCEL = 50;
+    private static final double MAX_JERK = 100;
 
     // Creates new set states for the Trapezoid Profile
     public static final TrapezoidProfile.State BOTTOM_GOAL = new TrapezoidProfile.State(MIN_HEIGHT_ROTATIONS, 0);
@@ -297,13 +299,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION));
   }
 
-  public Command setElevatorPositionCommand(double position ) {
-
-    return run(() -> {
-      setMagicMotion(position);
+  public Command setElevatorPositionCommand(DoubleSupplier position) { 
+    return 
+    run(() -> {
+      setMagicMotion(position.getAsDouble());
+      System.out.println(Units.inchesToMeters(position.getAsDouble()));
         })
-        .until(() -> getElevatorHeight(elevatorLeftMotor) < position * ElevatorConstants.MAX_ERROR_MOTION && 
-        getElevatorHeight(elevatorLeftMotor) * ElevatorConstants.MAX_ERROR_MOTION > position);
+        .until(() -> (Math.abs(getElevatorHeight(elevatorLeftMotor) - Units.inchesToMeters(position.getAsDouble())) < 0.06));
   }
 
   public Command setElevatorVoltage(double voltage) {
@@ -314,6 +316,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // System.out.println(Math.abs(getElevatorHeight(elevatorLeftMotor) - ElevatorConstants.MIN_HEIGHT));
   }
 
   @Override

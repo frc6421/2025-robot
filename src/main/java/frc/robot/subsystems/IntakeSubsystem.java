@@ -22,13 +22,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final int INTAKE_MOTOR_ID = 40;
 
-    private static final int INTAKE_CURRENT_LIMIT = 80;
+    private static final int INTAKE_CURRENT_LIMIT = 60;
 
     private static final int INTAKE_STALL_LIMIT = 30;
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = -0.6; 
+    public static final double INTAKE_OUT_SPEED = -1.0; 
   }
 
   /** Creates a new intakeSubsystem. */
@@ -87,7 +87,8 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void intiSendable(SendableBuilder builder) {
+  @Override
+  public void initSendable(SendableBuilder builder) {
     super.initSendable(builder);
 
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
