@@ -38,7 +38,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
 				elevatorSubsystem.setElevatorPositionCommand(position),
 				new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
-		new WaitCommand(0.2),
+		new WaitCommand(0.3),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),

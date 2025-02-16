@@ -112,11 +112,11 @@ public class RobotContainer {
 
 
 		testAuto = new TestAutoCommand(drivetrain);
-		redJKLRB = new RedJKLRBCommand(drivetrain);
+		redJKLRB = new RedJKLRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redEDCBB = new RedEDCBBCommand(drivetrain);
 		redHRB = new RedHRBCommand(drivetrain);
 		blueJKLBB = new BlueJKLBBCommand(drivetrain);
-		blueEDCRB = new BlueEDCRBCommand(drivetrain);
+		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueGRB = new BlueGRBCommand(drivetrain);
 
 		autoChooser = new SendableChooser<>();
@@ -238,12 +238,11 @@ public class RobotContainer {
         // joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
         // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
 
-				joystick.rightBumper().onTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-				//joystick.leftBumper().onTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
-				//joystick.rightTrigger().whileTrue(scoreSequenceCommand());
-				joystick.leftTrigger().onTrue(intakeSequenceCommand);
+				joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
-				joystick.rightTrigger().onTrue(scoreSequenceCommand);
+				joystick.leftTrigger().onTrue(intakeSequenceCommand);
+				joystick.rightTrigger().whileTrue(scoreSequenceCommand);
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
