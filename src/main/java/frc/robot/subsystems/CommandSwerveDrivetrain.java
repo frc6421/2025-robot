@@ -67,8 +67,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     .withDriveRequestType(DriveRequestType.Velocity)
     .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
 
-    //public final WarriorCamera frontLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.CAM_1_OFFSET);
-    //public final WarriorCamera frontRightCamera = new WarriorCamera("Camera3", WarriorCamera.CameraConstants.CAM_3_OFFSET);
+    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_LEFT_TRANSFORM3D);
     public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_RIGHT_TRANSFORM3D);
 
     private final ProfiledPIDController thetaController = new ProfiledPIDController(
@@ -283,8 +282,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         yController.setTolerance(.09, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.0, 3.0);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.0, 3.0);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
@@ -297,8 +296,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         yController.setTolerance(.09, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.4, 4.4);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.4, 4.4);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.0, 3.0);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.0, 3.0);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
@@ -311,7 +310,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public void periodic() {
         
-            //updatePose(frontLeftCamera);
+            updatePose(backLeftCamera);
             updatePose(backRightCamera);
             //updatePose(backCamera);
         

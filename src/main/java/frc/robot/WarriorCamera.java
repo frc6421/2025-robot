@@ -54,9 +54,12 @@ public class WarriorCamera implements Sendable {
   private Matrix<N3, N1> standardDeviation;
 
   public final static class CameraConstants {
-    public final static Transform3d BACK_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(-0.28, -.26, 0.23),
-        new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-23.24),
-            Units.degreesToRadians(-25.8 + 180.0)));
+    public final static Transform3d BACK_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(-.25, -.3, .31),
+        new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-22.2),
+            Units.degreesToRadians(180 - 26)));
+    public final static Transform3d BACK_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(-.25, .3, .21),
+        new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-18.5),
+            Units.degreesToRadians(180 + 26)));
     private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
         .loadField(AprilTagFields.k2025ReefscapeWelded);
 
@@ -75,11 +78,13 @@ public class WarriorCamera implements Sendable {
   private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
   /* Robot swerve drive state */
-  private final NetworkTable cameraStateTable = inst.getTable("CameraState");
-  private final StructPublisher<Pose3d> cameraPose = cameraStateTable.getStructTopic("Pose", Pose3d.struct).publish();
+  private final NetworkTable cameraStateTable;
+  private final StructPublisher<Pose3d> cameraPose; 
 
   public WarriorCamera(String cameraName, Transform3d offsets) {
     camera = new PhotonCamera(cameraName);
+    cameraStateTable = inst.getTable(camera.getName() + "CameraState");
+    cameraPose = cameraStateTable.getStructTopic("Pose", Pose3d.struct).publish();
 
     poseEstimator = new PhotonPoseEstimator(
         CameraConstants.TAG_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, offsets);
@@ -120,6 +125,7 @@ public class WarriorCamera implements Sendable {
   public Pose2d getPose2d() {
     return cameraPose2d;
   }
+
 
   public Matrix<N3, N1> getStandardDeviation() {
     return standardDeviation;

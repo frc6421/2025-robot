@@ -3,26 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands.autoCommands;
-
-import java.util.List;
-
-import edu.wpi.first.math.controller.HolonomicDriveController;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -34,44 +15,9 @@ public class RedHRBCommand extends SequentialCommandGroup {
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
 
-  private Field2d field;
-
-  public SwerveDriveKinematics kinematics;
-
   public RedHRBCommand(CommandSwerveDrivetrain drive) {
-    
+
     driveSubsystem = drive;
-
-    kinematics = driveSubsystem.getKinematics();
-
-    TrajectoryConfig forwardConfig = new TrajectoryConfig(
-        AutoConstants.AUTO_MAX_VELOCITY_METERS_PER_SECOND,
-        AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
-        .setKinematics(kinematics);
-    
-    TrajectoryConfig reverseConfig = new TrajectoryConfig(
-        AutoConstants.AUTO_MAX_VELOCITY_METERS_PER_SECOND,
-        AutoConstants.AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED)
-        .setKinematics(kinematics)
-        .setReversed(true);
-
-    Trajectory toHTrajectory = TrajectoryGenerator.generateTrajectory(List.of(
-        TrajectoryConstants.RED_SINGLE_START, 
-        TrajectoryConstants.RED_H), 
-        reverseConfig);
-    
-
-  // Simulation
-    //  field = new Field2d();
-
-    //  if (RobotBase.isSimulation()) {
-    //     SmartDashboard.putData(field);
-
-    //     field.setRobotPose(toHTrajectory.getInitialPose());
-      
-    //     field.getObject("1 Trajectory").setTrajectory(toHTrajectory);
-    //   }
-
    
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());

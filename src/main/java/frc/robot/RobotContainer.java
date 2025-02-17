@@ -27,12 +27,17 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.ClimbCommand;
+import frc.robot.commands.IntakeSequenceCommand;
+import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
@@ -48,6 +53,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -70,9 +76,9 @@ public class RobotContainer {
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 	private final WristSubsystem wristSubsystem = new WristSubsystem();
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
-	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
+	//private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
+	//private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -88,16 +94,29 @@ public class RobotContainer {
 	private SendableChooser<Command> autoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
+		private SendableChooser<Double> elevatorPositionChooser;
+
+	private final ScoreSequenceCommand scoreSequenceCommand;
+	private final IntakeSequenceCommand intakeSequenceCommand;
 
 	public RobotContainer() {
-		configureBindings();
+
+		elevatorPositionChooser = new SendableChooser<>();
+				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+
+				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+
 
 		testAuto = new TestAutoCommand(drivetrain);
-		redJKLRB = new RedJKLRBCommand(drivetrain);
+		redJKLRB = new RedJKLRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redEDCBB = new RedEDCBBCommand(drivetrain);
 		redHRB = new RedHRBCommand(drivetrain);
 		blueJKLBB = new BlueJKLBBCommand(drivetrain);
-		blueEDCRB = new BlueEDCRBCommand(drivetrain);
+		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueGRB = new BlueGRBCommand(drivetrain);
 
 		autoChooser = new SendableChooser<>();
@@ -140,18 +159,26 @@ public class RobotContainer {
         redSourceChooser.addOption("6", TrajectoryConstants.R_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Auto Chooser", autoChooser);
-        SmartDashboard.putData("Position Chooser", redPositionChooser);
-        SmartDashboard.putData("Source Chooser", redSourceChooser);
+    SmartDashboard.putData("Position Chooser", redPositionChooser);
+    SmartDashboard.putData("Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
-        configureBindings();
+    configureBindings();
 	}
 
 	private void configureBindings() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
 		// Uncomment for running sysid routines
-		// sysIdButtonBindings();
+
+		joystick.x().onTrue(drivetrain.resetGyro());
+		//  joystick.a().onTrue(new InstantCommand(() -> SignalLogger.start()));
+		//  joystick.b().onTrue(new InstantCommand(() -> SignalLogger.stop()));
+		//  joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+		//  joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+		//  joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+		//  joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
 
 		// Note that X is defined as forward according to WPILib convention,
 		// and Y is defined as to the left according to WPILib convention.
@@ -171,24 +198,17 @@ public class RobotContainer {
 		// () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(),
 		// -joystick.getLeftX()))));
 
-		// joystick.y().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(-45))));
-		// joystick.y().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+		//  joystick.y().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_FORWARD_SOFT_LIMIT.magnitude()))));
 
-		// joystick.x().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(45))));
-		// joystick.x().whileFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+		//  joystick.x().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()))));
+
+		//  joystick.a().whileTrue(intakeSubsystem.run(() -> intakeSubsystem.setIntakeInSpeed()));
+		//  joystick.a().onFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+
+		//  joystick.b().whileTrue(intakeSubsystem.run(() -> intakeSubsystem.setIntakeOutSpeed()));
+		//  joystick.b().onFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
 
 		// Climb buttons
-		joystick.a().whileTrue(climbCommand);
-
-        joystick.x().whileTrue(cageIntakeSubsystem.cageIntakeInSpeedCommand());
-        joystick.x().onFalse(cageIntakeSubsystem.stopCageIntakeMotorCommand());
-
-        joystick.y().whileTrue(climbSubsystem.setVoltageCommand(1));
-        joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-
-        joystick.b().whileTrue(climbSubsystem.setVoltageCommand(-1));
-        joystick.b().onFalse(climbSubsystem.setVoltageCommand(0));
-
 
 		// joystick.a().whileTrue(climbSubsystem.setVoltageCommand(2)
 		// 		.until(climbSubsystem::isOutPosition)
@@ -203,20 +223,26 @@ public class RobotContainer {
 		//joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         //joystick.x().onTrue(elevatorSubsystem.setElevatorPositionCommand(elevatorSubsystem.getSelectedState()));
-        joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271 + 36));
-        joystick.a().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+        // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271 + 36));
+        // joystick.a().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
-        joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271));
-        joystick.b().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+        // joystick.b().onFalse(elevatorSubsystem.setElevatorPositionCommand(29.271));
+        // joystick.b().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
-        joystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(1));
-        joystick.x().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+        // joystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(1));
+        // joystick.x().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
-        joystick.y().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
-        joystick.y().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
+        // joystick.y().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
+        // joystick.y().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
 
         // joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
         // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
+
+				joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+
+				joystick.leftTrigger().onTrue(intakeSequenceCommand);
+				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
@@ -226,12 +252,17 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedPoseCommand() {
-        return redPositionChooser.getSelected();
+			return redPositionChooser.getSelected();
     }
 
     public Pose2d getSelectedSource() {
         return redSourceChooser.getSelected();
     }
+
+		public Double getElevatorPosition() {
+			return elevatorPositionChooser.getSelected();
+		}
+
     public static void applyTalonConfigs(TalonFX motor, TalonFXConfiguration config) {
 		StatusCode status = StatusCode.StatusCodeNotInitialized;
 		for (int i = 0; i < 5; ++i) {
