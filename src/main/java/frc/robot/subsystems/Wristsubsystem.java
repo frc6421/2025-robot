@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import javax.naming.spi.ResolveResult;
+
 //Imports
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -119,6 +121,7 @@ public class WristSubsystem extends SubsystemBase {
     wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude());
 
     SmartDashboard.putData("Wrist" , this);
+    SmartDashboard.putData("RESET WRIST ANGLE", resetWrist());
   }
 
   // Nothing needs to happen here, only when the subsystem is called
@@ -135,6 +138,10 @@ public class WristSubsystem extends SubsystemBase {
   public Command setAngle(double angle) {
     return run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
     .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < 1);
+  }
+
+  public Command resetWrist() {
+    return runOnce(() -> wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude()));
   }
 
   /**

@@ -44,22 +44,22 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
         //scoreSequence
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L2_POSITION.magnitude())),
+				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
-		new WaitCommand(0.3),
+		new WaitCommand(0.2),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
         ),
 
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_OUT), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER), 
 
         //intakeSequence
         new SequentialCommandGroup(
 			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(2),
+			new WaitCommand(1.5),
 			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
         ),
 
@@ -69,21 +69,21 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
-		new WaitCommand(0.3),
+		new WaitCommand(0.2),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
         ),
 
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_OUT), 
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER), 
 
         //intakeSequence
         new SequentialCommandGroup(
 			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(2),
+			new WaitCommand(1.5),
 			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
         ),
 
@@ -93,13 +93,13 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
-		new WaitCommand(0.3),
+		new WaitCommand(0.2),
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
         )
     );
   }

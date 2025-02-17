@@ -242,7 +242,7 @@ public class RobotContainer {
 				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
-				joystick.rightTrigger().whileTrue(scoreSequenceCommand);
+				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
@@ -252,7 +252,7 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedPoseCommand() {
-        return redPositionChooser.getSelected();
+			return redPositionChooser.getSelected();
     }
 
     public Pose2d getSelectedSource() {

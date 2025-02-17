@@ -337,6 +337,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     getSelectedState().position, null);
 
     builder.addDoubleProperty("Elevator SetPoint", () -> currentElevatorState.position, null);
-    builder.addDoubleProperty("Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
+    builder.addDoubleProperty("L Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
+    builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);
   }
 }
