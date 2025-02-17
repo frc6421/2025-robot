@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -93,7 +94,9 @@ public class RobotContainer {
 
 	private SendableChooser<Command> autoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
+    private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
+    private SendableChooser<Pose2d> blueSourceChooser;
 		private SendableChooser<Double> elevatorPositionChooser;
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
@@ -150,6 +153,20 @@ public class RobotContainer {
         redPositionChooser.addOption("K", TrajectoryConstants.RED_K);
         redPositionChooser.addOption("L", TrajectoryConstants.RED_L);
 
+        bluePositionChooser = new SendableChooser<>();
+        bluePositionChooser.setDefaultOption("A", TrajectoryConstants.BLUE_A);
+        bluePositionChooser.addOption("B", TrajectoryConstants.BLUE_B);
+        bluePositionChooser.addOption("C", TrajectoryConstants.BLUE_C);
+        bluePositionChooser.addOption("D", TrajectoryConstants.BLUE_D);
+        bluePositionChooser.addOption("E", TrajectoryConstants.BLUE_E);
+        bluePositionChooser.addOption("F", TrajectoryConstants.BLUE_F);
+        bluePositionChooser.addOption("G", TrajectoryConstants.BLUE_G);
+        bluePositionChooser.addOption("H", TrajectoryConstants.BLUE_H);
+        bluePositionChooser.addOption("I", TrajectoryConstants.BLUE_I);
+        bluePositionChooser.addOption("J", TrajectoryConstants.BLUE_J);
+        bluePositionChooser.addOption("K", TrajectoryConstants.BLUE_K);
+        bluePositionChooser.addOption("L", TrajectoryConstants.BLUE_L);
+
         redSourceChooser = new SendableChooser<>();
         redSourceChooser.setDefaultOption("1", TrajectoryConstants.R_HP_LEFT_OUT);
         redSourceChooser.addOption("2", TrajectoryConstants.R_HP_LEFT_CENTER);
@@ -157,6 +174,14 @@ public class RobotContainer {
         redSourceChooser.addOption("4", TrajectoryConstants.R_HP_RIGHT_IN);
         redSourceChooser.addOption("5", TrajectoryConstants.R_HP_RIGHT_CENTER);
         redSourceChooser.addOption("6", TrajectoryConstants.R_HP_RIGHT_OUT);
+
+        blueSourceChooser = new SendableChooser<>();
+        blueSourceChooser.setDefaultOption("1", TrajectoryConstants.B_HP_LEFT_OUT);
+        blueSourceChooser.addOption("2", TrajectoryConstants.B_HP_LEFT_CENTER);
+        blueSourceChooser.addOption("3", TrajectoryConstants.B_HP_LEFT_IN);
+        blueSourceChooser.addOption("4", TrajectoryConstants.B_HP_RIGHT_IN);
+        blueSourceChooser.addOption("5", TrajectoryConstants.B_HP_RIGHT_CENTER);
+        blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Auto Chooser", autoChooser);
     SmartDashboard.putData("Position Chooser", redPositionChooser);
@@ -172,7 +197,6 @@ public class RobotContainer {
 
 		// Uncomment for running sysid routines
 
-		joystick.x().onTrue(drivetrain.resetGyro());
 		//  joystick.a().onTrue(new InstantCommand(() -> SignalLogger.start()));
 		//  joystick.b().onTrue(new InstantCommand(() -> SignalLogger.stop()));
 		//  joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
@@ -244,6 +268,12 @@ public class RobotContainer {
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
 				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
+				joystick.x().onTrue(drivetrain.resetGyro());
+
+				// Manual Overrides
+				joystick.start().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
+				joystick.back().whileTrue(wristSubsystem.setWristVoltage(-1));
+
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
 
@@ -252,11 +282,19 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedPoseCommand() {
+			if (DriverStation.getAlliance().equals(Alliance.Red)) {
 			return redPositionChooser.getSelected();
+			} else {
+				return bluePositionChooser.getSelected();
+			}
     }
 
     public Pose2d getSelectedSource() {
+			if (DriverStation.getAlliance().equals(Alliance.Red)) {
         return redSourceChooser.getSelected();
+			} else {
+				return blueSourceChooser.getSelected();
+			}
     }
 
 		public Double getElevatorPosition() {

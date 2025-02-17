@@ -41,7 +41,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Soft Limits
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
-    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12);
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12); // TODO needs to chnage with new numbers
 
     // PID constants
     private static final double WRIST_KP = 0.03;
@@ -142,6 +142,10 @@ public class WristSubsystem extends SubsystemBase {
 
   public Command resetWrist() {
     return runOnce(() -> wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude()));
+  }
+
+  public Command setWristVoltage(double voltage) {
+    return run(() -> wristMotor.setVoltage(voltage));
   }
 
   /**
