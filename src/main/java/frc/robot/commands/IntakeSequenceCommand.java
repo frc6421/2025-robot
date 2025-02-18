@@ -5,7 +5,6 @@
 package frc.robot.commands;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -32,8 +31,7 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
     addCommands(
       elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)), 
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()), 
-			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(2),
+			intakeSubsystem.intakeCoral(),
 			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
     );
   }

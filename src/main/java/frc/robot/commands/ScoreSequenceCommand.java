@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -42,7 +41,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT))))
+			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT)))
     );
   }
 }

@@ -3,13 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands.autoCommands;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.IntakeSequenceCommand;
-import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
@@ -51,15 +48,14 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
         ),
 
         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER), 
 
         //intakeSequence
         new SequentialCommandGroup(
-			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(1.5),
+			intakeSubsystem.intakeCoral(),
 			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
         ),
 
@@ -75,15 +71,14 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
         ),
 
         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER), 
 
         //intakeSequence
         new SequentialCommandGroup(
-			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
-			new WaitCommand(1.5),
+			intakeSubsystem.intakeCoral(),
 			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
         ),
 
@@ -99,7 +94,7 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)))
+			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
         )
     );
   }

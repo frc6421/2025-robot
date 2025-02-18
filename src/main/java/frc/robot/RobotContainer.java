@@ -6,37 +6,22 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.revrobotics.REVLibError;
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
@@ -47,14 +32,12 @@ import frc.robot.commands.autoCommands.RedHRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CageIntakeSubsystem;
 import frc.robot.subsystems.ClimbPivotSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
-import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -92,7 +75,8 @@ public class RobotContainer {
 	private final BlueEDCRBCommand blueEDCRB;
 	private final BlueGRBCommand blueGRB;
 
-	private SendableChooser<Command> autoChooser;
+	private SendableChooser<Command> redAutoChooser;
+	private SendableChooser<Command> blueAutoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
@@ -122,22 +106,15 @@ public class RobotContainer {
 		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueGRB = new BlueGRBCommand(drivetrain);
 
-		autoChooser = new SendableChooser<>();
-		autoChooser.addOption("Auto Test", testAuto);
-		autoChooser.addOption("Red JKL RB", redJKLRB);
-		autoChooser.addOption("Red EDC BB", redEDCBB);
-		autoChooser.addOption("Red H RB", redHRB);
-		autoChooser.addOption("Blue JKL BB", blueJKLBB);
-		autoChooser.addOption("Blue EDC RB", blueEDCRB);
-		autoChooser.addOption("Blue G RB", blueGRB);
-        autoChooser = new SendableChooser<>();
-        autoChooser.addOption("Auto Test", testAuto);
-        autoChooser.addOption("Red JKL RB", redJKLRB);
-        autoChooser.addOption("Red EDC BB", redEDCBB);
-        autoChooser.addOption("Red H RB", redHRB);
-        autoChooser.addOption("Blue JKL BB", blueJKLBB);
-        autoChooser.addOption("Blue EDC RB", blueEDCRB);
-        autoChooser.addOption("Blue G RB", blueGRB);
+		redAutoChooser = new SendableChooser<>();
+		redAutoChooser.addOption("Red JKL RB", redJKLRB);
+		redAutoChooser.addOption("Red EDC BB", redEDCBB);
+		redAutoChooser.addOption("Red H RB", redHRB);
+
+        blueAutoChooser = new SendableChooser<>();
+        blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
+        blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
+        blueAutoChooser.addOption("Blue G RB", blueGRB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -183,9 +160,12 @@ public class RobotContainer {
         blueSourceChooser.addOption("5", TrajectoryConstants.B_HP_RIGHT_CENTER);
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
-		SmartDashboard.putData("Auto Chooser", autoChooser);
-    SmartDashboard.putData("Position Chooser", redPositionChooser);
-    SmartDashboard.putData("Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
+		SmartDashboard.putData("Blue Auto Chooser", blueAutoChooser);
+    SmartDashboard.putData("Red Position Chooser", redPositionChooser);
+	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
+    SmartDashboard.putData("Red Source Chooser", redSourceChooser);
+	SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
@@ -278,8 +258,11 @@ public class RobotContainer {
 	}
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
-    }
+		if (DriverStation.getAlliance().equals(Alliance.Red)) {
+			return redAutoChooser.getSelected();
+			} else {
+				return blueAutoChooser.getSelected();
+			}    }
 
     public Pose2d getSelectedPoseCommand() {
 			if (DriverStation.getAlliance().equals(Alliance.Red)) {
