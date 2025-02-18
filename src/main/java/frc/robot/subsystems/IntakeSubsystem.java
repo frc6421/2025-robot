@@ -58,7 +58,7 @@ public class IntakeSubsystem extends SubsystemBase {
     RobotContainer.applyTalonConfigs(intakeMotor, intakeMotorConfig);
 
 
-    SmartDashboard.putData("Intake/Intake Speed", this);
+    SmartDashboard.putData("Intake", this);
   }
 
   /**
@@ -90,6 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
     super.initSendable(builder);
 
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
+    builder.addDoubleProperty("Intake Current", () -> intakeMotor.getStatorCurrent().getValueAsDouble(), null);
   }
 
 }
