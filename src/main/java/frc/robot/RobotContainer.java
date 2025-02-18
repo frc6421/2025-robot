@@ -58,7 +58,7 @@ import frc.robot.subsystems.WristSubsystem.WristConstants;
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
 	private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-																																										// max angular velocity
+																						// max angular velocity
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 
 	/* Setting up bindings for necessary control of the swerve drive platform */
@@ -94,7 +94,7 @@ public class RobotContainer {
 	private SendableChooser<Command> autoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
-		private SendableChooser<Double> elevatorPositionChooser;
+	private SendableChooser<Double> elevatorPositionChooser;
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
@@ -102,13 +102,13 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		elevatorPositionChooser = new SendableChooser<>();
-				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+		elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
-				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -159,12 +159,12 @@ public class RobotContainer {
         redSourceChooser.addOption("6", TrajectoryConstants.R_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Auto Chooser", autoChooser);
-    SmartDashboard.putData("Position Chooser", redPositionChooser);
-    SmartDashboard.putData("Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Position Chooser", redPositionChooser);
+		SmartDashboard.putData("Source Chooser", redSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
-    configureBindings();
+    	configureBindings();
 	}
 
 	private void configureBindings() {
@@ -238,11 +238,11 @@ public class RobotContainer {
         // joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
         // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
 
-				joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+		joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
-				joystick.leftTrigger().onTrue(intakeSequenceCommand);
-				joystick.rightTrigger().onTrue(scoreSequenceCommand);
+		joystick.leftTrigger().onTrue(intakeSequenceCommand);
+		joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
@@ -252,23 +252,23 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedPoseCommand() {
-			return redPositionChooser.getSelected();
+		return redPositionChooser.getSelected();
     }
 
     public Pose2d getSelectedSource() {
         return redSourceChooser.getSelected();
     }
 
-		public Double getElevatorPosition() {
-			return elevatorPositionChooser.getSelected();
-		}
+	public Double getElevatorPosition() {
+		return elevatorPositionChooser.getSelected();
+	}
 
     public static void applyTalonConfigs(TalonFX motor, TalonFXConfiguration config) {
 		StatusCode status = StatusCode.StatusCodeNotInitialized;
 		for (int i = 0; i < 5; ++i) {
 			status = motor.getConfigurator().apply(config);
 			if (status.isOK())
-				break;
+			break;
 		}
 		if (!status.isOK()) {
 			DataLogManager.log("Erorr:" + motor.getDescription() + " Configuration not applied " + status.toString());

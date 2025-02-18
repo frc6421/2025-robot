@@ -70,7 +70,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double MAX_ERROR_MOTION = 1.02;
 
     // Maximum and minimum extension of the elevator, in meters
-    private static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
+    public static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
     public static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT / METERS_PER_ROTATION;
