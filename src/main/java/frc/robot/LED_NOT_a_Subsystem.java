@@ -32,12 +32,12 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     public static final int[] WHITE = {255,255,255}, 
     PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
     RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
-    VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36};
+    VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36},
+    OFF = {0,0,0},
+    VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0}, VISION_BACK_COLOR = {0,255,0};
     public static enum LED_MODES{
       RAINBOW,
-      FLICKER,
       SNAKING_RAINBOW,
-      HIGHLIGHT,
       COLLISION,
     }
     //TODO: Set the desired color for the Elevator target
@@ -48,7 +48,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   private static AddressableLED led;//Led Strip
   private static AddressableLEDBuffer ledBuffer;//Buffer used before displaying to the strip
 
-  private static int[] patternColor = LEDConstants.WHITE;
+  private static int[] patternColor = LEDConstants.OFF;
 
   private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
@@ -83,6 +83,17 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     //Creates a solid LED patern with the color given by the array, and applies it to the buffer
     LEDPattern.solid(new Color(color[0],color[1],color[2])).applyTo(ledBuffer); 
     led.setData(ledBuffer);
+    patternColor = color;
+  }
+  /**
+   * @breif  Mixes colors together. Useful if several things happen at once, but only one LED strip
+   * @param newColor  The color to add.
+   */
+  public static void addLED(int newColor[]){
+    for(int i = 0; i < 3; i++){
+      if(newColor[i] + patternColor[i] >= 255) patternColor[i] = (newColor[i] > patternColor[i] ? newColor[i] - patternColor[i] : patternColor[i] - newColor[i]);
+      else patternColor[i] += newColor[i];
+    }
   }
 
   /**
@@ -115,9 +126,9 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       case SNAKING_RAINBOW:
         //Checking if it is at the number of delay cycles
         if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
-          if(previousColorLimit > 255) previousColorLimit = 0;
+          if(previousColorLimit > (LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS) * 2) previousColorLimit = 0;
           //Resets the previous snaking LED
-          if(previousSnakingLED == (LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS * 2) + 
+          if(previousSnakingLED >= (LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS * 2) + 
             ((LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS * 2) * (LEDConstants.TRAILING_BRIGHTNESS * 2 / 100))){
             previousSnakingLED = 0;
           }
@@ -168,22 +179,24 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
           previousSnakingLED++;
         }else currentRobotCycle++;
       break;
-
-      case FLICKER:
-        if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
-          LEDPattern.solid(new Color(patternColor[0], patternColor[1], patternColor[2])).applyTo(ledBuffer);
-          led.setData(ledBuffer);
-          currentRobotCycle = 0;
-        }else{
-          LEDPattern.solid(new Color(0,0,0)).applyTo(ledBuffer);
-          led.setData(ledBuffer);
-          currentRobotCycle++;
-        }
-      break;
       default: break;
     }
   }
 
+  /**
+   * @breif  Flickers the LED's every few robot cycles
+   */
+  public static void flicker(){
+    if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
+      LEDPattern.solid(new Color(patternColor[0], patternColor[1], patternColor[2])).applyTo(ledBuffer);
+      led.setData(ledBuffer);
+      currentRobotCycle = 0;
+    }else{
+      LEDPattern.solid(new Color(0,0,0)).applyTo(ledBuffer);
+      led.setData(ledBuffer);
+      currentRobotCycle++;
+    }
+  }
   /**
    * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
    * @param elevatorTarget  The Distance object of the Elevator position
@@ -216,8 +229,6 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
     }
     led.setData(ledBuffer);//Update the strip
-    
-    System.out.println("\n\n\nLower Target: "+elevatorLowerTarget+"\nUpper Target: "+elevatorUpperTarget+"\nCurrent Elevator Height:"+currentElevatorHeight+"\n\n\n");
   }
 
   /**
@@ -265,11 +276,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   //and the current color limit
   private static int[] rainbowColor(int wheelPos){
     int r = 0, g = 0, b = 0;
-    int numIterations = 1;
-    while(wheelPos / 255 > numIterations){
-      wheelPos -= 100;
-      numIterations++;
-    }
+    while(wheelPos / 255 > 0) wheelPos -= 255;
     if(wheelPos < 85) {
       r = wheelPos * 3;
       g = 255 - wheelPos * 3;

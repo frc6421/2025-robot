@@ -38,6 +38,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.LED_NOT_a_Subsystem.LEDConstants;
+import frc.robot.LED_NOT_a_Subsystem;
 import frc.robot.WarriorCamera;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -265,16 +267,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void updatePose(WarriorCamera camera) {
-        if(camera.filterOdometry()) {
-                addVisionMeasurement(
-                new Pose2d(camera.getPose2d().getX(),
-                camera.getPose2d().getY(),
-                getPigeon2().getRotation2d()),
-                Utils.fpgaToCurrentTime(camera.getTimer()),
-                camera.getStandardDeviation());
-            }
+      if(camera.filterOdometry()) {
+        addVisionMeasurement(
+          new Pose2d(
+            camera.getPose2d().getX(),
+            camera.getPose2d().getY(),
+            getPigeon2().getRotation2d()
+          ),
+          Utils.fpgaToCurrentTime(camera.getTimer()),
+          camera.getStandardDeviation()
+        );
+      }
     }
-
+    /**
+     * Aligns the robot, drive and all, to a specific pos
+     * @param targetPose  The pose to go to
+     * @return  The apply reuest
+     */
     public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
@@ -310,10 +319,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public void periodic() {
         
-            updatePose(backLeftCamera);
-            updatePose(backRightCamera);
-            //updatePose(backCamera);
-        
+        updatePose(backLeftCamera);
+        updatePose(backRightCamera);
+        //updatePose(backCamera);
+        //Updating LED's to indicate that there is a vision target only in Telop
+        if(DriverStation.isTeleop()){
+          if(backLeftCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_LEFT_COLOR);
+          if(backRightCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_RIGHT_COLOR);
+          //if(backCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_COLOR);
+          LED_NOT_a_Subsystem.flicker();
+        }
         
         /*
          * Periodically try to apply the operator perspective.

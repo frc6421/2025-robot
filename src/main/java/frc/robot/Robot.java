@@ -44,7 +44,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledExit() {
     LED_NOT_a_Subsystem.resetLength();
-    LED_NOT_a_Subsystem.setElevatorLEDPosition(ElevatorConstants.L3_POSITION, 1.0);
   }
 
   @Override
