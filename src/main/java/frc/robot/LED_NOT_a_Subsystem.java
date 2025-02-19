@@ -42,7 +42,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     }
     //TODO: Set the desired color for the Elevator target
     private static int[] ELEVATOR_TARGET_COLOR = {0,255,0}, ELEVATOR_CURRENT_POS_COLOR = {0,0,255};
-    private static int TRAILING_BRIGHTNESS = 10;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
+    private static int TRAILING_BRIGHTNESS = 7;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   }
 
   private static AddressableLED led;//Led Strip
@@ -91,10 +91,22 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
    */
   public static void addLED(int newColor[]){
     for(int i = 0; i < 3; i++){
-      if(newColor[i] + patternColor[i] >= 255) patternColor[i] = (newColor[i] > patternColor[i] ? newColor[i] - patternColor[i] : patternColor[i] - newColor[i]);
+      if(newColor[i] + patternColor[i] >= 255) patternColor[i] = 255;
       else patternColor[i] += newColor[i];
     }
   }
+  /**
+   * @breif  Mixes colors together. Useful if several things happen at once, but only one LED strip
+   * @param newColor  The color to subtract.
+   */
+  public static void subtractLED(int newColor[]){
+    for(int i = 0; i < 3; i++){
+      if(newColor[i] - patternColor[i] <= 0) patternColor[i] = 0;
+      else patternColor[i] -= newColor[i];
+    }
+  }
+
+
 
   /**
    * @breif   Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
@@ -234,7 +246,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   /**
    * @breif   Turns the LEDs off
    */
-  public void off(){
+  public static void off(){
     LEDPattern.solid(Color.kBlack).applyTo(ledBuffer);
     led.setData(ledBuffer);
   }

@@ -66,6 +66,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    LED_NOT_a_Subsystem.off();
   }
 
   @Override
