@@ -271,8 +271,8 @@ public class RobotContainer {
 				joystick.x().onTrue(drivetrain.resetGyro());
 
 				// Manual Overrides
-				joystick.start().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
-				joystick.back().whileTrue(wristSubsystem.setWristVoltage(-1));
+				joystick.start().whileTrue(elevatorSubsystem.resetElevator());
+				joystick.back().whileTrue(wristSubsystem.resetWrist());
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}

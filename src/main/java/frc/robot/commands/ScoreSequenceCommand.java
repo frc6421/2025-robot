@@ -42,7 +42,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
 		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT))))
+			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT_INCHES))))
     );
   }
 }
