@@ -10,6 +10,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -32,9 +33,9 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
     addCommands(
       elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT_INCHES)), 
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()), 
-			intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeInSpeed()),
+			intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_IN_SPEED),
 			new WaitCommand(2),
-			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
+			intakeSubsystem.stopIntake()
     );
   }
 }

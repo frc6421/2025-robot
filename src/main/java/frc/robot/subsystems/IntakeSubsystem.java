@@ -4,19 +4,22 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class IntakeSubsystem extends SubsystemBase {
-  private SparkMax intakeMotor;
-  private SparkMaxConfig intakeMotorConfig;
+  private TalonFX intakeMotor;
+  private TalonFXConfiguration intakeMotorConfig;
 
   public static class IntakeConstants {
 
@@ -24,62 +27,57 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final int INTAKE_CURRENT_LIMIT = 60;
 
-    private static final int INTAKE_STALL_LIMIT = 30;
+    private static final CurrentLimitsConfigs INTAKE_CURRENT_CONFIGS = new CurrentLimitsConfigs()
+    .withStatorCurrentLimit(INTAKE_CURRENT_LIMIT)
+    .withStatorCurrentLimitEnable(true);
+
+    private static final double INTAKE_STALL_LIMIT = 30;
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
     public static final double INTAKE_OUT_SPEED = -1.0; 
+
+    private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
+    .withNeutralMode(NeutralModeValue.Coast)
+    .withInverted(InvertedValue.CounterClockwise_Positive);
   }
 
   /** Creates a new intakeSubsystem. */
   public IntakeSubsystem() {
-    // Identifies the motor object as a Spark Max Controller
-    intakeMotor = new SparkMax(IntakeConstants.INTAKE_MOTOR_ID, MotorType.kBrushless);
+    // Identifies the motor object 
+    intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
 
-    intakeMotorConfig = new SparkMaxConfig();
-    // TODO: Do we need Brake when have coral?
-    intakeMotorConfig.idleMode(IdleMode.kCoast);// Sets the motor to freely rotate
-    intakeMotorConfig.smartCurrentLimit(IntakeConstants.INTAKE_CURRENT_LIMIT);// Setting current limit
-    intakeMotorConfig.inverted(true);// Inverts
+    RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
 
-    // Applies the configuration to the motor
-    intakeMotor.configure(intakeMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kNoPersistParameters);
+    intakeMotorConfig = new TalonFXConfiguration()
+    .withCurrentLimits(IntakeConstants.INTAKE_CURRENT_CONFIGS)
+    .withMotorOutput(IntakeConstants.INTAKE_MOTOR_CONFIGS);
 
-    SmartDashboard.putData("Intake/Intake Speed", this);
+
+     // Applies the configuration to the motor
+    RobotContainer.applyTalonConfigs(intakeMotor, intakeMotorConfig);
+
+
+    SmartDashboard.putData("Intake", this);
   }
 
   /**
    * @breif Sets the intake to the Intake In speed
    */
-  public void setIntakeInSpeed() {
-    intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED);
-  }
 
-  /**
-   * @breif Sets the intake to the Intake Out speed
-   */
-  public void setIntakeOutSpeed() {
-    intakeMotor.set(IntakeConstants.INTAKE_OUT_SPEED);
-  }
-
-  /**
-   * @breif Sets the intake voltage
-   * @param value Voltage to set
-   */
-  public void setIntakeVoltage(double voltage) {
-    intakeMotor.setVoltage(voltage);
+  public Command setIntakeSpeed(double output) {
+    return runOnce(() -> intakeMotor.set(output));
   }
 
   /**
    * @breif Stops the motor
    */
-  public void stopIntake() {
-    intakeMotor.stopMotor();
+  public Command stopIntake() {
+    return runOnce(() -> intakeMotor.stopMotor());
   }
 
   public boolean haveCoral(){
-    return intakeMotor.getOutputCurrent()> IntakeConstants.INTAKE_STALL_LIMIT;
+    return intakeMotor.getStatorCurrent().getValueAsDouble()> IntakeConstants.INTAKE_STALL_LIMIT;
   }
 
   @Override
@@ -92,6 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
     super.initSendable(builder);
 
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
+    builder.addDoubleProperty("Intake Current", () -> intakeMotor.getStatorCurrent().getValueAsDouble(), null);
   }
 
 }
