@@ -3,13 +3,11 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
-import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -30,10 +28,10 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT)), 
+      elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT), 
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()), 
 			intakeSubsystem.intakeCoral(),
-			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
+			intakeSubsystem.stopIntake()
     );
   }
 }

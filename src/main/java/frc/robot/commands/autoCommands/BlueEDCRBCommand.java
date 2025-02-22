@@ -40,63 +40,53 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_E),
 
         //scoreSequence
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-		new WaitCommand(0.2),
-		intakeSubsystem.stopIntake(),
-		new ParallelCommandGroup(
-			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
-        ),
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))),
 
         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER), 
 
         //intakeSequence
-        new SequentialCommandGroup(
 			intakeSubsystem.intakeCoral(),
-			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
-        ),
+			intakeSubsystem.stopIntake(),
 
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_D),
 
         //scoreSequence
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-		new WaitCommand(0.2),
-		intakeSubsystem.stopIntake(),
-		new ParallelCommandGroup(
-			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
-        ),
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))),
 
         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER), 
 
         //intakeSequence
-        new SequentialCommandGroup(
 			intakeSubsystem.intakeCoral(),
-			intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake())
-        ),
+			intakeSubsystem.stopIntake(),
 
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_C), 
 
         //scoreSequence
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
-				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-		new WaitCommand(0.2),
-		intakeSubsystem.stopIntake(),
-		new ParallelCommandGroup(
-			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
-        )
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT)))
     );
   }
 }

@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -22,7 +24,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
+import frc.robot.commands.AlgaeRemovalCommand;
 import frc.robot.commands.IntakeSequenceCommand;
+import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
@@ -85,6 +89,10 @@ public class RobotContainer {
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
+	private final AlgaeRemovalCommand algaeRemovalCommand;
+	private final ResetAlgaeCommand resetAlgaeCommand;
+
+	Optional<Alliance> alliance = DriverStation.getAlliance();
 
 	public RobotContainer() {
 
@@ -96,6 +104,9 @@ public class RobotContainer {
 
 				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+				algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+				resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -254,30 +265,46 @@ public class RobotContainer {
 				joystick.start().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
 				joystick.back().whileTrue(wristSubsystem.setWristVoltage(-1));
 
+				joystick.a().onTrue(algaeRemovalCommand);
+				joystick.b().onTrue(resetAlgaeCommand);
+
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
 
     public Command getAutonomousCommand() {
-		if (DriverStation.getAlliance().equals(Alliance.Red)) {
-			return redAutoChooser.getSelected();
+		if (alliance.isPresent()) {
+			if (alliance.get() == Alliance.Red) {
+				return redAutoChooser.getSelected();
 			} else {
 				return blueAutoChooser.getSelected();
-			}    }
+			} 
+		} else {
+			return redAutoChooser.getSelected();
+		} 
+	}
 
     public Pose2d getSelectedPoseCommand() {
-			if (DriverStation.getAlliance().equals(Alliance.Red)) {
-			return redPositionChooser.getSelected();
+		if (alliance.isPresent()) {
+			if (alliance.get() == Alliance.Red) {
+				return redPositionChooser.getSelected();
 			} else {
 				return bluePositionChooser.getSelected();
 			}
+		} else {
+			return redPositionChooser.getSelected();
+		}
     }
 
     public Pose2d getSelectedSource() {
-			if (DriverStation.getAlliance().equals(Alliance.Red)) {
-        return redSourceChooser.getSelected();
+		if (alliance.isPresent()) {
+			if (alliance.get() == Alliance.Red) {
+				return redSourceChooser.getSelected();
 			} else {
 				return blueSourceChooser.getSelected();
 			}
+		} else {
+			return redSourceChooser.getSelected();
+		}
     }
 
 		public Double getElevatorPosition() {
