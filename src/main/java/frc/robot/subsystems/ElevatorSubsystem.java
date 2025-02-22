@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.LED_NOT_a_Subsystem;
 
 public class ElevatorSubsystem extends SubsystemBase {
   // Creating the Motor Controller objects
@@ -300,6 +301,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public Command setElevatorPositionCommand(DoubleSupplier position) { 
+    LED_NOT_a_Subsystem.setElevatorLEDPosition(getSelectedState().position, getElevatorHeight(elevatorLeftMotor));
     return 
     run(() -> {
       setMagicMotion(position.getAsDouble());

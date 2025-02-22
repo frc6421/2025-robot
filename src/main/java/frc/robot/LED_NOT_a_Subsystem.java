@@ -33,14 +33,15 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
     RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
     VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36},
+    SEA_BLUE = {0,80,255}, FOAM_WHITE = {190,220,255}, SKY_BLUE = {150,150,255},
     OFF = {0,0,0},
     VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0}, VISION_BACK_COLOR = {0,255,0};
     public static enum LED_MODES{
       RAINBOW,
       SNAKING_RAINBOW,
       COLLISION,
-    }
-    //TODO: Set the desired color for the Elevator target
+      WAVE,
+    };
     private static int[] ELEVATOR_TARGET_COLOR = {0,255,0}, ELEVATOR_CURRENT_POS_COLOR = {0,0,255};
     private static int TRAILING_BRIGHTNESS = 7;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   }
@@ -59,6 +60,11 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   private static int currentRobotCycle;//Current amount of waited robot cycles
 
   private static LED_MODES selectedDisabledPattern;
+
+  private static float waveStep;//The position of the sine wave, in radians.
+
+  private static int waveHeight;
+  
 
   /** Creates a new LEDSubsystem. */
   public LED_NOT_a_Subsystem() {
@@ -105,8 +111,6 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       else patternColor[i] -= newColor[i];
     }
   }
-
-
 
   /**
    * @breif   Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
@@ -191,6 +195,23 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
           previousSnakingLED++;
         }else currentRobotCycle++;
       break;
+
+      case WAVE:
+        if(waveStep == 2*Math.PI) waveStep = 0;
+        //The acutal height of the wave
+        long position = Math.round(4 * Math.sin(waveStep) + waveHeight);
+        //The wave will slowly increase over time, then decrease
+        position += Math.round(8 * Math.sin(waveStep / 256));
+        for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
+          //Setting the wave
+          if(LEDNum <= position) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
+          //Setting the layer of foam on top
+          if(LEDNum == position + 1 || LEDNum == position + 2) ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
+          if(LEDNum > position + 2) ledBuffer.setRGB(LEDNum, LEDConstants.SKY_BLUE[0], LEDConstants.SKY_BLUE[1], LEDConstants.SKY_BLUE[2]);
+        }
+        waveStep += Math.PI / 128;
+        led.setData(ledBuffer);
+      break;
       default: break;
     }
   }
@@ -214,20 +235,20 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
    * @param elevatorTarget  The Distance object of the Elevator position
    * @param currentElevatorHeight  The current height of the elevator, given in inches
    */
-  public static void setElevatorLEDPosition(Distance elevatorTarget, double currentElevatorHeight){
+  public static void setElevatorLEDPosition(double elevatorTarget, double currentElevatorHeight){
     int elevatorUpperTarget, elevatorLowerTarget;
     //Setting the lower position to be the next-lowest set scoring position
     //L1 position, should be the lowest 
-    if(elevatorTarget.in(Inches) <= ElevatorConstants.L1_POSITION.in(Inches)){
+    if(elevatorTarget <= ElevatorConstants.L1_POSITION.in(Inches)){
       elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
       elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
-    }else if(elevatorTarget.in(Inches) <= ElevatorConstants.L2_POSITION.in(Inches)){
+    }else if(elevatorTarget <= ElevatorConstants.L2_POSITION.in(Inches)){
       elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
       elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
-    }else if(elevatorTarget.in(Inches) <= ElevatorConstants.STATION_POSITION.in(Inches)){
+    }else if(elevatorTarget <= ElevatorConstants.STATION_POSITION.in(Inches)){
       elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
       elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
-    }else if(elevatorTarget.in(Inches) <= ElevatorConstants.L3_POSITION.in(Inches)){
+    }else if(elevatorTarget <= ElevatorConstants.L3_POSITION.in(Inches)){
       elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
       elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
     }else{
@@ -263,7 +284,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     //Random Object
     Random random = new Random();
     //There are six different patterns
-    switch(random.nextInt(3)){
+    switch(random.nextInt(4)){
       case 0: selectedDisabledPattern = LED_MODES.RAINBOW; break;
       case 1: 
         selectedDisabledPattern = LED_MODES.SNAKING_RAINBOW; 
@@ -272,6 +293,10 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
         //Setting the length of the LED strip
         led.setLength(ledBuffer.getLength());break;
       case 2: selectedDisabledPattern = LED_MODES.COLLISION; break;
+      case 3: 
+        selectedDisabledPattern = LED_MODES.WAVE; 
+        waveHeight = random.nextInt(20, Math.round(LEDConstants.NUMBER_OF_LEDS / 2));
+      break;
     }
     LED_NOT_a_Subsystem.setLED(selectedDisabledPattern);
   }
