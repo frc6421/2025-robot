@@ -9,6 +9,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more

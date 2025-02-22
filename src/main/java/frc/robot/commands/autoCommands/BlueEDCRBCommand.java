@@ -10,6 +10,7 @@ import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
@@ -43,9 +44,9 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
 				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
+		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.2),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
+		intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
 			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
@@ -66,9 +67,9 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
 				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
+		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.2),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
+		intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
 			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
@@ -89,9 +90,9 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
 				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.setIntakeOutSpeed()),
+		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.2),
-		intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()),
+		intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
 			new SequentialCommandGroup(new WaitCommand(0.5), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT))
