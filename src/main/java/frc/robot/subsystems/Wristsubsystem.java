@@ -32,12 +32,12 @@ public class WristSubsystem extends SubsystemBase {
 
     // Gearbox reductions
     private static final double WRIST_GEARBOX_RATIO = 48;
-    private static final double WRIST_SPROCKET_RATIO = 73/24;
+    private static final double WRIST_SPROCKET_RATIO = 78/30;
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
-    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12);
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(11);
 
     // PID constants
     private static final double WRIST_KP = 0.03;
@@ -48,10 +48,12 @@ public class WristSubsystem extends SubsystemBase {
     private static final double WRIST_ALLOWABLE_ERROR = 1;
     private static final double WRIST_MAX_ACCELERATION = 60;
     private static final double WRIST_MAX_VELOCITY = 60;
+    private static final double POSITION_MAX_OUTPUT = 1;
+    private static final double POSITION_MIN_OUTPUT = -1;
     
 
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(14);
   }
 
   private SparkFlex wristMotor;// Motor Objet
@@ -59,9 +61,6 @@ public class WristSubsystem extends SubsystemBase {
   private RelativeEncoder wristEncoder; // Motor Encoder Object
 
   private final SparkFlexConfig wristMotorConfig;// Configurator Object
-
-  private double positionMaxOutput;
-  private double positionMinOutput;
 
   public double setAngle;
 
@@ -94,10 +93,6 @@ public class WristSubsystem extends SubsystemBase {
 
     // PID
 
-    // Percent of the position of the wrist
-    positionMaxOutput = 1;
-    positionMinOutput = -1;
-
     wristMotorConfig.closedLoop.p(WristConstants.WRIST_KP);
     wristMotorConfig.closedLoop.i(WristConstants.WRIST_KI);
     wristMotorConfig.closedLoop.d(WristConstants.WRIST_KD);
@@ -108,7 +103,7 @@ public class WristSubsystem extends SubsystemBase {
         .allowedClosedLoopError(WristConstants.WRIST_ALLOWABLE_ERROR);
 
     // Setting the range of motion avaliable
-    wristMotorConfig.closedLoop.outputRange(positionMinOutput, positionMaxOutput);
+    wristMotorConfig.closedLoop.outputRange(WristConstants.POSITION_MIN_OUTPUT, WristConstants.POSITION_MAX_OUTPUT);
 
     // Apply the configuration to the motor
     wristMotor.configure(wristMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
@@ -117,7 +112,6 @@ public class WristSubsystem extends SubsystemBase {
     wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude());
 
     SmartDashboard.putData("Wrist" , this);
-    SmartDashboard.putData("RESET WRIST ANGLE", resetWrist());
   }
 
   // Nothing needs to happen here, only when the subsystem is called
@@ -132,12 +126,30 @@ public class WristSubsystem extends SubsystemBase {
    * @param position The position percentage to set
    */
   public Command setAngle(double angle) {
+    double angleError = 1;
     return run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
-    .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < 1);
+    .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
   }
 
   public Command resetWrist() {
-    return runOnce(() -> wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude()));
+    double voltage = 0.5;
+    return runOnce(() -> {
+      wristMotorConfig.softLimit.forwardSoftLimitEnabled(false);
+      wristMotorConfig.softLimit.reverseSoftLimitEnabled(false);
+      wristMotor.configure(wristMotorConfig, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+    }).andThen(setWristVoltage(voltage))
+
+    .finallyDo(() -> {
+      stopWrist();
+      wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude());
+      wristMotorConfig.softLimit.forwardSoftLimitEnabled(true);
+      wristMotorConfig.softLimit.reverseSoftLimitEnabled(true);
+      wristMotor.configure(wristMotorConfig, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+    });
+  }
+
+  public Command setWristVoltage(double voltage) {
+    return run(() -> wristMotor.setVoltage(voltage));
   }
 
   /**
@@ -152,6 +164,10 @@ public class WristSubsystem extends SubsystemBase {
 
   public double getWristVelocity() {
     return wristEncoder.getVelocity();
+  }
+
+  public Command stopWrist() {
+    return runOnce(() -> wristMotor.stopMotor());
   }
 
   @Override
