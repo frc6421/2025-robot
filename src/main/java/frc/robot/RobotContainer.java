@@ -96,12 +96,8 @@ public class RobotContainer {
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
-<<<<<<< HEAD
-	private SendableChooser<Double> elevatorPositionChooser;
-=======
     private SendableChooser<Pose2d> blueSourceChooser;
-		private SendableChooser<Double> elevatorPositionChooser;
->>>>>>> main
+	private SendableChooser<Double> elevatorPositionChooser;
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
@@ -289,15 +285,11 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedPoseCommand() {
-<<<<<<< HEAD
-		return redPositionChooser.getSelected();
-=======
 			if (DriverStation.getAlliance().equals(Alliance.Red)) {
 			return redPositionChooser.getSelected();
 			} else {
 				return bluePositionChooser.getSelected();
 			}
->>>>>>> main
     }
 
     public Pose2d getSelectedSource() {

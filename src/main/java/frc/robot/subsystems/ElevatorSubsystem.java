@@ -31,13 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-<<<<<<< HEAD
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.LED_NOT_a_Subsystem;
-=======
 import frc.robot.RobotContainer;
 
->>>>>>> main
 
 public class ElevatorSubsystem extends SubsystemBase {
   // Creating the Motor Controller objects
@@ -63,19 +58,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double ELEVATOR_STAGE_RATIO = 3.0;
     private static final double ELEVATOR_INCHES_PER_ROTATION = (ELEVATOR_SPROCKET_DIAMETER * Math.PI * ELEVATOR_STAGE_RATIO) / ELEVATOR_GEAR_RATIO;
 
-<<<<<<< HEAD
-    private static final double METERS_PER_ROTATION = Units.inchesToMeters(ELEVATOR_INCHES_PER_ROTATION);
-    private static final double MAX_ERROR_MOTION = 1.02;
-
-    // Maximum and minimum extension of the elevator, in meters
-    public static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
-    public static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
-=======
     // Maximum and minimum extension of the elevator, in inches
     private static final double MAX_HEIGHT_INCHES = 84;
     public static final double MIN_HEIGHT_INCHES = 29.271;
     private static final double MAX_ERROR_INCHES = 0.5;
->>>>>>> main
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
@@ -240,7 +226,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public Command setElevatorPositionCommand(DoubleSupplier position) { 
-    LED_NOT_a_Subsystem.setElevatorLEDPosition(getSelectedState().position, getElevatorHeight(elevatorLeftMotor));
     return 
     run(() -> {
       elevatorLeftMotor
