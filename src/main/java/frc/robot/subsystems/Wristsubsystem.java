@@ -34,12 +34,12 @@ public class WristSubsystem extends SubsystemBase {
 
     // Gearbox reductions
     private static final double WRIST_GEARBOX_RATIO = 48;
-    private static final double WRIST_SPROCKET_RATIO = 73/24;
+    private static final double WRIST_SPROCKET_RATIO = 78/30;
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
-    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(-12); // TODO needs to chnage with new numbers
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(11);
 
     // PID constants
     private static final double WRIST_KP = 0.03;
@@ -55,7 +55,7 @@ public class WristSubsystem extends SubsystemBase {
     
 
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(14);
   }
 
   private SparkFlex wristMotor;// Motor Objet
