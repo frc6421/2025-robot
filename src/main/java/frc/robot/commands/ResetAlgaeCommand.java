@@ -33,7 +33,7 @@ public class ResetAlgaeCommand extends SequentialCommandGroup {
       intakeSubsystem.stopIntake(),
 		  new ParallelCommandGroup(
 			  wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			  new SequentialCommandGroup(new WaitCommand(0.2), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT)))
+			  new SequentialCommandGroup(new WaitCommand(0.2), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_INCHES)))
     );
   }
 }

@@ -10,10 +10,12 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotContainer;
 
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -41,12 +44,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final TalonFXConfiguration elevatorRightConfig;
   private final Follower elevatorFollower;
 
-  // Trapezoid Profile for the Elevator
-  private TrapezoidProfile.State currentElevatorState;// Set point
   private MotionMagicVoltage elevatorRequest;// Voltage to maintian the set point
   private VoltageOut voltageRequest;
-
-  private final SysIdRoutine sysIdRoutine;
 
   public static final class ElevatorConstants {
     // CAN ID's
@@ -59,14 +58,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double ELEVATOR_STAGE_RATIO = 3.0;
     private static final double ELEVATOR_INCHES_PER_ROTATION = (ELEVATOR_SPROCKET_DIAMETER * Math.PI * ELEVATOR_STAGE_RATIO) / ELEVATOR_GEAR_RATIO;
 
-    private static final double METERS_PER_ROTATION = Units.inchesToMeters(ELEVATOR_INCHES_PER_ROTATION);
-
-    // Maximum and minimum extension of the elevator, in meters
-    private static final double MAX_HEIGHT = Units.inchesToMeters(65.271);
-    public static final double MIN_HEIGHT = Units.inchesToMeters(29.271);
+    // Maximum and minimum extension of the elevator, in inches
+    private static final double MAX_HEIGHT_INCHES = 84;
+    public static final double MIN_HEIGHT_INCHES = 29.271;
+    private static final double MAX_ERROR_INCHES = 0.5;
     // Maximum and minimum extension of the elevator, in rotations
-    private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT / METERS_PER_ROTATION;
-    private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT / METERS_PER_ROTATION;
+    private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
+    private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
 
     // Current limit of either motor
     private static final Current CURRENT_LIMIT = Amps.of(80);
@@ -126,10 +124,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Positions of the different Coral Branches in relation to the robot
 
     public static final Distance STATION_POSITION = Inches.of(32);
-    public static final Distance L1_POSITION = Inches.of(37);
-    public static final Distance L2_POSITION = Inches.of(42);
-    public static final Distance L3_POSITION = Inches.of(57);
-    public static final Distance L4_POSITION = Inches.of(57);
+    public static final Distance L1_POSITION = Inches.of(39);
+    public static final Distance L2_POSITION = Inches.of(44);
+    public static final Distance L3_POSITION = Inches.of(59);
+    public static final Distance L4_POSITION = Inches.of(82);
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
@@ -138,7 +136,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     /** Maximum acceleration of the Motors, in Rotations per second per second */
     private static final double MAX_ACCEL = 50;
     private static final double MAX_JERK = 100;
+
+    private static final MotionMagicConfigs ELEVATOR_MOTION_CONFIGS = new MotionMagicConfigs()
+    .withMotionMagicCruiseVelocity(MAX_VELOCITY_RPS)
+    .withMotionMagicAcceleration(MAX_ACCEL)
+    .withMotionMagicJerk(MAX_JERK);
+
     private static final Voltage MAX_VOLTS = Volts.of(11);
+
+    private static final VoltageConfigs ELEVATOR_VOLTAGE_CONFIGS = new VoltageConfigs()
+    .withPeakForwardVoltage(MAX_VOLTS)
+    .withPeakReverseVoltage(MAX_VOLTS);
   }
 
 
@@ -160,58 +168,32 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withSlot0(ElevatorConstants.LEFT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
         .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG)
-        .withMotorOutput(ElevatorConstants.LEFT_MOTOR_CONFIGS);
-    
-    elevatorLeftConfig.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MAX_VELOCITY_RPS;
-    elevatorLeftConfig.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL;
-    elevatorLeftConfig.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
-
-    elevatorLeftConfig.Voltage.withPeakForwardVoltage(ElevatorConstants.MAX_VOLTS.magnitude())
-        .withPeakReverseVoltage(ElevatorConstants.MAX_VOLTS.magnitude());
+        .withMotorOutput(ElevatorConstants.LEFT_MOTOR_CONFIGS)
+        .withMotionMagic(ElevatorConstants.ELEVATOR_MOTION_CONFIGS)
+        .withVoltage(ElevatorConstants.ELEVATOR_VOLTAGE_CONFIGS);
 
     elevatorRightConfig = new TalonFXConfiguration()
         .withSlot0(ElevatorConstants.RIGHT_SLOT_CONFIG)
         .withCurrentLimits(ElevatorConstants.ELEVATOR_CURRENT_CONFIG)
         .withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG)
-        .withMotorOutput(ElevatorConstants.RIGHT_MOTOR_CONFIGS);
-
-    elevatorRightConfig.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MAX_VELOCITY_RPS;
-    elevatorRightConfig.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCEL;
-    elevatorRightConfig.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
-
-    elevatorRightConfig.Voltage.withPeakForwardVoltage(ElevatorConstants.MAX_VOLTS.magnitude())
-        .withPeakReverseVoltage(ElevatorConstants.MAX_VOLTS.magnitude());
+        .withMotorOutput(ElevatorConstants.RIGHT_MOTOR_CONFIGS)
+        .withMotionMagic(ElevatorConstants.ELEVATOR_MOTION_CONFIGS)
+        .withVoltage(ElevatorConstants.ELEVATOR_VOLTAGE_CONFIGS);
 
     // Go to a position with an added voltage for Feed Forward Compensation
     elevatorRequest = new MotionMagicVoltage(0);
     voltageRequest = new VoltageOut(Volts.of(0));
 
-    // New Elevator Set point
-    currentElevatorState = new TrapezoidProfile.State();
-
     // Applying the Configurators to their respective motors
-    elevatorLeftMotor.getConfigurator().apply(elevatorLeftConfig);
-    elevatorRightMotor.getConfigurator().apply(elevatorRightConfig);
+    RobotContainer.applyTalonConfigs(elevatorLeftMotor, elevatorLeftConfig);
+    RobotContainer.applyTalonConfigs(elevatorRightMotor, elevatorRightConfig);
 
     elevatorLeftMotor.setPosition(
-        Rotations.of(ElevatorConstants.MIN_HEIGHT / ElevatorConstants.METERS_PER_ROTATION));
+        Rotations.of(ElevatorConstants.MIN_HEIGHT_INCHES / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
     elevatorRightMotor.setPosition(
-        Rotations.of(ElevatorConstants.MIN_HEIGHT / ElevatorConstants.METERS_PER_ROTATION));
-        
-    sysIdRoutine = new SysIdRoutine(
-        new SysIdRoutine.Config(
-            Volts.of(1).per(Second),
-            Volts.of(4),
-            Seconds.of(5),
-            // Log state with SignalLogger class
-            (state) -> SignalLogger.writeString("SysIdTranslation_StateElevator", state.toString())),
-        new SysIdRoutine.Mechanism(
-            output -> elevatorLeftMotor.setControl(voltageRequest.withOutput(output)),
-            null,
-            this));
+        Rotations.of(ElevatorConstants.MIN_HEIGHT_INCHES / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
 
     SmartDashboard.putData("Elevator", this);
-    SmartDashboard.putData("Elevator/RESET ELEVATOR", resetElevator());
   }
 
   // Get methods \\
@@ -226,38 +208,30 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   /**
    * @param motor
-   * @return height in meters
+   * @return height in inches
    */
   private double getElevatorHeight(TalonFX motor) {
-    return (ElevatorConstants.METERS_PER_ROTATION * getElevatorRotations(motor));
+    return (ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION * getElevatorRotations(motor));
+  }
+
+  private boolean withinPositionError(double position) {
+    return (Math.abs(getElevatorHeight(elevatorLeftMotor) - position) < ElevatorConstants.MAX_ERROR_INCHES);
   }
 
   /**
    * Stops the elevator from moving
    */
-  public void stopElevator() {
-    elevatorLeftMotor.stopMotor();
-  }
-
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return sysIdRoutine.quasistatic(direction);
-  }
-
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return sysIdRoutine.dynamic(direction);
-  }
-
-  public void setMagicMotion(double position) {
-    elevatorLeftMotor.setControl(elevatorRequest.withPosition(Units.inchesToMeters(position) / ElevatorConstants.METERS_PER_ROTATION));
+  public Command stopElevator() {
+    return runOnce(() -> elevatorLeftMotor.stopMotor());
   }
 
   public Command setElevatorPositionCommand(DoubleSupplier position) { 
     return 
     run(() -> {
-      setMagicMotion(position.getAsDouble());
-      System.out.println(Units.inchesToMeters(position.getAsDouble()));
+      elevatorLeftMotor
+      .setControl(elevatorRequest.withPosition(position.getAsDouble() / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
         })
-        .until(() -> (Math.abs(getElevatorHeight(elevatorLeftMotor) - Units.inchesToMeters(position.getAsDouble())) < 0.06));
+        .until(() -> withinPositionError(position.getAsDouble()));
   }
 
   public Command setElevatorVoltage(double voltage) {
@@ -267,7 +241,17 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public Command resetElevator() {
-    return runOnce(() -> elevatorLeftMotor.setPosition(ElevatorConstants.MIN_HEIGHT_ROTATIONS));
+    SoftwareLimitSwitchConfigs config = new SoftwareLimitSwitchConfigs();
+    return runOnce(() -> {
+      RobotContainer.applyTalonConfigs(elevatorLeftMotor, elevatorLeftConfig.withSoftwareLimitSwitch(config));
+      RobotContainer.applyTalonConfigs(elevatorRightMotor, elevatorRightConfig.withSoftwareLimitSwitch(config));
+    }).andThen(setElevatorVoltage(-.5))
+    .finallyDo(() -> {
+    stopElevator();
+    elevatorLeftMotor.setPosition(ElevatorConstants.MIN_HEIGHT_INCHES);
+    RobotContainer.applyTalonConfigs(elevatorLeftMotor, elevatorLeftConfig.withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG));
+    RobotContainer.applyTalonConfigs(elevatorRightMotor, elevatorRightConfig.withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG));
+    });
   }
 
   @Override
@@ -276,19 +260,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.addDoubleProperty("L Elevator Current Position Rotations", () ->
-    getElevatorRotations(elevatorLeftMotor), null);
-
-    builder.addDoubleProperty("R Elevator Current Position Rotations", () ->
-    getElevatorRotations(elevatorRightMotor), null);
 
     builder.addDoubleProperty("L Elevator Current Position Inches", () ->
-    Units.metersToInches(getElevatorHeight(elevatorLeftMotor)), null);
+    getElevatorHeight(elevatorLeftMotor), null);
 
     builder.addDoubleProperty("R Elevator Current Position Inches", () ->
-    Units.metersToInches(getElevatorHeight(elevatorRightMotor)), null);
+    getElevatorHeight(elevatorRightMotor), null);
 
-    builder.addDoubleProperty("Elevator SetPoint", () -> currentElevatorState.position, null);
     builder.addDoubleProperty("L Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);
   }

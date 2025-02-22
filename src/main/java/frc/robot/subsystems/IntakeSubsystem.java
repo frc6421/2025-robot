@@ -39,7 +39,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
     .withNeutralMode(NeutralModeValue.Coast)
-    .withInverted(InvertedValue.CounterClockwise_Positive);
+    .withInverted(InvertedValue.Clockwise_Positive);
   }
 
   /** Creates a new intakeSubsystem. */
