@@ -29,7 +29,7 @@ public class CageIntakeSubsystem extends SubsystemBase {
 
     public static final double CAGE_INTAKE_SPEED = 1; // TODO: Update Numbers
 
-    public static final double CAGE_STALL_LIMIT = 50;
+    public static final double CAGE_STALL_LIMIT = 110;
 
   }
 

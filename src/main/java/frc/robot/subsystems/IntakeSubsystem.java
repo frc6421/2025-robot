@@ -25,13 +25,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private static final int INTAKE_MOTOR_ID = 40;
 
-    private static final int INTAKE_CURRENT_LIMIT = 60;
+    private static final int INTAKE_CURRENT_LIMIT = 80;
 
     private static final CurrentLimitsConfigs INTAKE_CURRENT_CONFIGS = new CurrentLimitsConfigs()
     .withStatorCurrentLimit(INTAKE_CURRENT_LIMIT)
     .withStatorCurrentLimitEnable(true);
 
-    private static final double INTAKE_STALL_LIMIT = 30;
+    private static final double INTAKE_STALL_LIMIT = 45;
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces

@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.AlgaeRemovalCommand;
+import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreSequenceCommand;
@@ -36,12 +37,14 @@ import frc.robot.commands.autoCommands.RedHRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CageIntakeSubsystem;
 import frc.robot.subsystems.ClimbPivotSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -64,9 +67,9 @@ public class RobotContainer {
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 	private final WristSubsystem wristSubsystem = new WristSubsystem();
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
-	//private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
+	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	//private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
+	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -262,14 +265,20 @@ public class RobotContainer {
 				joystick.x().onTrue(drivetrain.resetGyro());
 
 				// Manual Overrides
-				joystick.start().whileTrue(elevatorSubsystem.resetElevator());
+				joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
 				joystick.back().whileTrue(wristSubsystem.resetWrist());
 
 				joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 				joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-				joystick.a().onTrue(algaeRemovalCommand);
-				joystick.b().onTrue(resetAlgaeCommand);
+				// joystick.a().onTrue(algaeRemovalCommand);
+				// joystick.b().onTrue(resetAlgaeCommand);
+
+				// joystick.y().onTrue(climbCommand);
+
+				joystick.a().whileTrue(climbSubsystem.setVoltageCommand(3));
+				
+				joystick.a().onFalse(climbSubsystem.setVoltageCommand(0));
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}

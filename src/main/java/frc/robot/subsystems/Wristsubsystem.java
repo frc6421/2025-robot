@@ -33,29 +33,29 @@ public class WristSubsystem extends SubsystemBase {
     private static final int WRIST_CURRENT_LIMIT = 80;
 
     // Gearbox reductions
-    private static final double WRIST_GEARBOX_RATIO = 48;
-    private static final double WRIST_SPROCKET_RATIO = 78/30;
-    private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
+    private static final double WRIST_GEARBOX_RATIO = 48.0;
+    private static final double WRIST_SPROCKET_RATIO = 78.0/30.0;
+    private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360.0 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
-    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(225);
+    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
     public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(11); // TODO needs to chnage with new numbers
 
     // PID constants
-    private static final double WRIST_KP = 0.03;
+    private static final double WRIST_KP = 0.006;
     private static final double WRIST_KI = 0;
     private static final double WRIST_KD = 0;
 
     //MAXMotion constant
-    private static final double WRIST_ALLOWABLE_ERROR = 1;
-    private static final double WRIST_MAX_ACCELERATION = 60;
+    private static final double WRIST_ALLOWABLE_ERROR = 1.5;
+    private static final double WRIST_MAX_ACCELERATION = 100;
     private static final double WRIST_MAX_VELOCITY = 60;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(220);
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(190); // TODO: possibly add different scoring positions
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(205);
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
   }
@@ -102,8 +102,8 @@ public class WristSubsystem extends SubsystemBase {
     wristMotorConfig.closedLoop.d(WristConstants.WRIST_KD);
     wristMotorConfig.closedLoop.positionWrappingEnabled(false);
     wristMotorConfig.closedLoop.maxMotion
-        .maxVelocity(WristConstants.WRIST_MAX_VELOCITY * 240)
-        .maxAcceleration(WristConstants.WRIST_MAX_ACCELERATION * 180)
+        .maxVelocity(WristConstants.WRIST_MAX_VELOCITY * 360)
+        .maxAcceleration(WristConstants.WRIST_MAX_ACCELERATION * 360)
         .allowedClosedLoopError(WristConstants.WRIST_ALLOWABLE_ERROR);
 
     // Setting the range of motion avaliable
@@ -130,8 +130,8 @@ public class WristSubsystem extends SubsystemBase {
    * @param position The position percentage to set
    */
   public Command setAngle(double angle) {
-    double angleError = 1;
-    return run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
+    double angleError = 2;
+    return this.run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
     .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
   }
 

@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -25,7 +25,6 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
   private ElevatorSubsystem elevatorSubsystem;
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
-  private double wristScorePosition;
   
   public ScoreSequenceCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake, DoubleSupplier position) {
 
@@ -36,24 +35,15 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-
-    new InstantCommand(() -> {
-      if (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()) {
-        wristScorePosition = WristConstants.WRIST_SCORE_POSITION_4.magnitude();
-      } else {
-        wristScorePosition = WristConstants.WRIST_SCORE_POSITION.magnitude();
-      }
-    }),
-
     new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(wristScorePosition))),
+				new SequentialCommandGroup(new WaitCommand(0.3), new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude())))),
 		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.2),
-		intakeSubsystem.stopIntake(),
+    intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_INCHES)))
+			new SequentialCommandGroup(new WaitCommand(0.6), elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))))
     );
   }
 }
