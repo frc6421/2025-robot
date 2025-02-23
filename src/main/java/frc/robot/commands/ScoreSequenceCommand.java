@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -37,13 +37,13 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
     addCommands(
     new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				new SequentialCommandGroup(new WaitCommand(0.5), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+				new SequentialCommandGroup(new WaitCommand(0.3), new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude())))),
 		intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-		new WaitCommand(0.3),
-		intakeSubsystem.stopIntake(),
+		new WaitCommand(0.2),
+    intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.8), elevatorSubsystem.setElevatorPositionCommand(() -> Units.metersToInches(ElevatorConstants.MIN_HEIGHT_INCHES))))
+			new SequentialCommandGroup(new WaitCommand(0.6), elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))))
     );
   }
 }

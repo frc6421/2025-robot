@@ -61,10 +61,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Maximum and minimum extension of the elevator, in inches
     private static final double MAX_HEIGHT_INCHES = 84;
     public static final double MIN_HEIGHT_INCHES = 29.271;
-    private static final double MAX_ERROR_INCHES = 0.5;
+    public static final double MIN_HEIGHT_MATCH = MIN_HEIGHT_INCHES + 0.3;
+    private static final double MAX_ERROR_INCHES = 0.25;
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
+
+    private static final double MIN_MATCH_HEIGHT_ROTATIONS = (MIN_HEIGHT_INCHES + 0.3) / ELEVATOR_INCHES_PER_ROTATION; 
 
     // Current limit of either motor
     private static final Current CURRENT_LIMIT = Amps.of(80);
@@ -81,7 +84,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
-    private static final double LEFT_KG = 0.60;
+    private static final double LEFT_KG = 0.30;
     private static final double LEFT_KS = 0;
     private static final double LEFT_KV = 0.0;
     private static final double LEFT_KA = 0;
@@ -123,11 +126,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Positions of the different Coral Branches in relation to the robot
 
-    public static final Distance STATION_POSITION = Inches.of(32);
-    public static final Distance L1_POSITION = Inches.of(39);
-    public static final Distance L2_POSITION = Inches.of(44);
-    public static final Distance L3_POSITION = Inches.of(59);
-    public static final Distance L4_POSITION = Inches.of(82);
+    public static final Distance STATION_POSITION = Inches.of(32.0);
+    public static final Distance L1_POSITION = Inches.of(39.0);
+    public static final Distance L2_POSITION = Inches.of(43.0);
+    public static final Distance L3_POSITION = Inches.of(58.0);
+    public static final Distance L4_POSITION = Inches.of(83.5);
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
@@ -135,7 +138,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
     private static final double MAX_ACCEL = 50;
-    private static final double MAX_JERK = 100;
+    private static final double MAX_JERK = 80;
 
     private static final MotionMagicConfigs ELEVATOR_MOTION_CONFIGS = new MotionMagicConfigs()
     .withMotionMagicCruiseVelocity(MAX_VELOCITY_RPS)
@@ -222,7 +225,10 @@ public class ElevatorSubsystem extends SubsystemBase {
    * Stops the elevator from moving
    */
   public Command stopElevator() {
-    return runOnce(() -> elevatorLeftMotor.stopMotor());
+    return runOnce(() -> {
+      elevatorLeftMotor.stopMotor();
+      elevatorRightMotor.stopMotor();
+  });
   }
 
   public Command setElevatorPositionCommand(DoubleSupplier position) { 
@@ -237,6 +243,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command setElevatorVoltage(double voltage) {
     return run(() -> {
       elevatorLeftMotor.setVoltage(voltage);
+      elevatorRightMotor.setVoltage(voltage);
     });
   }
 
@@ -247,11 +254,20 @@ public class ElevatorSubsystem extends SubsystemBase {
       RobotContainer.applyTalonConfigs(elevatorRightMotor, elevatorRightConfig.withSoftwareLimitSwitch(config));
     }).andThen(setElevatorVoltage(-.5))
     .finallyDo(() -> {
-    stopElevator();
-    elevatorLeftMotor.setPosition(ElevatorConstants.MIN_HEIGHT_INCHES);
+    // stopElevator();
+    setElevatorVoltage(0);
+    elevatorLeftMotor.setPosition(ElevatorConstants.MIN_HEIGHT_ROTATIONS);
+    elevatorRightMotor.setPosition(ElevatorConstants.MIN_HEIGHT_ROTATIONS);
     RobotContainer.applyTalonConfigs(elevatorLeftMotor, elevatorLeftConfig.withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG));
     RobotContainer.applyTalonConfigs(elevatorRightMotor, elevatorRightConfig.withSoftwareLimitSwitch(ElevatorConstants.ELEVATOR_SOFT_LIMITS_CONFIG));
     });
+  }
+
+  public Command stupidStupid() {
+    return runOnce(() -> {
+    elevatorLeftMotor.setPosition(ElevatorConstants.MIN_MATCH_HEIGHT_ROTATIONS);
+    elevatorRightMotor.setPosition(ElevatorConstants.MIN_MATCH_HEIGHT_ROTATIONS);
+  });
   }
 
   @Override
@@ -269,5 +285,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     builder.addDoubleProperty("L Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);
+
+    super.initSendable(builder);
   }
 }

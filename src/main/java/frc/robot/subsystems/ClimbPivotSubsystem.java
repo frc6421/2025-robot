@@ -43,9 +43,9 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     private static final int RIGHT_PIVOT_MOTOR_ID = 51;
 
     private static final double CLIMB_MOTOR_GEAR_RATIO = 5 * 5 * 3;
-    private static final double CLIMB_MOTOR_PULLEY_RATIO = 72 / 36;
-    private static final double CLIMB_TOTAL_RATIO = CLIMB_MOTOR_GEAR_RATIO * CLIMB_MOTOR_PULLEY_RATIO;
-    private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 360 / CLIMB_TOTAL_RATIO;
+    private static final double CLIMB_TOTAL_RATIO = CLIMB_MOTOR_GEAR_RATIO;
+    // private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 360 / CLIMB_TOTAL_RATIO;
+    private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 87.5 / 236.85; // TODO: check why this is like this
 
     private static final Current PIVOT_CURRENT_LIMIT = Amps.of(250); // TODO: Update Numbers
 
@@ -57,9 +57,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
     // soft limits
     /** In rotations */
-    public static final double PIVOT_FORWARD_SOFT_LIMIT = 75 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
+    public static final double PIVOT_FORWARD_SOFT_LIMIT = 174 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
     public static final double PIVOT_REVERSE_SOFT_LIMIT = 0 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
+
+    public static final double PIVOT_OUT_POSITION = 87 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
+
+    public static final double PIVOT_IN_POSITION = 174 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
 
     private static final SoftwareLimitSwitchConfigs PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitThreshold(ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT)
@@ -68,11 +72,11 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withReverseSoftLimitEnable(true);
 
     private static final MotorOutputConfigs LEFT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
+        .withInverted(InvertedValue.CounterClockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
     private static final MotorOutputConfigs RIGHT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
   }
@@ -99,18 +103,18 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     RobotContainer.applyTalonConfigs(leftPivotMotor, leftPivotMotorConfig);
     RobotContainer.applyTalonConfigs(rightPivotMotor, rightPivotMotorConfig);
 
-    // Set up follower
-    Follower follower = new Follower(rightPivotMotor.getDeviceID(), true);
-    status = StatusCode.StatusCodeNotInitialized;
-    for (int i = 0; i < 5; i++) {
-      status = leftPivotMotor.setControl(follower);
-      if (status.isOK()){
-        break;
-      }
-    }
-    if (!status.isOK()) {
-      DataLogManager.log("Follower not applied " + leftPivotMotor + " Statis code " + status.toString());
-    };
+    // // Set up follower
+    // Follower follower = new Follower(rightPivotMotor.getDeviceID(), true);
+    // status = StatusCode.StatusCodeNotInitialized;
+    // for (int i = 0; i < 5; i++) {
+    //   status = leftPivotMotor.setControl(follower);
+    //   if (status.isOK()){
+    //     break;
+    //   }
+    // }
+    // if (!status.isOK()) {
+    //   DataLogManager.log("Follower not applied " + leftPivotMotor + " Statis code " + status.toString());
+    // };
 
     voltageRequest = new VoltageOut(0);
 
@@ -131,8 +135,12 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   // Set methods \\
 
   public Command setVoltageCommand(double voltage) {
-    return this.run(() -> rightPivotMotor.setControl(voltageRequest.withOutput(voltage)));
-  }
+    return this.run(() -> {
+      rightPivotMotor.setControl(voltageRequest.withOutput(voltage));
+      leftPivotMotor.setControl(voltageRequest.withOutput(voltage));
+    }
+  );
+}
 
   public Command stopPivotMotors() {
     return this.runOnce(() -> leftPivotMotor.stopMotor())
@@ -176,6 +184,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     builder.addDoubleProperty("Left Pivot Angle", () -> getPivotAngle(leftPivotMotor), null);
     builder.addDoubleProperty("Right Pivot Angle", () -> getPivotAngle(rightPivotMotor), null);
+    builder.addDoubleProperty("Left Motor Rotations", () -> leftPivotMotor.getPosition().getValueAsDouble(), null);
     builder.addDoubleProperty("Left Pivot Current", () -> leftPivotMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("Right Pivot Current", () -> rightPivotMotor.getStatorCurrent().getValueAsDouble(), null);
   }

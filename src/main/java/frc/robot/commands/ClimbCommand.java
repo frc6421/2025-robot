@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CageIntakeSubsystem;
 import frc.robot.subsystems.ClimbPivotSubsystem;
 
@@ -35,6 +36,9 @@ public class ClimbCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    cageIntakeSubsystem.cageIntakeInSpeedCommand();
+    new WaitCommand(0.3);
+    cageIntakeSubsystem.stopCageIntakeMotorCommand();
     climbPivotSubsystem.setVoltageCommand(-2).until(climbPivotSubsystem::isInPosition);
   }
 
