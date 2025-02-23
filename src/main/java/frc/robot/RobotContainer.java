@@ -105,10 +105,10 @@ public class RobotContainer {
 		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
 		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
-				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-				algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 
 
@@ -176,10 +176,10 @@ public class RobotContainer {
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
 		SmartDashboard.putData("Blue Auto Chooser", blueAutoChooser);
-    SmartDashboard.putData("Red Position Chooser", redPositionChooser);
-	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
-    SmartDashboard.putData("Red Source Chooser", redSourceChooser);
-	SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
+		SmartDashboard.putData("Red Position Chooser", redPositionChooser);
+		SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
+		SmartDashboard.putData("Red Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
@@ -262,23 +262,23 @@ public class RobotContainer {
 		joystick.leftTrigger().onTrue(intakeSequenceCommand);
 		joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-				joystick.x().onTrue(drivetrain.resetGyro());
+		joystick.x().onTrue(drivetrain.resetGyro());
 
-				// Manual Overrides
-				joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
-				joystick.back().whileTrue(wristSubsystem.resetWrist());
+		// Manual Overrides
+		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
+		joystick.back().whileTrue(wristSubsystem.resetWrist());
 
-				joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
-				joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
+		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
+		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-				// joystick.a().onTrue(algaeRemovalCommand);
-				// joystick.b().onTrue(resetAlgaeCommand);
+		// joystick.a().onTrue(algaeRemovalCommand);
+		// joystick.b().onTrue(resetAlgaeCommand);
 
-				// joystick.y().onTrue(climbCommand);
+		// joystick.y().onTrue(climbCommand);
 
-				joystick.a().whileTrue(climbSubsystem.setVoltageCommand(3));
-				
-				joystick.a().onFalse(climbSubsystem.setVoltageCommand(0));
+		joystick.a().whileTrue(climbSubsystem.setVoltageCommand(3));
+		
+		joystick.a().onFalse(climbSubsystem.setVoltageCommand(0));
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
