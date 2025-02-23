@@ -60,9 +60,15 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
 
   private static LED_MODES selectedDisabledPattern;
 
-  private static float waveStep;//The position of the sine wave, in radians.
+  private static double waveStep = Math.PI / 4;//The position of the sine wave, in radians.
 
   private static int waveHeight;
+  private static int[] starPositions = {0,0,0,0,0};
+  private static boolean starBool = false;
+  private static int starAmount;
+
+  private static double waveSkyBrightness;
+  private static double starBrightness = 0;
   
 
   /** Creates a new LEDSubsystem. */
@@ -159,7 +165,8 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
             color = rainbowColor(wheelPos);
             //Decreasing the brightness of the color, looping over each part of it.
             for(int i = 0; i < 3; i++){
-              color[i] = (color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS * 2) < 0 ? 0 : color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS * 2));
+              color[i] = (color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS * 2) < 0 ? 0 
+              : color[i] - ((previousSnakingLED - LEDNum) * LEDConstants.TRAILING_BRIGHTNESS * 2));
             }
             //Setting that brightness change
             ledBuffer.setRGB(LEDNum, color[0], color[1], color[2]);
@@ -198,15 +205,51 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       case WAVE:
         if(waveStep == 2*Math.PI) waveStep = 0;
         //The acutal height of the wave
-        long position = Math.round(4 * Math.sin(waveStep) + waveHeight);
-        //The wave will slowly increase over time, then decrease
-        position += Math.round(8 * Math.sin(waveStep / 256));
+        long position = Math.round(4 * Math.sin(waveStep) + waveHeight) + Math.round(8 * Math.sin(waveStep / 16));
+        waveSkyBrightness = (0.5 * Math.sin(waveStep / 16 + Math.PI / 4)) - 0.5;
         for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
           //Setting the wave
           if(LEDNum <= position) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
           //Setting the layer of foam on top
-          if(LEDNum == position + 1 || LEDNum == position + 2) ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
-          if(LEDNum > position + 2) ledBuffer.setRGB(LEDNum, LEDConstants.SKY_BLUE[0], LEDConstants.SKY_BLUE[1], LEDConstants.SKY_BLUE[2]);
+          if(LEDNum == position + 1 || LEDNum == position + 2){
+            ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
+          }
+          if(LEDNum > position + 2){ ledBuffer.setRGB(LEDNum, 
+            (int)(LEDConstants.SKY_BLUE[0] + LEDConstants.SKY_BLUE[0] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[1] + LEDConstants.SKY_BLUE[1] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[2] + LEDConstants.SKY_BLUE[2] * waveSkyBrightness));
+          }
+          if(waveSkyBrightness < 0.5 * Math.sin(Math.PI / 8) - 0.5){
+            if(!starBool){
+              starAmount = new Random().nextInt(1,5);
+              for(int i = 0; i < starAmount; i++){
+                //Generates the star position above the maximum of each sine wave for position.
+                starPositions[i] = new Random().nextInt(
+                  (int) Math.round(4 * Math.sin(Math.PI / 2) + waveHeight + 10 + (8 * Math.sin(Math.PI / 32))), 
+                  LEDConstants.NUMBER_OF_LEDS);
+              }
+              starBool = true;
+            }else{
+              if(0.5 / 16 * Math.cos(waveStep / 16 + Math.PI / 4) < 0 && starBrightness <= 254) starBrightness += 0.005;
+              if(0.5 / 16 * Math.cos(waveStep / 16 + Math.PI / 4) > 0 && starBrightness >= -1) starBrightness -= 0.002;
+              int[] color = {
+                (int)(starBrightness + LEDConstants.SKY_BLUE[0] + LEDConstants.SKY_BLUE[0] * waveSkyBrightness),
+                (int)(starBrightness + LEDConstants.SKY_BLUE[1] + LEDConstants.SKY_BLUE[1] * waveSkyBrightness),
+                (int)(starBrightness + LEDConstants.SKY_BLUE[2] + LEDConstants.SKY_BLUE[2] * waveSkyBrightness)
+              };
+              for(int i = 0; i < 3; i++){
+                if(color[i] > 255) color[i] = 255;
+                if(color[i] < 0) color[i] = 0;
+              }
+              for(int i = 0; i < starAmount; i++){
+                //Setting the stars
+                ledBuffer.setRGB(starPositions[i], color[0], color[1], color[2]);
+              }
+            }
+          }else{
+            starBool = false;
+            starBrightness = 0;
+          }
         }
         waveStep += Math.PI / 128;
         led.setData(ledBuffer);
@@ -255,7 +298,12 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
     }
     //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
-    LEDPattern.steps(Map.of(currentElevatorHeight, Color.kBlack, 0.0, new Color(LEDConstants.ELEVATOR_CURRENT_POS_COLOR[0],LEDConstants.ELEVATOR_CURRENT_POS_COLOR[1],LEDConstants.ELEVATOR_CURRENT_POS_COLOR[2]))).applyTo(ledBuffer);//Applying the pattern to the buffer
+    LEDPattern.steps(Map.of(currentElevatorHeight, Color.kBlack, 0.0, new Color(
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[0],
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[1],
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[2]
+      )
+    )).applyTo(ledBuffer);//Applying the pattern to the buffer
     //Looping for the target LED colors
     for(int i = elevatorLowerTarget; i < elevatorUpperTarget; i++){
       ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
