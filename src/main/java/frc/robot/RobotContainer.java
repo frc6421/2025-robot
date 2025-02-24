@@ -29,11 +29,13 @@ import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreSequenceCommand;
+import frc.robot.commands.autoCommands.BlueEAlgaeRBCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
 import frc.robot.commands.autoCommands.RedEDCBBCommand;
 import frc.robot.commands.autoCommands.RedHRBCommand;
+import frc.robot.commands.autoCommands.RedJAlgaeRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
@@ -69,7 +71,7 @@ public class RobotContainer {
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
 	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
+	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -78,9 +80,11 @@ public class RobotContainer {
 	private final RedJKLRBCommand redJKLRB;
 	private final RedEDCBBCommand redEDCBB;
 	private final RedHRBCommand redHRB;
+	private final RedJAlgaeRBCommand redJAlgaeRB;
 	private final BlueJKLBBCommand blueJKLBB;
 	private final BlueEDCRBCommand blueEDCRB;
 	private final BlueGRBCommand blueGRB;
+	private final BlueEAlgaeRBCommand blueEAlgae;
 
 	private SendableChooser<Command> redAutoChooser;
 	private SendableChooser<Command> blueAutoChooser;
@@ -114,21 +118,25 @@ public class RobotContainer {
 
 		testAuto = new TestAutoCommand(drivetrain);
 		redJKLRB = new RedJKLRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		redEDCBB = new RedEDCBBCommand(drivetrain);
-		redHRB = new RedHRBCommand(drivetrain);
-		blueJKLBB = new BlueJKLBBCommand(drivetrain);
+		redEDCBB = new RedEDCBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redHRB = new RedHRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redJAlgaeRB = new RedJAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueJKLBB = new BlueJKLBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		blueGRB = new BlueGRBCommand(drivetrain);
+		blueGRB = new BlueGRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueEAlgae = new BlueEAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 		redAutoChooser = new SendableChooser<>();
 		redAutoChooser.addOption("Red JKL RB", redJKLRB);
 		redAutoChooser.addOption("Red EDC BB", redEDCBB);
 		redAutoChooser.addOption("Red H RB", redHRB);
+		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
 
         blueAutoChooser = new SendableChooser<>();
         blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
         blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
         blueAutoChooser.addOption("Blue G RB", blueGRB);
+		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgae);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -262,7 +270,7 @@ public class RobotContainer {
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
 				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-				joystick.x().onTrue(drivetrain.resetGyro());
+				joystick.b().onTrue(drivetrain.resetGyro());
 
 				// Manual Overrides
 				joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
@@ -271,14 +279,17 @@ public class RobotContainer {
 				joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 				joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-				// joystick.a().onTrue(algaeRemovalCommand);
-				// joystick.b().onTrue(resetAlgaeCommand);
+				joystick.a().whileTrue(algaeRemovalCommand);
+				joystick.a().onFalse(resetAlgaeCommand);
 
-				// joystick.y().onTrue(climbCommand);
+				//joystick.x().onTrue(climbCommand);
 
-				joystick.a().whileTrue(climbSubsystem.setVoltageCommand(3));
-				
-				joystick.a().onFalse(climbSubsystem.setVoltageCommand(0));
+				//joystick.y().whileTrue(climbSubsystem.setVoltageCommand(7)); //maybe later switch to climbin command
+				//joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+
+				//joystick.povUp().whileTrue(climbSubsystem.setVoltageCommand(-7));
+				//joystick.povUp().onFalse(climbSubsystem.setVoltageCommand(0));
+
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}

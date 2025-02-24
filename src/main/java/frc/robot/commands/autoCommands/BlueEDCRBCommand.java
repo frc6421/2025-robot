@@ -75,18 +75,7 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
 			intakeSubsystem.intakeCoral(),
 			intakeSubsystem.stopIntake(),
 
-        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_C), 
-
-        //scoreSequence
-      new ParallelCommandGroup(
-          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
-          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
-      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-      new WaitCommand(0.2),
-      intakeSubsystem.stopIntake(),
-      new ParallelCommandGroup(
-        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)))
-    );
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_C)
+);
   }
 }

@@ -55,7 +55,7 @@ public class WristSubsystem extends SubsystemBase {
     
 
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(190); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(205);
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(195);
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
   }

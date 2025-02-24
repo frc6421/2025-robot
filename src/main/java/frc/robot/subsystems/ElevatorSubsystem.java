@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -23,14 +22,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 
 
@@ -128,8 +124,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public static final Distance STATION_POSITION = Inches.of(32.0);
     public static final Distance L1_POSITION = Inches.of(39.0);
-    public static final Distance L2_POSITION = Inches.of(43.0);
-    public static final Distance L3_POSITION = Inches.of(58.0);
+    public static final Distance L2_POSITION = Inches.of(46.0);
+    public static final Distance L3_POSITION = Inches.of(61.0);
     public static final Distance L4_POSITION = Inches.of(83.5);
 
     // For trapezoid profile constrants.
