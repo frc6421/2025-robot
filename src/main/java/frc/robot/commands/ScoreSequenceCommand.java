@@ -36,15 +36,18 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
     new ParallelCommandGroup(
+        intakeSubsystem.setIntakeSpeed(0.1),
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				new SequentialCommandGroup(new WaitCommand(0.3), new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude())))),
-		new WaitCommand(0.1),
+				new SequentialCommandGroup(new WaitCommand(0.1), new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude())))),
+		intakeSubsystem.setIntakeSpeed(0.3),
+    new WaitCommand(0.2),
+    intakeSubsystem.stopIntake(),
     intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.2),
     intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			new SequentialCommandGroup(new WaitCommand(0.6), elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))))
+			new SequentialCommandGroup(new WaitCommand(0.3), elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))))
     );
   }
 }

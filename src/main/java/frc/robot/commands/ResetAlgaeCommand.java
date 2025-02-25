@@ -5,7 +5,6 @@
 package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -33,7 +32,7 @@ public class ResetAlgaeCommand extends SequentialCommandGroup {
       intakeSubsystem.stopIntake(),
 		  new ParallelCommandGroup(
 			  wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-			  new SequentialCommandGroup(new WaitCommand(0.2), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)))
+			  elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))
     );
   }
 }

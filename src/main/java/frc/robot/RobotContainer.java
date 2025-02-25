@@ -107,7 +107,7 @@ public class RobotContainer {
 				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
 				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
 				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+				// elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
 				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
@@ -127,14 +127,14 @@ public class RobotContainer {
 		blueEAlgae = new BlueEAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 		redAutoChooser = new SendableChooser<>();
-		redAutoChooser.addOption("Red JKL RB", redJKLRB);
-		redAutoChooser.addOption("Red EDC BB", redEDCBB);
+		//redAutoChooser.addOption("Red JKL RB", redJKLRB);
+		//redAutoChooser.addOption("Red EDC BB", redEDCBB);
 		redAutoChooser.addOption("Red H RB", redHRB);
 		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
 
         blueAutoChooser = new SendableChooser<>();
-        blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
-        blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
+        //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
+        //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
         blueAutoChooser.addOption("Blue G RB", blueGRB);
 		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgae);
 

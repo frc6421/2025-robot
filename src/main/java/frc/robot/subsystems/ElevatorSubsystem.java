@@ -123,10 +123,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Positions of the different Coral Branches in relation to the robot
 
     public static final Distance STATION_POSITION = Inches.of(32.0);
-    public static final Distance L1_POSITION = Inches.of(39.0);
-    public static final Distance L2_POSITION = Inches.of(46.0);
-    public static final Distance L3_POSITION = Inches.of(61.0);
-    public static final Distance L4_POSITION = Inches.of(83.5);
+    public static final Distance L1_POSITION = Inches.of(36.0);
+    public static final Distance L2_POSITION = Inches.of(38.5);
+    public static final Distance L3_POSITION = Inches.of(55.0);
+    public static final Distance L4_POSITION = Inches.of(81.5); // 81.5 was sometimes working
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */

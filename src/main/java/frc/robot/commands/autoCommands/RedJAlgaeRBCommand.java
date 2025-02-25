@@ -42,31 +42,28 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
         //scoreSequence
       new ParallelCommandGroup(
           elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L2_POSITION.magnitude()),
-          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+          new SequentialCommandGroup(new WaitCommand(0.2), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
       intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
       new WaitCommand(0.2),
+        //algae
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude()),
+        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
       intakeSubsystem.stopIntake(),
       new ParallelCommandGroup(
-        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))),
-
-        //algae
-        new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude()),
-				new SequentialCommandGroup(new WaitCommand(0.2), intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude()))),
-        intakeSubsystem.stopIntake(),
-        new ParallelCommandGroup(
-          wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-          new SequentialCommandGroup(new WaitCommand(0.2), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))),
+        wristSubsystem.setAngle(WristConstants.WRIST_RESTING_POSITION.magnitude()),
+        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)),
       
 
-      driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER), 
+      new ParallelCommandGroup(
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT), 
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude())),
 
         //intakeSequence
 			intakeSubsystem.intakeCoral(),
 			intakeSubsystem.stopIntake(),
 
-      driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_A)
+      driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J)
       );
   }
 }

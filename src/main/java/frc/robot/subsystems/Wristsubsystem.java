@@ -55,9 +55,10 @@ public class WristSubsystem extends SubsystemBase {
     
 
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(190); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(195);
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(190); //191 was working
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
+    public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
   }
 
   private SparkFlex wristMotor;// Motor Objet
