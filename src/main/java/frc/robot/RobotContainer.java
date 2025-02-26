@@ -32,6 +32,7 @@ import frc.robot.commands.ScoreFinishCommand;
 import frc.robot.commands.ScorePrepCommand;
 import frc.robot.commands.ScoreSequenceCommand;
 import frc.robot.commands.autoCommands.BlueEAlgaeRBCommand;
+import frc.robot.commands.autoCommands.BlueEBARBCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJAlgaeBBCommand;
@@ -39,6 +40,7 @@ import frc.robot.commands.autoCommands.BlueJKLBBCommand;
 import frc.robot.commands.autoCommands.RedEAlgaeBBCommand;
 import frc.robot.commands.autoCommands.RedEDCBBCommand;
 import frc.robot.commands.autoCommands.RedHRBCommand;
+import frc.robot.commands.autoCommands.RedJABRBCommand;
 import frc.robot.commands.autoCommands.RedJAlgaeRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
@@ -86,11 +88,13 @@ public class RobotContainer {
 	private final RedHRBCommand redHRB;
 	private final RedJAlgaeRBCommand redJAlgaeRB;
 	private final RedEAlgaeBBCommand redEAlgaeBB;
+	private final RedJABRBCommand redJABRB;
 	private final BlueJKLBBCommand blueJKLBB;
 	private final BlueEDCRBCommand blueEDCRB;
 	private final BlueGRBCommand blueGRB;
 	private final BlueJAlgaeBBCommand blueJAlgaeBB;
 	private final BlueEAlgaeRBCommand blueEAlgaeRB;
+	private final BlueEBARBCommand blueEBARB;
 	
 
 	private SendableChooser<Command> redAutoChooser;
@@ -132,25 +136,29 @@ public class RobotContainer {
 		redHRB = new RedHRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redJAlgaeRB = new RedJAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redEAlgaeBB = new RedEAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redJABRB = new RedJABRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueJKLBB = new BlueJKLBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueGRB = new BlueGRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueJAlgaeBB = new BlueJAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueEAlgaeRB = new BlueEAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueEBARB = new BlueEBARBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 		redAutoChooser = new SendableChooser<>();
 		//redAutoChooser.addOption("Red JKL RB", redJKLRB);
 		//redAutoChooser.addOption("Red EDC BB", redEDCBB);
-		redAutoChooser.addOption("Red H RB", redHRB);
+		redAutoChooser.addOption("Red H", redHRB);
 		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
 		redAutoChooser.addOption("Red E Algae BB", redEAlgaeBB);
+		redAutoChooser.addOption("Red JAB RB", redJABRB);
 
         blueAutoChooser = new SendableChooser<>();
         //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
         //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
-        blueAutoChooser.addOption("Blue G RB", blueGRB);
+        blueAutoChooser.addOption("Blue G", blueGRB);
 		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
 		blueAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
+		blueAutoChooser.addOption("Blue EBA RB", blueEBARB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
