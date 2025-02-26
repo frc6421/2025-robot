@@ -48,8 +48,8 @@ public class WristSubsystem extends SubsystemBase {
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
-    private static final double WRIST_MAX_ACCELERATION = 100;
-    private static final double WRIST_MAX_VELOCITY = 60;
+    private static final double WRIST_MAX_ACCELERATION = 150;
+    private static final double WRIST_MAX_VELOCITY = 100;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     

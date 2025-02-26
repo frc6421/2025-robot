@@ -19,7 +19,7 @@ import frc.robot.subsystems.WristSubsystem.WristConstants;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RedJAlgaeRBCommand extends SequentialCommandGroup {
+public class BlueJAlgaeBBCommand extends SequentialCommandGroup {
   /** Creates a new BLUEHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
@@ -27,7 +27,7 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
 
-  public RedJAlgaeRBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist,
+  public BlueJAlgaeBBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist,
       IntakeSubsystem intake) {
 
     driveSubsystem = drive;
@@ -39,7 +39,7 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
         new ParallelCommandGroup(
-            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J),
+            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_J),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L2_POSITION.magnitude()),
             wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
@@ -55,7 +55,7 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT),
+            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT),
             wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
             intakeSubsystem.intakeCoral()),
@@ -63,8 +63,8 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.RED_J_OFFSET),
-                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J)),
+            new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.BLUE_J_OFFSET),
+                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_J)),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude()),
             wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
@@ -76,7 +76,7 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT),
+            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT),
             wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
             intakeSubsystem.intakeCoral()),
@@ -84,8 +84,8 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.RED_J_OFFSET),
-                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_I)),
+            new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.BLUE_J_OFFSET),
+                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_I)),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude()),
             wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),

@@ -96,8 +96,11 @@ public final class Constants {
     public static final Pose2d RED_SINGLE_START = new Pose2d (new Translation2d(Inches.of(400), Inches.of(152)), new Rotation2d(Degrees.of(180)));
     public static final Pose2d BLUE_SINGLE_START = new Pose2d (new Translation2d(Inches.of(290), Inches.of(152)), new Rotation2d(Degrees.of(180)));
 
-    public static final Pose2d RED_J_OFFSET = new Pose2d (new Translation2d(Inches.of(495.265), Inches.of(80.832)), new Rotation2d(Degrees.of(250)));
+    public static final Pose2d RED_J_OFFSET = new Pose2d (new Translation2d(Inches.of(495.265), Inches.of(80.832)), new Rotation2d(Degrees.of(240)));
+    public static final Pose2d RED_E_OFFSET = new Pose2d (new Translation2d(Inches.of(493.533), Inches.of(235.168)), new Rotation2d(Degrees.of(120)));
 
+    public static final Pose2d BLUE_J_OFFSET = new Pose2d (new Translation2d(Inches.of(195.605), Inches.of(236.168)), new Rotation2d(Degrees.of(60)));
+    public static final Pose2d BLUE_E_OFFSET = new Pose2d (new Translation2d(Inches.of(197.337), Inches.of(80.832)), new Rotation2d(Degrees.of(300)));
 
   }
 
