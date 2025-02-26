@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
+import org.photonvision.PhotonCamera;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -73,6 +75,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_LEFT_TRANSFORM3D);
     public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_RIGHT_TRANSFORM3D);
+    public final PhotonCamera allignCamera = new PhotonCamera("Camera_4_OV9281_USB_Camera");
 
     private final ProfiledPIDController thetaController = new ProfiledPIDController(
       AutoConstants.THETA_P, AutoConstants.THETA_I, AutoConstants.THETA_D,
@@ -177,7 +180,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         SmartDashboard.putData("Reset Gyro", resetGyro());
-        
+        allignCamera.setDriverMode(true);
     }
 
     /**
@@ -286,8 +289,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         yController.setTolerance(.01, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.0, 2.0);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.0, 2.0);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.0, 3.0);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.0, 3.0);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
@@ -296,12 +299,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.05, .1);
-        yController.setTolerance(.05, .1);
+        xController.setTolerance(.08, .1);
+        yController.setTolerance(.08, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.0, 2.0);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.0, 2.0);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.0, 3.0);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.0, 3.0);
+
+          return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+    }
+
+
+    public Command offsetAlignCommand(Supplier<Pose2d> targetPose) {
+        alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
+        xController.setTolerance(.2, .1);
+        yController.setTolerance(.2, .1);
+        return applyRequest(() ->  { 
+          Pose2d currentPose = getState().Pose;
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.0, 3.0);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.0, 3.0);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());

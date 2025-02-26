@@ -130,11 +130,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
-    private static final double MAX_VELOCITY_RPS = 70;
+    private static final double MAX_VELOCITY_RPS = 500;
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
-    private static final double MAX_ACCEL = 50;
-    private static final double MAX_JERK = 80;
+    private static final double MAX_ACCEL = 500;
+    private static final double MAX_JERK = 400;
 
     private static final MotionMagicConfigs ELEVATOR_MOTION_CONFIGS = new MotionMagicConfigs()
     .withMotionMagicCruiseVelocity(MAX_VELOCITY_RPS)

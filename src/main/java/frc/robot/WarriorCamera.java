@@ -169,10 +169,11 @@ public class WarriorCamera implements Sendable {
       return false;
     }
 
-    if (isTagReliable() && cameraEstimatedPose.get().targetsUsed.size() >= 2) {
+    if (isTagReliable() && cameraEstimatedPose.get().targetsUsed.size() >= 1) {
       standardDeviation = CameraConstants.LOW_SD;
     } else {
       standardDeviation = CameraConstants.HIGH_SD;
+      return false;
     }
 
     Optional<DriverStation.Alliance> allianceColor = DriverStation.getAlliance();

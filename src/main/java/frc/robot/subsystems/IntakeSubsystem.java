@@ -31,7 +31,7 @@ public class IntakeSubsystem extends SubsystemBase {
     .withStatorCurrentLimit(INTAKE_CURRENT_LIMIT)
     .withStatorCurrentLimitEnable(true);
 
-    private static final double INTAKE_STALL_LIMIT = 45;
+    private static final double INTAKE_STALL_LIMIT = 55;
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces

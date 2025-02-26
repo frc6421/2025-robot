@@ -3,6 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands.autoCommands;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -37,33 +41,67 @@ public class RedJAlgaeRBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J),
-
         //scoreSequence
-      new ParallelCommandGroup(
-          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L2_POSITION.magnitude()),
-          new SequentialCommandGroup(new WaitCommand(0.2), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-      new WaitCommand(0.2),
         //algae
+        new ParallelCommandGroup(
+          driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J),
+          intakeSubsystem.setIntakeSpeed(0.1),
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L2_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.1), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(0.3),
+      new WaitCommand(0.1),
+      intakeSubsystem.stopIntake(),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.1),
+      
       new ParallelCommandGroup(
         wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude()),
         elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude())),
       intakeSubsystem.stopIntake(),
-      new ParallelCommandGroup(
-        wristSubsystem.setAngle(WristConstants.WRIST_RESTING_POSITION.magnitude()),
-        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)),
-      
 
       new ParallelCommandGroup(
         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT), 
-        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude())),
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
+        intakeSubsystem.intakeCoral()),
 
         //intakeSequence
-			intakeSubsystem.intakeCoral(),
-			intakeSubsystem.stopIntake(),
+			intakeSubsystem.stopIntake(), 
+     
+      new ParallelCommandGroup(
+          new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.RED_J_OFFSET), driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.RED_J)),
+          intakeSubsystem.setIntakeSpeed(0.1),
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.1), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(0.3),
+      new WaitCommand(0.1),
+      intakeSubsystem.stopIntake(),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.1), 
+      intakeSubsystem.stopIntake(),
+		
+      new ParallelCommandGroup(
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT), 
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
+        intakeSubsystem.intakeCoral()),
 
-      driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J)
-      );
+        new ParallelCommandGroup(
+          new SequentialCommandGroup(driveSubsystem.offsetAlignCommand(() -> TrajectoryConstants.RED_J_OFFSET), driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.RED_I)),
+          intakeSubsystem.setIntakeSpeed(0.1),
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L3_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.1), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
+      
+          intakeSubsystem.setIntakeSpeed(0.3),
+          new WaitCommand(0.1),
+          intakeSubsystem.stopIntake(),
+          intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+          new WaitCommand(0.2),
+          intakeSubsystem.stopIntake(), 
+
+          new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))
+          );
   }
 }
