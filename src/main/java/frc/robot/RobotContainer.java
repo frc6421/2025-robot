@@ -70,6 +70,7 @@ public class RobotContainer {
 	private final Telemetry logger = new Telemetry(MaxSpeed);
 
 	private final CommandXboxController joystick = new CommandXboxController(0);
+	private CommandXboxController testJoystick;
 
 	private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -98,7 +99,7 @@ public class RobotContainer {
 	
 
 	private SendableChooser<Command> redAutoChooser;
-	private SendableChooser<Command> blueAutoChooser;
+	// private SendableChooser<Command> blueAutoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
@@ -151,14 +152,12 @@ public class RobotContainer {
 		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
 		redAutoChooser.addOption("Red E Algae BB", redEAlgaeBB);
 		redAutoChooser.addOption("Red JAB RB", redJABRB);
-
-        blueAutoChooser = new SendableChooser<>();
         //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
         //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
-        blueAutoChooser.addOption("Blue G", blueGRB);
-		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
-		blueAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
-		blueAutoChooser.addOption("Blue EBA RB", blueEBARB);
+    redAutoChooser.addOption("Blue G", blueGRB);
+		redAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
+		redAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
+		redAutoChooser.addOption("Blue EBA RB", blueEBARB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -205,7 +204,6 @@ public class RobotContainer {
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
-		SmartDashboard.putData("Blue Auto Chooser", blueAutoChooser);
     SmartDashboard.putData("Red Position Chooser", redPositionChooser);
 	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
     SmartDashboard.putData("Red Source Chooser", redSourceChooser);
@@ -248,7 +246,6 @@ public class RobotContainer {
 				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
-				// joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 				joystick.rightBumper().whileTrue(scorePrepCommand);
 				joystick.rightTrigger().onTrue(scoreFinishCommand);
@@ -270,45 +267,48 @@ public class RobotContainer {
 				//joystick.y().whileTrue(climbSubsystem.setVoltageCommand(7)); //maybe later switch to climbin command
 				//joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
 
-				//joystick.povUp().whileTrue(climbSubsystem.setVoltageCommand(-7));
-				//joystick.povUp().onFalse(climbSubsystem.setVoltageCommand(0));
+				if (!DriverStation.isFMSAttached()) {
+				testJoystick = new CommandXboxController(3);
+				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
+				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+				}
 
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
 
     public Command getAutonomousCommand() {
-		if (alliance.isPresent()) {
-			if (alliance.get() == Alliance.Red) {
-				return redAutoChooser.getSelected();
-			} else {
-				return blueAutoChooser.getSelected();
-			} 
-		} else {
-			return redAutoChooser.getSelected();
-		} 
+		return redAutoChooser.getSelected();
 	}
 
     public Pose2d getSelectedPoseCommand() {
+			alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
+				System.out.println("red pos");
 				return redPositionChooser.getSelected();
 			} else {
+				System.out.println("blue pos");
 				return bluePositionChooser.getSelected();
 			}
 		} else {
+			System.out.println("no alliance red pos");
 			return redPositionChooser.getSelected();
 		}
     }
 
     public Pose2d getSelectedSource() {
+			alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
+				System.out.println("red source");
 				return redSourceChooser.getSelected();
 			} else {
+				System.out.println("blue source");
 				return blueSourceChooser.getSelected();
 			}
 		} else {
+			System.out.println("no alliance red source");
 			return redSourceChooser.getSelected();
 		}
     }

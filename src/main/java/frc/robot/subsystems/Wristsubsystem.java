@@ -39,7 +39,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Soft Limits
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
-    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(11); // TODO needs to chnage with new numbers
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(6); // TODO needs to chnage with new numbers
 
     // PID constants
     private static final double WRIST_KP = 0.006;
@@ -48,8 +48,8 @@ public class WristSubsystem extends SubsystemBase {
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
-    private static final double WRIST_MAX_ACCELERATION = 150;
-    private static final double WRIST_MAX_VELOCITY = 100;
+    private static final double WRIST_MAX_ACCELERATION = 300;
+    private static final double WRIST_MAX_VELOCITY = 300;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     

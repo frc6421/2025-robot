@@ -202,19 +202,19 @@ public class ElevatorSubsystem extends SubsystemBase {
    * 
    * @param rotations - the motor you want rotations of
    */
-  private double getElevatorRotations(TalonFX motor) {
-    return motor.getPosition().refresh().getValue().magnitude();
+  private double getElevatorRotations() {
+    return elevatorLeftMotor.getPosition().refresh().getValue().magnitude();
   }
   /**
    * @param motor
    * @return height in inches
    */
-  private double getElevatorHeight(TalonFX motor) {
-    return (ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION * getElevatorRotations(motor));
+  public double getElevatorHeight() {
+    return (ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION * getElevatorRotations());
   }
 
   private boolean withinPositionError(double position) {
-    return (Math.abs(getElevatorHeight(elevatorLeftMotor) - position) < ElevatorConstants.MAX_ERROR_INCHES);
+    return (Math.abs(getElevatorHeight() - position) < ElevatorConstants.MAX_ERROR_INCHES);
   }
 
   /**
@@ -234,6 +234,15 @@ public class ElevatorSubsystem extends SubsystemBase {
       .setControl(elevatorRequest.withPosition(position.getAsDouble() / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
         })
         .until(() -> withinPositionError(position.getAsDouble()));
+  }
+
+  public Command setElevatorPositionCommand(double position) { 
+    return 
+    run(() -> {
+      elevatorLeftMotor
+      .setControl(elevatorRequest.withPosition(position / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
+        })
+        .until(() -> withinPositionError(position));
   }
 
   public Command setElevatorVoltage(double voltage) {
@@ -274,10 +283,10 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
 
     builder.addDoubleProperty("L Elevator Current Position Inches", () ->
-    getElevatorHeight(elevatorLeftMotor), null);
+    getElevatorHeight(), null);
 
     builder.addDoubleProperty("R Elevator Current Position Inches", () ->
-    getElevatorHeight(elevatorRightMotor), null);
+    getElevatorHeight(), null);
 
     builder.addDoubleProperty("L Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);

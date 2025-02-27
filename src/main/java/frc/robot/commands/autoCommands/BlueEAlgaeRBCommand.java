@@ -54,7 +54,7 @@ public class BlueEAlgaeRBCommand extends SequentialCommandGroup {
     intakeSubsystem.stopIntake(),
 
     new ParallelCommandGroup(
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_OUT),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER),
         wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
         elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
         intakeSubsystem.intakeCoral()),
@@ -75,7 +75,7 @@ public class BlueEAlgaeRBCommand extends SequentialCommandGroup {
     intakeSubsystem.stopIntake(),
 
     new ParallelCommandGroup(
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_OUT),
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_RIGHT_CENTER),
         wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
         elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
         intakeSubsystem.intakeCoral()),
