@@ -264,8 +264,8 @@ public class RobotContainer {
 
 				//joystick.x().onTrue(climbCommand);
 
-				//joystick.y().whileTrue(climbSubsystem.setVoltageCommand(7)); //maybe later switch to climbin command
-				//joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+				//joystick.x().whileTrue(climbSubsystem.climbIn());
 
 				if (!DriverStation.isFMSAttached()) {
 				testJoystick = new CommandXboxController(3);
