@@ -58,7 +58,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double MAX_HEIGHT_INCHES = 84;
     public static final double MIN_HEIGHT_INCHES = 29.271;
     public static final double MIN_HEIGHT_MATCH = MIN_HEIGHT_INCHES + 0.3;
-    private static final double MAX_ERROR_INCHES = 0.25;
+    private static final double MAX_ERROR_INCHES = 0.50;
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;

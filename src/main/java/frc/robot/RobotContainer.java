@@ -242,13 +242,13 @@ public class RobotContainer {
 
 
 
-				// joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+			 joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
-				joystick.rightBumper().whileTrue(scorePrepCommand);
-				joystick.rightTrigger().onTrue(scoreFinishCommand);
+				//joystick.rightBumper().whileTrue(scorePrepCommand);
+				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 				joystick.b().onTrue(drivetrain.resetGyro());
 
@@ -265,7 +265,11 @@ public class RobotContainer {
 				//joystick.x().onTrue(climbCommand);
 
 				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(3));
+				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
 				//joystick.x().whileTrue(climbSubsystem.climbIn());
+				//joystick.x().whileTrue(climbSubsystem.climbIn());
+				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
 				if (!DriverStation.isFMSAttached()) {
 				testJoystick = new CommandXboxController(3);
