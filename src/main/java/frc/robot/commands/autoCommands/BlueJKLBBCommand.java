@@ -3,28 +3,78 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands.autoCommands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
+import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class BlueJKLBBCommand extends SequentialCommandGroup {
-  /** Creates a new RedHRB. */
+  /** Creates a new BLUEHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
-  public BlueJKLBBCommand(CommandSwerveDrivetrain drive) {
+  private ElevatorSubsystem elevatorSubsystem;
+  private WristSubsystem wristSubsystem;
+  private IntakeSubsystem intakeSubsystem;
+
+
+  public BlueJKLBBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
 
     driveSubsystem = drive;
-    
+    elevatorSubsystem = elevator;
+    wristSubsystem = wrist;
+    intakeSubsystem = intake;
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_J),
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT), 
-        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_K), 
-        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_OUT), 
+
+        //scoreSequence
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))),
+
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER), 
+
+        //intakeSequence
+			intakeSubsystem.intakeCoral(),
+			intakeSubsystem.stopIntake(),
+
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_K),
+
+        //scoreSequence
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L4_POSITION.magnitude()),
+          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()))),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH))),
+
+        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER), 
+
+        //intakeSequence
+			intakeSubsystem.intakeCoral(),
+			intakeSubsystem.stopIntake(),
+
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_L)
     );
   }

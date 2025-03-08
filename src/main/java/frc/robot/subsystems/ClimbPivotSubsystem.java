@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -57,13 +56,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
     // soft limits
     /** In rotations */
-    public static final double PIVOT_FORWARD_SOFT_LIMIT = 174 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
+    public static final double PIVOT_FORWARD_SOFT_LIMIT = 300 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
     public static final double PIVOT_REVERSE_SOFT_LIMIT = 0 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
 
-    public static final double PIVOT_OUT_POSITION = 87 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
+    public static final double PIVOT_OUT_POSITION = 105 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
 
-    public static final double PIVOT_IN_POSITION = 174 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
+    public static final double PIVOT_IN_POSITION = 240 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
 
     private static final SoftwareLimitSwitchConfigs PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitThreshold(ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT)
@@ -120,9 +119,9 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
     // Set initial motor position in rotations with error checking.
     setPosition(leftPivotMotor,
-        ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT);
+        ClimbPivotConstants.PIVOT_REVERSE_SOFT_LIMIT);
     setPosition(rightPivotMotor,
-        ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT);
+        ClimbPivotConstants.PIVOT_REVERSE_SOFT_LIMIT);
 
     SmartDashboard.putData("Climb Pivots", this);
   }
@@ -173,11 +172,23 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   }
 
   public boolean isInPosition() {
-    return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT;
+    return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.PIVOT_IN_POSITION;
   }
 
   public boolean isOutPosition() {
-    return rightPivotMotor.getPosition().getValueAsDouble() <= ClimbPivotConstants.PIVOT_REVERSE_SOFT_LIMIT;
+    return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.PIVOT_OUT_POSITION;
+  }
+
+  public Command climbOut() {
+    return run(() -> setVoltageCommand(7))
+    .until(() -> isOutPosition())
+    .finallyDo(() -> setVoltageCommand(0));
+  }
+
+  public Command climbIn() {
+    return run(() -> setVoltageCommand(7))
+    .until(() -> isInPosition())
+    .finallyDo(() -> setVoltageCommand(0));
   }
 
   @Override
@@ -185,6 +196,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Left Pivot Angle", () -> getPivotAngle(leftPivotMotor), null);
     builder.addDoubleProperty("Right Pivot Angle", () -> getPivotAngle(rightPivotMotor), null);
     builder.addDoubleProperty("Left Motor Rotations", () -> leftPivotMotor.getPosition().getValueAsDouble(), null);
+    builder.addDoubleProperty("Right Motor Rotations", () -> rightPivotMotor.getPosition().getValueAsDouble(), null);
     builder.addDoubleProperty("Left Pivot Current", () -> leftPivotMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("Right Pivot Current", () -> rightPivotMotor.getStatorCurrent().getValueAsDouble(), null);
   }

@@ -46,16 +46,17 @@ public class WristSubsystem extends SubsystemBase {
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
-    private static final double WRIST_MAX_ACCELERATION = 100;
-    private static final double WRIST_MAX_VELOCITY = 60;
+    private static final double WRIST_MAX_ACCELERATION = 150;
+    private static final double WRIST_MAX_VELOCITY = 100;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(190); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(205);
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(190); //191 was working
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
+    public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
   }
 
   private SparkFlex wristMotor;// Motor Objet

@@ -28,12 +28,20 @@ import frc.robot.commands.AlgaeRemovalCommand;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ResetAlgaeCommand;
+import frc.robot.commands.ScoreFinishCommand;
+import frc.robot.commands.ScorePrepCommand;
 import frc.robot.commands.ScoreSequenceCommand;
+import frc.robot.commands.autoCommands.BlueEAlgaeRBCommand;
+import frc.robot.commands.autoCommands.BlueEBARBCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
+import frc.robot.commands.autoCommands.BlueJAlgaeBBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
+import frc.robot.commands.autoCommands.RedEAlgaeBBCommand;
 import frc.robot.commands.autoCommands.RedEDCBBCommand;
 import frc.robot.commands.autoCommands.RedHRBCommand;
+import frc.robot.commands.autoCommands.RedJABRBCommand;
+import frc.robot.commands.autoCommands.RedJAlgaeRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
@@ -69,7 +77,7 @@ public class RobotContainer {
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
 	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem);
+	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -78,9 +86,16 @@ public class RobotContainer {
 	private final RedJKLRBCommand redJKLRB;
 	private final RedEDCBBCommand redEDCBB;
 	private final RedHRBCommand redHRB;
+	private final RedJAlgaeRBCommand redJAlgaeRB;
+	private final RedEAlgaeBBCommand redEAlgaeBB;
+	private final RedJABRBCommand redJABRB;
 	private final BlueJKLBBCommand blueJKLBB;
 	private final BlueEDCRBCommand blueEDCRB;
 	private final BlueGRBCommand blueGRB;
+	private final BlueJAlgaeBBCommand blueJAlgaeBB;
+	private final BlueEAlgaeRBCommand blueEAlgaeRB;
+	private final BlueEBARBCommand blueEBARB;
+	
 
 	private SendableChooser<Command> redAutoChooser;
 	private SendableChooser<Command> blueAutoChooser;
@@ -94,41 +109,56 @@ public class RobotContainer {
 	private final IntakeSequenceCommand intakeSequenceCommand;
 	private final AlgaeRemovalCommand algaeRemovalCommand;
 	private final ResetAlgaeCommand resetAlgaeCommand;
+	private final ScorePrepCommand scorePrepCommand;
+	private final ScoreFinishCommand scoreFinishCommand;
 
 	Optional<Alliance> alliance = DriverStation.getAlliance();
 
 	public RobotContainer() {
 
 		elevatorPositionChooser = new SendableChooser<>();
-		elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-		elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
-		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+				// elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
-		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-
+				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+				algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+				resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+				scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
+				scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 
 		testAuto = new TestAutoCommand(drivetrain);
 		redJKLRB = new RedJKLRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		redEDCBB = new RedEDCBBCommand(drivetrain);
-		redHRB = new RedHRBCommand(drivetrain);
-		blueJKLBB = new BlueJKLBBCommand(drivetrain);
+		redEDCBB = new RedEDCBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redHRB = new RedHRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redJAlgaeRB = new RedJAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redEAlgaeBB = new RedEAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		redJABRB = new RedJABRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueJKLBB = new BlueJKLBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		blueGRB = new BlueGRBCommand(drivetrain);
+		blueGRB = new BlueGRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueJAlgaeBB = new BlueJAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueEAlgaeRB = new BlueEAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		blueEBARB = new BlueEBARBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 		redAutoChooser = new SendableChooser<>();
-		redAutoChooser.addOption("Red JKL RB", redJKLRB);
-		redAutoChooser.addOption("Red EDC BB", redEDCBB);
-		redAutoChooser.addOption("Red H RB", redHRB);
+		//redAutoChooser.addOption("Red JKL RB", redJKLRB);
+		//redAutoChooser.addOption("Red EDC BB", redEDCBB);
+		redAutoChooser.addOption("Red H", redHRB);
+		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
+		redAutoChooser.addOption("Red E Algae BB", redEAlgaeBB);
+		redAutoChooser.addOption("Red JAB RB", redJABRB);
 
         blueAutoChooser = new SendableChooser<>();
-        blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
-        blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
-        blueAutoChooser.addOption("Blue G RB", blueGRB);
+        //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
+        //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
+        blueAutoChooser.addOption("Blue G", blueGRB);
+		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
+		blueAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
+		blueAutoChooser.addOption("Blue EBA RB", blueEBARB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -210,59 +240,20 @@ public class RobotContainer {
 						// Drive counterclockwise with negative X (left)
 						.withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
 
-		// TODO Do we need / want?
-		// joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-		// joystick.b().whileTrue(drivetrain.applyRequest(
-		// () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(),
-		// -joystick.getLeftX()))));
 
-		//  joystick.y().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_FORWARD_SOFT_LIMIT.magnitude()))));
 
-		//  joystick.x().whileTrue((wristSubsystem.run(() -> wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()))));
 
-		//  joystick.a().whileTrue(intakeSubsystem.run(() -> intakeSubsystem.setIntakeInSpeed()));
-		//  joystick.a().onFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
 
-		//  joystick.b().whileTrue(intakeSubsystem.run(() -> intakeSubsystem.setIntakeOutSpeed()));
-		//  joystick.b().onFalse(intakeSubsystem.runOnce(() -> intakeSubsystem.stopIntake()));
+				// joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
-		// Climb buttons
+				joystick.leftTrigger().onTrue(intakeSequenceCommand);
+				// joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-		// joystick.a().whileTrue(climbSubsystem.setVoltageCommand(2)
-		// 		.until(climbSubsystem::isOutPosition)
-		// 		.andThen(cageIntakeSubsystem.cageIntakeInSpeedCommand())
-		// 		.until(() -> cageIntakeSubsystem.haveCage())
-		// 		.finallyDo(() -> climbSubsystem.setVoltageCommand(-2).until(climbSubsystem::isInPosition)));
+				joystick.rightBumper().whileTrue(scorePrepCommand);
+				joystick.rightTrigger().onTrue(scoreFinishCommand);
 
-		// joystick.b().onFalse(climbSubsystem.stopPivotMotors()
-		// 		.alongWith(cageIntakeSubsystem.cageIntakeInSpeedCommand()));
-
-		// reset the field-centric heading on left bumper press
-		//joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        //joystick.x().onTrue(elevatorSubsystem.setElevatorPositionCommand(elevatorSubsystem.getSelectedState()));
-        // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(29.271 + 36));
-        // joystick.a().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
-
-        // joystick.b().onFalse(elevatorSubsystem.setElevatorPositionCommand(29.271));
-        // joystick.b().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
-
-        // joystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(1));
-        // joystick.x().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
-
-        // joystick.y().whileTrue(elevatorSubsystem.setElevatorVoltage(-1));
-        // joystick.y().onFalse(new InstantCommand(() -> elevatorSubsystem.stopElevator()));
-
-        // joystick.a().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L1_GOAL));
-        // joystick.b().whileTrue(elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.BOTTOM_GOAL));
-
-		joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
-
-		joystick.leftTrigger().onTrue(intakeSequenceCommand);
-		joystick.rightTrigger().onTrue(scoreSequenceCommand);
-
-		joystick.x().onTrue(drivetrain.resetGyro());
+				joystick.b().onTrue(drivetrain.resetGyro());
 
 		// Manual Overrides
 		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
@@ -271,14 +262,17 @@ public class RobotContainer {
 		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-		// joystick.a().onTrue(algaeRemovalCommand);
-		// joystick.b().onTrue(resetAlgaeCommand);
+				joystick.a().whileTrue(algaeRemovalCommand);
+				joystick.a().onFalse(resetAlgaeCommand);
 
-		// joystick.y().onTrue(climbCommand);
+				//joystick.x().onTrue(climbCommand);
 
-		joystick.a().whileTrue(climbSubsystem.setVoltageCommand(3));
-		
-		joystick.a().onFalse(climbSubsystem.setVoltageCommand(0));
+				//joystick.y().whileTrue(climbSubsystem.setVoltageCommand(7)); //maybe later switch to climbin command
+				//joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+
+				//joystick.povUp().whileTrue(climbSubsystem.setVoltageCommand(-7));
+				//joystick.povUp().onFalse(climbSubsystem.setVoltageCommand(0));
+
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}

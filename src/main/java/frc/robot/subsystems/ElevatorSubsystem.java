@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -23,14 +22,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 
 
@@ -127,18 +123,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Positions of the different Coral Branches in relation to the robot
 
     public static final Distance STATION_POSITION = Inches.of(32.0);
-    public static final Distance L1_POSITION = Inches.of(39.0);
-    public static final Distance L2_POSITION = Inches.of(43.0);
-    public static final Distance L3_POSITION = Inches.of(58.0);
-    public static final Distance L4_POSITION = Inches.of(83.5);
+    public static final Distance L1_POSITION = Inches.of(36.0);
+    public static final Distance L2_POSITION = Inches.of(38.5);
+    public static final Distance L3_POSITION = Inches.of(55.0);
+    public static final Distance L4_POSITION = Inches.of(81.5); // 81.5 was sometimes working
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
-    private static final double MAX_VELOCITY_RPS = 70;
+    private static final double MAX_VELOCITY_RPS = 500;
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
-    private static final double MAX_ACCEL = 50;
-    private static final double MAX_JERK = 80;
+    private static final double MAX_ACCEL = 500;
+    private static final double MAX_JERK = 400;
 
     private static final MotionMagicConfigs ELEVATOR_MOTION_CONFIGS = new MotionMagicConfigs()
     .withMotionMagicCruiseVelocity(MAX_VELOCITY_RPS)

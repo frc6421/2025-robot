@@ -8,24 +8,28 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CageIntakeSubsystem;
 import frc.robot.subsystems.ClimbPivotSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ClimbCommand extends Command {
   private final ClimbPivotSubsystem climbPivotSubsystem;
   private final CageIntakeSubsystem cageIntakeSubsystem;
+  private final WristSubsystem wristSubsystem;
   /** Creates a new climbCommand. */
-  public ClimbCommand(ClimbPivotSubsystem climbPivotSubsystem, CageIntakeSubsystem cageIntakeSubsystem) {
+  public ClimbCommand(ClimbPivotSubsystem climbPivotSubsystem, CageIntakeSubsystem cageIntakeSubsystem, WristSubsystem wristSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.climbPivotSubsystem = climbPivotSubsystem;
     this.cageIntakeSubsystem = cageIntakeSubsystem;
-    addRequirements(cageIntakeSubsystem, climbPivotSubsystem);
+    this.wristSubsystem = wristSubsystem;
+    addRequirements(cageIntakeSubsystem, climbPivotSubsystem, wristSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     //TODO: Detemine a good voltage to run at.
-    climbPivotSubsystem.setVoltageCommand(2).until(climbPivotSubsystem::isOutPosition);
+    climbPivotSubsystem.climbOut();
+    wristSubsystem.setAngle(90);
     cageIntakeSubsystem.cageIntakeInSpeedCommand();
   }
 
@@ -39,7 +43,6 @@ public class ClimbCommand extends Command {
     cageIntakeSubsystem.cageIntakeInSpeedCommand();
     new WaitCommand(0.3);
     cageIntakeSubsystem.stopCageIntakeMotorCommand();
-    climbPivotSubsystem.setVoltageCommand(-2).until(climbPivotSubsystem::isInPosition);
   }
 
   // Returns true when the command should end.
