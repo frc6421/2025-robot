@@ -11,9 +11,7 @@
  */
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Inches;
 
-import java.util.Map;
 import java.util.Random;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -22,7 +20,6 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
-import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static class LEDConstants {
