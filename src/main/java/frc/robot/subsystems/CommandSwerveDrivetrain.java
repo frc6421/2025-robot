@@ -329,18 +329,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        
         updatePose(backLeftCamera);
         updatePose(backRightCamera);
-        //updatePose(backCamera);
         //Updating LED's to indicate that there is a vision target only in Telop
         if(!DriverStation.isDisabled()){
           if(backLeftCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_LEFT_COLOR);
           if(!backLeftCamera.hasTarget()) LED_NOT_a_Subsystem.subtractLED(LEDConstants.VISION_BACK_LEFT_COLOR);
           if(backRightCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_RIGHT_COLOR);
           if(!backRightCamera.hasTarget()) LED_NOT_a_Subsystem.subtractLED(LEDConstants.VISION_BACK_RIGHT_COLOR);
-          //if(backCamera.hasTarget()) LED_NOT_a_Subsystem.addLED(LEDConstants.VISION_BACK_COLOR);
-          //if(!backCamera.hasTarget()) LED_NOT_a_Subsystem.subtractLED(LEDConstants.VISION_BACK_COLOR);
           LED_NOT_a_Subsystem.flicker();
         }
         

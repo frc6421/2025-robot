@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -31,11 +30,13 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     LED_NOT_a_Subsystem.setDisabledPattern();
+    LED_NOT_a_Subsystem.flicker(5);//Waits 5 robot cycles, or 100 milliseconds.
   }
 
   @Override
   public void disabledPeriodic() {
-    //Updates the strip(s). And by that I mean it runs the method and changes the colors on the strip.
+    //Updates the strip(s). And by that I mean it runs the method and changes the colors on the strip based on 
+    //the current robot cycle.
     LED_NOT_a_Subsystem.setLED(LED_NOT_a_Subsystem.getDisabledPattern());
   }
 

@@ -34,7 +34,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36},
     SEA_BLUE = {0,80,255}, FOAM_WHITE = {190,220,255}, SKY_BLUE = {150,150,255},
     OFF = {0,0,0},
-    VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0}, VISION_BACK_COLOR = {0,255,0};
+    VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0};
     public static enum LED_MODES{
       RAINBOW,
       SNAKING_RAINBOW,
@@ -44,29 +44,23 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     private static int[] ELEVATOR_TARGET_COLOR = {0,255,0}, ELEVATOR_CURRENT_POS_COLOR = {0,0,255};
     private static int TRAILING_BRIGHTNESS = 7;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
   }
-
   private static AddressableLED led;//Led Strip
   private static AddressableLEDBuffer ledBuffer;//Buffer used before displaying to the strip
-
+  private static int flickerDelay = 1;
   private static int[] patternColor = LEDConstants.OFF;
-
   private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
   private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
-
   private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
-
   private static int currentRobotCycle;//Current amount of waited robot cycles
-
   private static LED_MODES selectedDisabledPattern;
-
   private static double waveStep = Math.PI / 4;//The position of the sine wave, in radians.
-
   private static int waveHeight;
+  //Stars for the disabled pattern
   private static int[] starPositions = {0,0,0,0,0};
   private static boolean starBool = false;
   private static int starAmount;
-
+  //Sky brightness for the wave pattern.
   private static double waveSkyBrightness;
   private static double starBrightness = 0;
   
@@ -262,7 +256,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
    * @breif  Flickers the LED's every few robot cycles
    */
   public static void flicker(){
-    if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
+    if(currentRobotCycle == flickerDelay){
       LEDPattern.solid(new Color(patternColor[0], patternColor[1], patternColor[2])).applyTo(ledBuffer);
       led.setData(ledBuffer);
       currentRobotCycle = 0;
@@ -272,43 +266,16 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       currentRobotCycle++;
     }
   }
+  public static void flicker(int delay){
+    flickerDelay = delay;
+  }
   /**
    * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
    * @param elevatorTarget  The Distance object of the Elevator position
    * @param currentElevatorHeight  The current height of the elevator, given in inches
    */
   public static void setElevatorLEDPosition(double elevatorTarget, double currentElevatorHeight){
-    int elevatorUpperTarget, elevatorLowerTarget;
-    //Setting the lower position to be the next-lowest set scoring position
-    //L1 position, should be the lowest 
-    if(elevatorTarget <= ElevatorConstants.L1_POSITION.in(Inches)){
-      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
-      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
-    }else if(elevatorTarget <= ElevatorConstants.L2_POSITION.in(Inches)){
-      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
-      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
-    }else if(elevatorTarget <= ElevatorConstants.STATION_POSITION.in(Inches)){
-      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
-      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
-    }else if(elevatorTarget <= ElevatorConstants.L3_POSITION.in(Inches)){
-      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
-      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
-    }else{
-      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 5 / 5;
-      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
-    }
-    //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
-    LEDPattern.steps(Map.of(currentElevatorHeight, Color.kBlack, 0.0, new Color(
-      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[0],
-      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[1],
-      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[2]
-      )
-    )).applyTo(ledBuffer);//Applying the pattern to the buffer
-    //Looping for the target LED colors
-    for(int i = elevatorLowerTarget; i < elevatorUpperTarget; i++){
-      ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
-    }
-    led.setData(ledBuffer);//Update the strip
+    
   }
 
   /**
