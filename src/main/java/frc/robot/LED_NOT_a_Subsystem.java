@@ -11,7 +11,9 @@
  */
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
 
+import java.util.Map;
 import java.util.Random;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -20,6 +22,7 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static class LEDConstants {
@@ -266,13 +269,43 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static void flicker(int delay){
     flickerDelay = delay;
   }
-  /**
+    /**
    * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
    * @param elevatorTarget  The Distance object of the Elevator position
    * @param currentElevatorHeight  The current height of the elevator, given in inches
    */
   public static void setElevatorLEDPosition(double elevatorTarget, double currentElevatorHeight){
-    
+    int elevatorUpperTarget, elevatorLowerTarget;
+    //Setting the lower position to be the next-lowest set scoring position
+    //L1 position, should be the lowest 
+    if(elevatorTarget <= ElevatorConstants.L1_POSITION.in(Inches)){
+      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 0 / 5;
+    }else if(elevatorTarget <= ElevatorConstants.L2_POSITION.in(Inches)){
+      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 1 / 5;
+    }else if(elevatorTarget <= ElevatorConstants.STATION_POSITION.in(Inches)){
+      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 2 / 5;
+    }else if(elevatorTarget <= ElevatorConstants.L3_POSITION.in(Inches)){
+      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 3 / 5;
+    }else{
+      elevatorUpperTarget = LEDConstants.NUMBER_OF_LEDS * 5 / 5;
+      elevatorLowerTarget = LEDConstants.NUMBER_OF_LEDS * 4 / 5;
+    }
+    //Using the lower elevator position, black, the max elevator position at that point, and the pattern color in RGB.
+    LEDPattern.steps(Map.of(currentElevatorHeight, Color.kBlack, 0.0, new Color(
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[0],
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[1],
+      LEDConstants.ELEVATOR_CURRENT_POS_COLOR[2]
+      )
+    )).applyTo(ledBuffer);//Applying the pattern to the buffer
+    //Looping for the target LED colors
+    for(int i = elevatorLowerTarget; i < elevatorUpperTarget; i++){
+      ledBuffer.setRGB(i, LEDConstants.ELEVATOR_TARGET_COLOR[0], LEDConstants.ELEVATOR_TARGET_COLOR[1], LEDConstants.ELEVATOR_TARGET_COLOR[2]);
+    }
+    led.setData(ledBuffer);//Update the strip
   }
 
   /**
