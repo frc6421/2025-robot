@@ -275,6 +275,8 @@ public class RobotContainer {
 				testJoystick = new CommandXboxController(3);
 				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+				testJoystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(SmartDashboard.getNumber("kG", 0)));
+				testJoystick.x().onFalse(elevatorSubsystem.stopElevator());
 				}
 
 

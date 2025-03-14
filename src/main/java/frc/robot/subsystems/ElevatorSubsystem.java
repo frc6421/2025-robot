@@ -24,6 +24,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,19 +52,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Gear ratio
     private static final double ELEVATOR_GEAR_RATIO = 12.0;
     private static final double ELEVATOR_SPROCKET_DIAMETER = 1.504;
-    private static final double ELEVATOR_STAGE_RATIO = 3.0;
+    private static final double ELEVATOR_STAGE_RATIO = 2.0;
     private static final double ELEVATOR_INCHES_PER_ROTATION = (ELEVATOR_SPROCKET_DIAMETER * Math.PI * ELEVATOR_STAGE_RATIO) / ELEVATOR_GEAR_RATIO;
 
     // Maximum and minimum extension of the elevator, in inches
-    private static final double MAX_HEIGHT_INCHES = 84;
-    public static final double MIN_HEIGHT_INCHES = 29.271;
-    public static final double MIN_HEIGHT_MATCH = MIN_HEIGHT_INCHES + 0.3;
+    private static final double MAX_HEIGHT_INCHES = 88;
+    public static final double MIN_HEIGHT_INCHES = 38.5;
+    public static final double MIN_HEIGHT_MATCH = MIN_HEIGHT_INCHES + 0.25;
     private static final double MAX_ERROR_INCHES = 0.50;
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
 
-    private static final double MIN_MATCH_HEIGHT_ROTATIONS = (MIN_HEIGHT_INCHES + 0.3) / ELEVATOR_INCHES_PER_ROTATION; 
+    private static final double MIN_MATCH_HEIGHT_ROTATIONS = (MIN_HEIGHT_MATCH) / ELEVATOR_INCHES_PER_ROTATION; 
 
     // Current limit of either motor
     private static final Current CURRENT_LIMIT = Amps.of(80);
@@ -97,8 +98,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withKD(LEFT_KD);
 
     private static final MotorOutputConfigs LEFT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Brake);
+        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withNeutralMode(NeutralModeValue.Coast);
 
     private static final double RIGHT_KG = LEFT_KG;
     private static final double RIGHT_KS = LEFT_KS;
@@ -117,16 +118,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withKD(RIGHT_KD);
 
     private static final MotorOutputConfigs RIGHT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Brake);
+        .withInverted(InvertedValue.Clockwise_Positive)
+        .withNeutralMode(NeutralModeValue.Coast);
 
     // Positions of the different Coral Branches in relation to the robot
 
-    public static final Distance STATION_POSITION = Inches.of(32.0);
-    public static final Distance L1_POSITION = Inches.of(36.0);
-    public static final Distance L2_POSITION = Inches.of(38.5);
-    public static final Distance L3_POSITION = Inches.of(55.0);
-    public static final Distance L4_POSITION = Inches.of(81.5); // 81.5 was sometimes working
+    public static final Distance STATION_POSITION = Inches.of(38.75);
+    public static final Distance L1_POSITION = Inches.of(38.75);
+    public static final Distance L2_POSITION = Inches.of(38.75);
+    public static final Distance L3_POSITION = Inches.of(54.0);
+    public static final Distance L4_POSITION = Inches.of(78.0); // 81.5 was sometimes working
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
@@ -193,6 +194,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         Rotations.of(ElevatorConstants.MIN_HEIGHT_INCHES / ElevatorConstants.ELEVATOR_INCHES_PER_ROTATION));
 
     SmartDashboard.putData("Elevator", this);
+    SmartDashboard.putNumber("kG", 0);
   }
 
   // Get methods \\
@@ -291,6 +293,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     builder.addDoubleProperty("L Elevator Stator Current", () -> elevatorLeftMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);
 
+    builder.addDoubleProperty("L Elevator Velocity", () -> elevatorLeftMotor.getVelocity().getValueAsDouble(), null);
     super.initSendable(builder);
   }
 }
