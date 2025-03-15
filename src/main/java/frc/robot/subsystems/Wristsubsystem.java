@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
@@ -36,8 +37,8 @@ public class WristSubsystem extends SubsystemBase {
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360.0 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     // Soft Limits
-    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(215);
-    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(11); // TODO needs to chnage with new numbers
+    public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(270);
+    public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(17); // TODO needs to chnage with new numbers
 
     // PID constants
     private static final double WRIST_KP = 0.006;
@@ -46,16 +47,16 @@ public class WristSubsystem extends SubsystemBase {
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
-    private static final double WRIST_MAX_ACCELERATION = 150;
-    private static final double WRIST_MAX_VELOCITY = 100;
+    private static final double WRIST_MAX_ACCELERATION = 125;
+    private static final double WRIST_MAX_VELOCITY = 300;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(190); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(190); //191 was working
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // L2 & L3
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(220); 
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
-    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(15);
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(18);
     public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
   }
 
@@ -104,6 +105,7 @@ public class WristSubsystem extends SubsystemBase {
         .maxVelocity(WristConstants.WRIST_MAX_VELOCITY * 360)
         .maxAcceleration(WristConstants.WRIST_MAX_ACCELERATION * 360)
         .allowedClosedLoopError(WristConstants.WRIST_ALLOWABLE_ERROR);
+    wristMotorConfig.inverted(true);
 
     // Setting the range of motion avaliable
     wristMotorConfig.closedLoop.outputRange(WristConstants.POSITION_MIN_OUTPUT, WristConstants.POSITION_MAX_OUTPUT);
@@ -130,7 +132,7 @@ public class WristSubsystem extends SubsystemBase {
    */
   public Command setAngle(double angle) {
     double angleError = 2;
-    return this.run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
+    return this.run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0.2*Math.cos(getWristEncoderPosition()-103)))
     .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
   }
 

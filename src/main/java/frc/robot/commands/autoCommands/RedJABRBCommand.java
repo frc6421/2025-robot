@@ -51,7 +51,7 @@ public class RedJABRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
+            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT),
             wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
             intakeSubsystem.intakeCoral()),
@@ -71,7 +71,7 @@ public class RedJABRBCommand extends SequentialCommandGroup {
         intakeSubsystem.stopIntake(),
 
         new ParallelCommandGroup(
-            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
+            driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_OUT),
             wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
             elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH),
             intakeSubsystem.intakeCoral()),

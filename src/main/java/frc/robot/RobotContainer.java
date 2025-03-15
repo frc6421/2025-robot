@@ -53,6 +53,7 @@ import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
+import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -70,6 +71,7 @@ public class RobotContainer {
 	private final Telemetry logger = new Telemetry(MaxSpeed);
 
 	private final CommandXboxController joystick = new CommandXboxController(0);
+	private CommandXboxController testJoystick;
 
 	private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -98,7 +100,7 @@ public class RobotContainer {
 	
 
 	private SendableChooser<Command> redAutoChooser;
-	private SendableChooser<Command> blueAutoChooser;
+	// private SendableChooser<Command> blueAutoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
@@ -151,14 +153,12 @@ public class RobotContainer {
 		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
 		redAutoChooser.addOption("Red E Algae BB", redEAlgaeBB);
 		redAutoChooser.addOption("Red JAB RB", redJABRB);
-
-        blueAutoChooser = new SendableChooser<>();
         //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
         //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
-        blueAutoChooser.addOption("Blue G", blueGRB);
-		blueAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
-		blueAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
-		blueAutoChooser.addOption("Blue EBA RB", blueEBARB);
+    redAutoChooser.addOption("Blue G", blueGRB);
+		redAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
+		redAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
+		redAutoChooser.addOption("Blue EBA RB", blueEBARB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -205,11 +205,10 @@ public class RobotContainer {
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
-		SmartDashboard.putData("Blue Auto Chooser", blueAutoChooser);
-		SmartDashboard.putData("Red Position Chooser", redPositionChooser);
-		SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
-		SmartDashboard.putData("Red Source Chooser", redSourceChooser);
-		SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
+    SmartDashboard.putData("Red Position Chooser", redPositionChooser);
+	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
+    SmartDashboard.putData("Red Source Chooser", redSourceChooser);
+	SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
@@ -244,14 +243,13 @@ public class RobotContainer {
 
 
 
-				// joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-				joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+			 joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 
 				joystick.leftTrigger().onTrue(intakeSequenceCommand);
-				// joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-				joystick.rightBumper().whileTrue(scorePrepCommand);
-				joystick.rightTrigger().onTrue(scoreFinishCommand);
+				//joystick.rightBumper().whileTrue(scorePrepCommand);
+				joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 				joystick.b().onTrue(drivetrain.resetGyro());
 
@@ -267,48 +265,61 @@ public class RobotContainer {
 
 				//joystick.x().onTrue(climbCommand);
 
-				//joystick.y().whileTrue(climbSubsystem.setVoltageCommand(7)); //maybe later switch to climbin command
-				//joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(3));
+				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+				//joystick.x().whileTrue(climbSubsystem.climbIn());
+				//joystick.x().whileTrue(climbSubsystem.climbIn());
+				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
-				//joystick.povUp().whileTrue(climbSubsystem.setVoltageCommand(-7));
-				//joystick.povUp().onFalse(climbSubsystem.setVoltageCommand(0));
+				if (!DriverStation.isFMSAttached()) {
+				testJoystick = new CommandXboxController(3);
+				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
+				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+				testJoystick.x().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
+				testJoystick.x().onFalse(wristSubsystem.stopWrist());
+				testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
+				testJoystick.y().onFalse(wristSubsystem.stopWrist());
+				testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
+				testJoystick.a().onFalse(wristSubsystem.stopWrist());
+				}
 
 
 		drivetrain.registerTelemetry(logger::telemeterize);
 	}
 
     public Command getAutonomousCommand() {
-		if (alliance.isPresent()) {
-			if (alliance.get() == Alliance.Red) {
-				return redAutoChooser.getSelected();
-			} else {
-				return blueAutoChooser.getSelected();
-			} 
-		} else {
-			return redAutoChooser.getSelected();
-		} 
+		return redAutoChooser.getSelected();
 	}
 
     public Pose2d getSelectedPoseCommand() {
+			alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
+				System.out.println("red pos");
 				return redPositionChooser.getSelected();
 			} else {
+				System.out.println("blue pos");
 				return bluePositionChooser.getSelected();
 			}
 		} else {
+			System.out.println("no alliance red pos");
 			return redPositionChooser.getSelected();
 		}
     }
 
     public Pose2d getSelectedSource() {
+			alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
+				System.out.println("red source");
 				return redSourceChooser.getSelected();
 			} else {
+				System.out.println("blue source");
 				return blueSourceChooser.getSelected();
 			}
 		} else {
+			System.out.println("no alliance red source");
 			return redSourceChooser.getSelected();
 		}
     }

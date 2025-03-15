@@ -35,7 +35,7 @@ public class AlgaeRemovalCommand extends SequentialCommandGroup {
     addCommands(
     new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				new SequentialCommandGroup(new WaitCommand(0.2), intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude())))
+				intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude()))
     );
   }
 }

@@ -41,10 +41,10 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     private static final int LEFT_PIVOT_MOTOR_ID = 50;
     private static final int RIGHT_PIVOT_MOTOR_ID = 51;
 
-    private static final double CLIMB_MOTOR_GEAR_RATIO = 5 * 5 * 3;
+    private static final double CLIMB_MOTOR_GEAR_RATIO = 5 * 5;
     private static final double CLIMB_TOTAL_RATIO = CLIMB_MOTOR_GEAR_RATIO;
-    // private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 360 / CLIMB_TOTAL_RATIO;
-    private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 87.5 / 236.85; // TODO: check why this is like this
+    private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 360 / CLIMB_TOTAL_RATIO;
+    //private static final double CLIMB_DEGREES_PER_MOTOR_ROTATION = 87.5 / 236.85; // TODO: check why this is like this
 
     private static final Current PIVOT_CURRENT_LIMIT = Amps.of(250); // TODO: Update Numbers
 
@@ -56,13 +56,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
     // soft limits
     /** In rotations */
-    public static final double PIVOT_FORWARD_SOFT_LIMIT = 300 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
+    public static final double PIVOT_FORWARD_SOFT_LIMIT = 10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
-    public static final double PIVOT_REVERSE_SOFT_LIMIT = 0 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
+    public static final double PIVOT_REVERSE_SOFT_LIMIT = -10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
 
     public static final double PIVOT_OUT_POSITION = 105 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
 
-    public static final double PIVOT_IN_POSITION = 240 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
+    public static final double PIVOT_IN_POSITION = -500;
 
     private static final SoftwareLimitSwitchConfigs PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitThreshold(ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT)
@@ -75,7 +75,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withNeutralMode(NeutralModeValue.Coast);
 
     private static final MotorOutputConfigs RIGHT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
+        .withInverted(InvertedValue.CounterClockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
   }
@@ -180,13 +180,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   }
 
   public Command climbOut() {
-    return run(() -> setVoltageCommand(7))
+    return run(() -> setVoltageCommand(3))
     .until(() -> isOutPosition())
     .finallyDo(() -> setVoltageCommand(0));
   }
 
   public Command climbIn() {
-    return run(() -> setVoltageCommand(7))
+    return run(() -> setVoltageCommand(3))
     .until(() -> isInPosition())
     .finallyDo(() -> setVoltageCommand(0));
   }

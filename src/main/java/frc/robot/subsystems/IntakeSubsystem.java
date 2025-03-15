@@ -10,7 +10,9 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.playingwithfusion.TimeOfFlight;
 
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,22 +22,25 @@ import frc.robot.RobotContainer;
 public class IntakeSubsystem extends SubsystemBase {
   private TalonFX intakeMotor;
   private TalonFXConfiguration intakeMotorConfig;
+  private TimeOfFlight intakeSensor;
+  private MedianFilter intakeFilter;
 
   public static class IntakeConstants {
 
     private static final int INTAKE_MOTOR_ID = 40;
+    private static final int INTAKE_TOF_ID = 41;
 
-    private static final int INTAKE_CURRENT_LIMIT = 80;
+    private static final int INTAKE_CURRENT_LIMIT = 200;
 
     private static final CurrentLimitsConfigs INTAKE_CURRENT_CONFIGS = new CurrentLimitsConfigs()
     .withStatorCurrentLimit(INTAKE_CURRENT_LIMIT)
     .withStatorCurrentLimitEnable(true);
 
-    private static final double INTAKE_STALL_LIMIT = 55;
+    private static final double INTAKE_STALL_LIMIT = 60;
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = -1.0; 
+    public static final double INTAKE_OUT_SPEED = -0.8; 
 
     private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
     .withNeutralMode(NeutralModeValue.Coast)
@@ -46,6 +51,8 @@ public class IntakeSubsystem extends SubsystemBase {
   public IntakeSubsystem() {
     // Identifies the motor object 
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
+    intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
+    intakeFilter = new MedianFilter(5);
 
     RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
 
@@ -67,6 +74,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public Command setIntakeSpeed(double output) {
     return runOnce(() -> intakeMotor.set(output));
+  }
+ /** In Millimeters */
+  public double getTOFDistance() {
+    return intakeFilter.calculate(intakeSensor.getRange());
   }
 
   /**
