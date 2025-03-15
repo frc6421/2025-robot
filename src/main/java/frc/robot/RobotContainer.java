@@ -53,6 +53,7 @@ import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
+import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -275,8 +276,12 @@ public class RobotContainer {
 				testJoystick = new CommandXboxController(3);
 				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-				testJoystick.x().whileTrue(elevatorSubsystem.setElevatorVoltage(SmartDashboard.getNumber("kG", 0)));
-				testJoystick.x().onFalse(elevatorSubsystem.stopElevator());
+				testJoystick.x().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
+				testJoystick.x().onFalse(wristSubsystem.stopWrist());
+				testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
+				testJoystick.y().onFalse(wristSubsystem.stopWrist());
+				testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
+				testJoystick.a().onFalse(wristSubsystem.stopWrist());
 				}
 
 

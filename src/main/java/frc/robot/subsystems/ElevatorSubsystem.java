@@ -17,6 +17,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -42,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final Follower elevatorFollower;
 
   private MotionMagicVoltage elevatorRequest;// Voltage to maintian the set point
-  private VoltageOut voltageRequest;
+  private PositionVoltage voltageRequest;
 
   public static final class ElevatorConstants {
     // CAN ID's
@@ -81,11 +82,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         .withForwardSoftLimitEnable(true);
 
     // Static, Voltage, Gravity, and PID for the motor
-    private static final double LEFT_KG = 0.30;
-    private static final double LEFT_KS = 0;
-    private static final double LEFT_KV = 0.0;
+    private static final double LEFT_KG = 0.3;
+    private static final double LEFT_KS = 0.225;
+    private static final double LEFT_KV = 0.116;
     private static final double LEFT_KA = 0;
-    private static final double LEFT_KP = 16.0;
+    private static final double LEFT_KP = 1.0;
     private static final double LEFT_KI = 0;
     private static final double LEFT_KD = 0;
     private static final Slot0Configs LEFT_SLOT_CONFIG = new Slot0Configs()
@@ -99,7 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private static final MotorOutputConfigs LEFT_MOTOR_CONFIGS = new MotorOutputConfigs()
         .withInverted(InvertedValue.CounterClockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Coast);
+        .withNeutralMode(NeutralModeValue.Brake);
 
     private static final double RIGHT_KG = LEFT_KG;
     private static final double RIGHT_KS = LEFT_KS;
@@ -119,7 +120,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private static final MotorOutputConfigs RIGHT_MOTOR_CONFIGS = new MotorOutputConfigs()
         .withInverted(InvertedValue.Clockwise_Positive)
-        .withNeutralMode(NeutralModeValue.Coast);
+        .withNeutralMode(NeutralModeValue.Brake);
 
     // Positions of the different Coral Branches in relation to the robot
 
@@ -127,15 +128,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final Distance L1_POSITION = Inches.of(38.75);
     public static final Distance L2_POSITION = Inches.of(38.75);
     public static final Distance L3_POSITION = Inches.of(54.0);
-    public static final Distance L4_POSITION = Inches.of(78.0); // 81.5 was sometimes working
+    public static final Distance L4_POSITION = Inches.of(78.0); 
 
     // For trapezoid profile constrants.
     /** Maximum velocity of the Motors, in Rotations per second */
-    private static final double MAX_VELOCITY_RPS = 500;
+    private static final double MAX_VELOCITY_RPS = 100;
 
     /** Maximum acceleration of the Motors, in Rotations per second per second */
-    private static final double MAX_ACCEL = 500;
-    private static final double MAX_JERK = 400;
+    private static final double MAX_ACCEL = 220;
+    private static final double MAX_JERK = 3200;
 
     private static final MotionMagicConfigs ELEVATOR_MOTION_CONFIGS = new MotionMagicConfigs()
     .withMotionMagicCruiseVelocity(MAX_VELOCITY_RPS)
@@ -182,7 +183,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Go to a position with an added voltage for Feed Forward Compensation
     elevatorRequest = new MotionMagicVoltage(0);
-    voltageRequest = new VoltageOut(Volts.of(0));
+    voltageRequest = new PositionVoltage(0).withSlot(0);
 
     // Applying the Configurators to their respective motors
     RobotContainer.applyTalonConfigs(elevatorLeftMotor, elevatorLeftConfig);

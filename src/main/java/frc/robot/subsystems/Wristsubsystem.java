@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
@@ -48,14 +49,14 @@ public class WristSubsystem extends SubsystemBase {
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
-    private static final double WRIST_MAX_ACCELERATION = 300;
+    private static final double WRIST_MAX_ACCELERATION = 125;
     private static final double WRIST_MAX_VELOCITY = 300;
     private static final double POSITION_MAX_OUTPUT = 1;
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // TODO: possibly add different scoring positions
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(220); //191 was working
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // L2 & L3
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(220); 
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(18);
     public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
@@ -133,7 +134,7 @@ public class WristSubsystem extends SubsystemBase {
    */
   public Command setAngle(double angle) {
     double angleError = 2;
-    return this.run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl))
+    return this.run(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, 0.2*Math.cos(getWristEncoderPosition()-103)))
     .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
   }
 
