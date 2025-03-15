@@ -38,8 +38,8 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
     new ParallelCommandGroup(
         intakeSubsystem.setIntakeSpeed(0.1),
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				//new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
-        wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
+				new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
+        // wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
 		intakeSubsystem.setIntakeSpeed(0.3),
     new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),

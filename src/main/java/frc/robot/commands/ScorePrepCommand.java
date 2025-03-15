@@ -8,11 +8,13 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
@@ -43,7 +45,7 @@ public class ScorePrepCommand extends SequentialCommandGroup {
             drivetrain.reefAlignCommand(location),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(position),
-            wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
+            new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
         intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.1),
         intakeSubsystem.stopIntake());

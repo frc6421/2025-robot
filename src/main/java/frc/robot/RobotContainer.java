@@ -31,17 +31,11 @@ import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreFinishCommand;
 import frc.robot.commands.ScorePrepCommand;
 import frc.robot.commands.ScoreSequenceCommand;
-import frc.robot.commands.autoCommands.BlueEAlgaeRBCommand;
-import frc.robot.commands.autoCommands.BlueEBARBCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
-import frc.robot.commands.autoCommands.BlueJAlgaeBBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
-import frc.robot.commands.autoCommands.RedEAlgaeBBCommand;
 import frc.robot.commands.autoCommands.RedEDCBBCommand;
 import frc.robot.commands.autoCommands.RedHRBCommand;
-import frc.robot.commands.autoCommands.RedJABRBCommand;
-import frc.robot.commands.autoCommands.RedJAlgaeRBCommand;
 import frc.robot.commands.autoCommands.RedJKLRBCommand;
 import frc.robot.commands.autoCommands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
@@ -88,16 +82,9 @@ public class RobotContainer {
 	private final RedJKLRBCommand redJKLRB;
 	private final RedEDCBBCommand redEDCBB;
 	private final RedHRBCommand redHRB;
-	private final RedJAlgaeRBCommand redJAlgaeRB;
-	private final RedEAlgaeBBCommand redEAlgaeBB;
-	private final RedJABRBCommand redJABRB;
 	private final BlueJKLBBCommand blueJKLBB;
 	private final BlueEDCRBCommand blueEDCRB;
-	private final BlueGRBCommand blueGRB;
-	private final BlueJAlgaeBBCommand blueJAlgaeBB;
-	private final BlueEAlgaeRBCommand blueEAlgaeRB;
-	private final BlueEBARBCommand blueEBARB;
-	
+	private final BlueGRBCommand blueGRB;	
 
 	private SendableChooser<Command> redAutoChooser;
 	// private SendableChooser<Command> blueAutoChooser;
@@ -122,7 +109,7 @@ public class RobotContainer {
 				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
 				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
 				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				// elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
 				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
@@ -136,29 +123,17 @@ public class RobotContainer {
 		redJKLRB = new RedJKLRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redEDCBB = new RedEDCBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		redHRB = new RedHRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		redJAlgaeRB = new RedJAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		redEAlgaeBB = new RedEAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		redJABRB = new RedJABRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueJKLBB = new BlueJKLBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueEDCRB = new BlueEDCRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		blueGRB = new BlueGRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		blueJAlgaeBB = new BlueJAlgaeBBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		blueEAlgaeRB = new BlueEAlgaeRBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		blueEBARB = new BlueEBARBCommand(drivetrain, elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 		redAutoChooser = new SendableChooser<>();
-		//redAutoChooser.addOption("Red JKL RB", redJKLRB);
-		//redAutoChooser.addOption("Red EDC BB", redEDCBB);
+		redAutoChooser.addOption("Red JKL RB", redJKLRB);
+		redAutoChooser.addOption("Red EDC BB", redEDCBB);
 		redAutoChooser.addOption("Red H", redHRB);
-		redAutoChooser.addOption("Red J Algae RB", redJAlgaeRB);
-		redAutoChooser.addOption("Red E Algae BB", redEAlgaeBB);
-		redAutoChooser.addOption("Red JAB RB", redJABRB);
-        //blueAutoChooser.addOption("Blue JKL BB", blueJKLBB);
-        //blueAutoChooser.addOption("Blue EDC RB", blueEDCRB);
-    redAutoChooser.addOption("Blue G", blueGRB);
-		redAutoChooser.addOption("Blue E Algae RB", blueEAlgaeRB);
-		redAutoChooser.addOption("Blue J Algae BB", blueJAlgaeBB);
-		redAutoChooser.addOption("Blue EBA RB", blueEBARB);
+        redAutoChooser.addOption("Blue JKL BB", blueJKLBB);
+        redAutoChooser.addOption("Blue EDC RB", blueEDCRB);
+   		redAutoChooser.addOption("Blue G", blueGRB);
 
         redPositionChooser = new SendableChooser<>();
         redPositionChooser.setDefaultOption("A", TrajectoryConstants.RED_A);
@@ -243,13 +218,13 @@ public class RobotContainer {
 
 
 
-			 joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+			//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
 		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+			joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
-				joystick.leftTrigger().onTrue(intakeSequenceCommand);
-
-				//joystick.rightBumper().whileTrue(scorePrepCommand);
-				joystick.rightTrigger().onTrue(scoreSequenceCommand);
+				joystick.rightBumper().whileTrue(scorePrepCommand);
+				joystick.rightTrigger().onTrue(scoreFinishCommand);
+				//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 				joystick.b().onTrue(drivetrain.resetGyro());
 
@@ -276,10 +251,10 @@ public class RobotContainer {
 				testJoystick = new CommandXboxController(3);
 				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-				testJoystick.x().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
-				testJoystick.x().onFalse(wristSubsystem.stopWrist());
+				testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
+				// testJoystick.x().onFalse(wristSubsystem.stopWrist());
 				testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
-				testJoystick.y().onFalse(wristSubsystem.stopWrist());
+				// testJoystick.y().onFalse(wristSubsystem.stopWrist());
 				testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
 				testJoystick.a().onFalse(wristSubsystem.stopWrist());
 				}

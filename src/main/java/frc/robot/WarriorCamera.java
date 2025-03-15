@@ -54,12 +54,12 @@ public class WarriorCamera implements Sendable {
   private Matrix<N3, N1> standardDeviation;
 
   public final static class CameraConstants {
-    public final static Transform3d BACK_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(-.25, -.27, .21),// adding makes number bigger
+    public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(.25, .27, .21),// adding makes number bigger
         new Rotation3d(Units.degreesToRadians(-1), Units.degreesToRadians(-24.2),
-            Units.degreesToRadians(180 - 26)));
-    public final static Transform3d BACK_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(-.22, .28, .21),
+            Units.degreesToRadians(-26)));
+    public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(.22, -.28, .21),
         new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-18.5),
-            Units.degreesToRadians(180 + 26)));
+            Units.degreesToRadians(26)));
     private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
         .loadField(AprilTagFields.k2025ReefscapeWelded);
 

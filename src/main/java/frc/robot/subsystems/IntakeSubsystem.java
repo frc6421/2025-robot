@@ -28,7 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public static class IntakeConstants {
 
     private static final int INTAKE_MOTOR_ID = 40;
-    private static final int INTAKE_TOF_ID = 41;
+    private static final int INTAKE_TOF_ID = 1;
 
     private static final int INTAKE_CURRENT_LIMIT = 200;
 
@@ -40,7 +40,9 @@ public class IntakeSubsystem extends SubsystemBase {
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = -0.8; 
+    public static final double INTAKE_OUT_SPEED = -0.6; 
+
+    public static final double CORAL_DISTANCE = 45.0;
 
     private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
     .withNeutralMode(NeutralModeValue.Coast)
@@ -88,7 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean haveCoral(){
-    return intakeMotor.getStatorCurrent().getValueAsDouble()> IntakeConstants.INTAKE_STALL_LIMIT;
+    return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
   }
 
 
@@ -100,6 +102,7 @@ public Command intakeCoral () {
 
   @Override
   public void periodic() {
+    getTOFDistance();
     // This method will be called once per scheduler run
   }
 
@@ -109,6 +112,7 @@ public Command intakeCoral () {
 
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
     builder.addDoubleProperty("Intake Current", () -> intakeMotor.getStatorCurrent().getValueAsDouble(), null);
+    builder.addDoubleProperty("TOF Distance", () -> getTOFDistance(), null);
   }
 
 }
