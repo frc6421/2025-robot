@@ -12,8 +12,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 
 import edu.wpi.first.units.measure.Angle;
@@ -28,7 +30,6 @@ public class WristSubsystem extends SubsystemBase {
 
     public static final int WRIST_CAN_ID = 30;
 
-    // TODO: Tune and collect the various values here
     // The Wrist Motor Current Limit
     private static final int WRIST_CURRENT_LIMIT = 80;
 
@@ -41,10 +42,13 @@ public class WristSubsystem extends SubsystemBase {
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(270);
     public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(16); // TODO needs to chnage with new numbers
 
-    // PID constants
-    private static final double WRIST_KP = 0.003;
-    private static final double WRIST_KI = 0;
-    private static final double WRIST_KD = 0;
+    //TODO: GET THE NEW CONSTANTS!!!!!!!!!!!!!!!!!!!
+    //PID Constants
+    public static final double WRIST_KP = 0.01;
+    public static final double WRIST_KI = 0.0;
+    public static final double WRIST_KD = 0.0;
+    public static final double WRIST_KS = 0.01;
+    public static final double WRIST_KG = (0.3759 - WRIST_KS);
 
     //MAXMotion constant
     private static final double WRIST_ALLOWABLE_ERROR = 1.5;
@@ -70,6 +74,8 @@ public class WristSubsystem extends SubsystemBase {
   public double setAngle;
 
   public double targetWristAngle = WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude();
+
+  private ClosedLoopSlot why = ClosedLoopSlot.kSlot0;
 
   /** Creates a new Wristsubsystem. */
   public WristSubsystem() {
@@ -126,15 +132,22 @@ public class WristSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  /**
-   * @brief Sets the position of the Wrist to a desired percentage position with a
-   *        PID Control Loop
-   * @param position The position percentage to set
-   */
+  
   public Command setAngle(double angle) {
+    //What was used: (kS + kG) * cos(wristPosition)
     // double angleError = 2;
-    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kMAXMotionPositionControl));
+    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, 1, ArbFFUnits.kVoltage));
     // .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
+  }
+
+  /**
+   * Sets the position of the Wrist to a desired position with a PID Control Loop and Feed Forward
+   * @param angle The angle to set to
+   * @param volts The voltage, calculated from the WristCommand
+   * @return  The Command to run
+   */
+  public Command setAngle(double angle, double volts){
+    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, volts, ArbFFUnits.kVoltage));
   }
 
   public Command resetWrist() {

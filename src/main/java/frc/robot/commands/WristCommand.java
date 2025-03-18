@@ -1,0 +1,99 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.commands;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.WristSubsystem;
+
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+public class WristCommand extends Command {
+  private final double DELTA_TIME = 0.02;
+  private final double WRIST_KG = 0.01;
+  private final double WRIST_KS = 0.01;
+  private WristSubsystem wrist;//Empty Wrist Object
+  private Timer timer = new Timer();//Set up the timer 
+  private final TrapezoidProfile.Constraints wristConstraints = new TrapezoidProfile.Constraints(1,1);//TODO: Update with the values we desire
+  private TrapezoidProfile.State wristInitial = new TrapezoidProfile.State();//Initial Wrist Position
+  private TrapezoidProfile.State wristGoal = new TrapezoidProfile.State();//Creates the empty Wrist Goal
+  private TrapezoidProfile.State wristCurrent = new TrapezoidProfile.State();
+  private TrapezoidProfile.State wristNext = new TrapezoidProfile.State();//Creates the empty Wrist Set point
+  private TrapezoidProfile wristProfile = new TrapezoidProfile(wristConstraints);//Creating the Profile
+  private double goToPos;//Position to set the Wrist to 
+  //TODO: Maybe put in a kV?
+  private final ArmFeedforward armFeedForward = new ArmFeedforward(WRIST_KS, WRIST_KG, 0);
+
+  /** Creates a new WristCommand. */
+  public WristCommand(WristSubsystem wristSubsystem, double position) {
+    addRequirements(wristSubsystem);
+    wrist = wristSubsystem;//Update the Wrist Object with the Wrist Subsystem
+    goToPos = position;//Setting the Position to go to
+  }
+
+  /**
+   * @breif  Called when the Command is initally scheduled.
+   */
+  @Override
+  public void initialize(){
+    timer.reset();//Resets the Timer
+    wristInitial = new TrapezoidProfile.State(wrist.getWristEncoderPosition(),0);//Sets the inital Wrist Position
+    wristGoal = new TrapezoidProfile.State(goToPos, 0);//Sets the position
+    timer.start();//Starts the timer
+  }
+
+
+  /**
+   * @breif  Called when the Scheduler runs while the Command is scheduled
+   */
+  @Override
+  public void execute(){
+    wristCurrent = wristProfile.calculate(timer.get(), wristInitial, wristGoal);
+    wristNext = wristProfile.calculate(timer.get() + DELTA_TIME, wristInitial, wristGoal);
+    wrist.setAngle(wristNext.position, armFeedForward.calculateWithVelocities(
+      wrist.getWristEncoderPosition(), wristCurrent.velocity, wristNext.velocity)
+    );//Sets the angle of the motor
+    /*
+    m_rightLeader.setSetpoint(
+        ExampleSmartMotorController.PIDMode.kPosition,
+        currentRight.position,
+        m_feedforward.calculateWithVelocities(currentLeft.velocity, nextLeft.velocity)
+            / RobotController.getBatteryVoltage());
+     */
+    /*
+    var currentRightSetpoint =
+                  m_profile.calculate(
+                      currentTime,
+                      new State(m_initialRightDistance, 0),
+                      new State(m_initialRightDistance + distance, 0));
+
+    var nextRightSetpoint =
+                  m_profile.calculate(
+                      currentTime + DriveConstants.kDt,
+                      new State(m_initialRightDistance, 0),
+                      new State(m_initialRightDistance + distance, 0));
+     */
+  }
+
+
+  /**
+   * @breif  Called when the command ends or is interrupted.
+   */
+  @Override
+  public void end(boolean interrupted){
+    wrist.setAngle(wristNext.position);
+  }
+
+
+  /**
+   * @breif  Determines if the command should end
+   * @return  true when the command *should* end
+   */
+  @Override
+  public boolean isFinished(){
+    return timer.get() > wristProfile.totalTime();
+  }
+}
