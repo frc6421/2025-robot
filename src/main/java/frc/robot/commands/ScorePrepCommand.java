@@ -30,6 +30,9 @@ public class ScorePrepCommand extends SequentialCommandGroup {
   private IntakeSubsystem intakeSubsystem;
   private CommandSwerveDrivetrain drivetrain;
 
+  private final WristCommand wristScoreCommand;
+	private final WristCommand wristScore4Command;
+
   public ScorePrepCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake,
       CommandSwerveDrivetrain drive, DoubleSupplier position, Supplier<Pose2d> location) {
 
@@ -38,6 +41,9 @@ public class ScorePrepCommand extends SequentialCommandGroup {
     intakeSubsystem = intake;
     drivetrain = drive;
 
+    wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());	
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -45,7 +51,7 @@ public class ScorePrepCommand extends SequentialCommandGroup {
             drivetrain.reefAlignCommand(location),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(position),
-            new ConditionalCommand(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude()), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()), () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
+            new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
         intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.1),
         intakeSubsystem.stopIntake());

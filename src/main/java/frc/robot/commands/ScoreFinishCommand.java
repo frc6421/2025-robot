@@ -24,11 +24,15 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
 
+  private final WristCommand wristIntakeCommand;
+
   public ScoreFinishCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
 
     elevatorSubsystem = elevator;
     wristSubsystem = wrist;
     intakeSubsystem = intake;
+
+    wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());	
 
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
@@ -40,7 +44,7 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
 		new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
-			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+			wristIntakeCommand,
 			elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))));
   }
 }

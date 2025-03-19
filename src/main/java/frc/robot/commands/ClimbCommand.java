@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CageIntakeSubsystem;
 import frc.robot.subsystems.ClimbPivotSubsystem;
 import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ClimbCommand extends Command {
@@ -28,9 +29,8 @@ public class ClimbCommand extends Command {
   @Override
   public void initialize() {
     //TODO: Detemine a good voltage to run at.
-    climbPivotSubsystem.climbOut();
-    wristSubsystem.setAngle(90);
-    cageIntakeSubsystem.cageIntakeInSpeedCommand();
+    new WristCommand(wristSubsystem, 120);
+    climbPivotSubsystem.setVoltageCommand(11);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

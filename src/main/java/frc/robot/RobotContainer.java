@@ -89,7 +89,6 @@ public class RobotContainer {
 	private final BlueGRBCommand blueGRB;	
 
 	private SendableChooser<Command> redAutoChooser;
-	// private SendableChooser<Command> blueAutoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
@@ -98,6 +97,10 @@ public class RobotContainer {
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
+	private final WristCommand wristScoreCommand;
+	private final WristCommand wristIntakeCommand;
+	private final WristCommand wristScore4Command;
+	private final WristCommand wristClimbCommand;
 	private final AlgaeRemovalCommand algaeRemovalCommand;
 	private final ResetAlgaeCommand resetAlgaeCommand;
 	private final ScorePrepCommand scorePrepCommand;
@@ -115,6 +118,10 @@ public class RobotContainer {
 
 		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
+		wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());
+		wristClimbCommand = new WristCommand(wristSubsystem, 150);
 		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
@@ -229,7 +236,7 @@ public class RobotContainer {
 
 		// Manual Overrides
 		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
-		joystick.back().whileTrue(wristSubsystem.resetWrist());
+		// joystick.back().whileTrue(wristSubsystem.resetWrist());
 
 		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
@@ -240,22 +247,16 @@ public class RobotContainer {
 		//joystick.x().onTrue(climbCommand);
 
 				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(2));
-				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-				joystick.x().whileTrue(climbSubsystem.climbIn());
+				joystick.x().whileTrue(climbSubsystem.climbOut());
+				joystick.y().whileTrue(climbSubsystem.climbIn());
 				//joystick.x().whileTrue(climbSubsystem.climbIn());
-				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
 		if (!DriverStation.isFMSAttached()) {
 			testJoystick = new CommandXboxController(3);
 			testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-			testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
-			// testJoystick.x().onFalse(wristSubsystem.stopWrist());
-			testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
-			// testJoystick.y().onFalse(wristSubsystem.stopWrist());
-			testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
-			testJoystick.a().onFalse(wristSubsystem.stopWrist());
+			testJoystick.x().onTrue(wristScoreCommand);
+			testJoystick.y().onTrue(wristIntakeCommand);
 		}
 
 
@@ -313,5 +314,6 @@ public class RobotContainer {
 			DataLogManager.log("Erorr:" + motor.getDescription() + " Configuration not applied " + status.toString());
 		}
 	}
+
 
 }

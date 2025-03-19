@@ -16,13 +16,13 @@ import frc.robot.subsystems.WristSubsystem;
 public class WristCommand extends Command {
   //TODO: Update with the values we desire
   private final double DELTA_TIME = 0.02;
-  private final double WRIST_KG = 0.1;
-  private final double WRIST_KS = 0.01;
+  private final double WRIST_KG = 0.4;
+  private final double WRIST_KS = 0.1;
   public static final double WRIST_KV = 0.1;//In Volts per radians per second
-  private final double WRIST_MAX_VELOCITY = 120;//In rad/sec
-  private final double WRIST_MAX_ACCELERATION = 300;//In rad/sec^2
+  private final double WRIST_MAX_VELOCITY = 2400;//In rad/sec
+  private final double WRIST_MAX_ACCELERATION = 6000;//In rad/sec^2
 
-  private WristSubsystem wrist;//Empty Wrist Object
+  private final WristSubsystem wrist;//Empty Wrist Object
   private Timer timer = new Timer();//Set up the timer 
 
   private final TrapezoidProfile.Constraints wristConstraints = new TrapezoidProfile.Constraints(
@@ -69,11 +69,14 @@ public class WristCommand extends Command {
     //differing
     wristCurrent = wristProfile.calculate(currentTime, wristInitial, wristGoal);//Calculates the current wrist position
     wristNext = wristProfile.calculate(currentTime + DELTA_TIME, wristInitial, wristGoal);//Calculates the next wrist position
+    System.out.println("Position: " + wristNext.position);
+    //System.out.println(wristProfile.timeLeftUntil(goToPos));
+
     wrist.setAngle(wristNext.position, armFeedForward.calculateWithVelocities(
       Math.toRadians(wrist.getWristEncoderPosition()), 
       Math.toRadians(wristCurrent.velocity), 
       Math.toRadians(wristNext.velocity))
-    );//Setting the angle of the motor
+      );//Setting the angle of the motor
   }
 
 
@@ -82,7 +85,7 @@ public class WristCommand extends Command {
    */
   @Override
   public void end(boolean interrupted){
-    wrist.setAngle(wristNext.position);
+    wrist.setAngle(wristNext.position, 0);
   }
 
 

@@ -62,14 +62,14 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withStatorCurrentLimitEnable(true)
         .withSupplyCurrentLimitEnable(true);
 
-    // soft limits
+    //Soft limits
     /** In rotations */
     public static final double PIVOT_FORWARD_SOFT_LIMIT = 10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
     public static final double PIVOT_REVERSE_SOFT_LIMIT = -10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
-
-    public static final double PIVOT_OUT_POSITION = 105 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
-
+    /** In rotations */
+    public static final double PIVOT_OUT_POSITION = -625; //here
+    /** In rotations */
     public static final double PIVOT_IN_POSITION = -500;
 
     private static final SoftwareLimitSwitchConfigs PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
@@ -196,13 +196,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   }
 
   public Command climbOut() {
-    return run(() -> setVoltageCommand(3))
+    return setVoltageCommand(9)
     .until(() -> isOutPosition())
-    .finallyDo(() -> setVoltageCommand(0));
+    .andThen(setVoltageCommand(0));
   }
 
   public Command climbIn() {
-    return setVoltageCommand(11)
+    return setVoltageCommand(9)
     .until(() -> isLimit())
     .andThen(setVoltageCommand(0));
     }

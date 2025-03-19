@@ -58,8 +58,8 @@ public class WristSubsystem extends SubsystemBase {
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(215); // L2 & L3
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(215); 
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // L2 & L3
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(210); 
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
     public static final Angle WRIST_INTAKE_POSITION = Degrees.of(20);
     public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
@@ -134,7 +134,7 @@ public class WristSubsystem extends SubsystemBase {
   public Command setAngle(double angle) {
     //What was used: (kS + kG) * cos(wristPosition)
     // double angleError = 2;
-    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, 1, ArbFFUnits.kVoltage));
+    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition));
     // .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
   }
 
@@ -144,9 +144,14 @@ public class WristSubsystem extends SubsystemBase {
    * @param volts The voltage, calculated from the WristCommand
    * @return  The Command to run
    */
-  public Command setAngle(double angle, double volts){
-    return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, volts, ArbFFUnits.kVoltage));
+  // public Command setAngle(double angle, double volts){
+  //   return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, volts, ArbFFUnits.kVoltage));
+  // }
+
+  public void setAngle(double angle, double volts){
+    wristPIDController.setReference(angle, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, volts, ArbFFUnits.kVoltage);
   }
+
 
   public Command resetWrist() {
     double voltage = 0.5;

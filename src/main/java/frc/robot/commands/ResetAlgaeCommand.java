@@ -19,6 +19,8 @@ public class ResetAlgaeCommand extends SequentialCommandGroup {
   private ElevatorSubsystem elevatorSubsystem;
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
+
+  private final WristCommand wristIntakeCommand;
   
   public ResetAlgaeCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
 
@@ -26,12 +28,14 @@ public class ResetAlgaeCommand extends SequentialCommandGroup {
     wristSubsystem = wrist;
     intakeSubsystem = intake;
 
+    wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());	
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       intakeSubsystem.stopIntake(),
 		  new ParallelCommandGroup(
-			  wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+			  wristIntakeCommand,
 			  elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)));
   }
 }
