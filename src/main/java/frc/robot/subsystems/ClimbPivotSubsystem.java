@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 
+import javax.xml.crypto.Data;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -17,8 +19,11 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +33,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
   private final TalonFX leftPivotMotor;
   private final TalonFX rightPivotMotor;
+  private final DigitalInput pivotLimitSwitch;
 
   private final TalonFXConfiguration leftPivotMotorConfig;
   private final TalonFXConfiguration rightPivotMotorConfig;
@@ -35,11 +41,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   private final VoltageOut voltageRequest;
 
   private StatusCode status = StatusCode.StatusCodeNotInitialized;
+  private boolean isClimberOut = false;
 
   public static class ClimbPivotConstants {
 
     private static final int LEFT_PIVOT_MOTOR_ID = 50;
     private static final int RIGHT_PIVOT_MOTOR_ID = 51;
+    private static final int PIVOT_LIMIT_SWITCH_PORT = 0;
 
     private static final double CLIMB_MOTOR_GEAR_RATIO = 5 * 5;
     private static final double CLIMB_TOTAL_RATIO = CLIMB_MOTOR_GEAR_RATIO;
@@ -75,7 +83,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withNeutralMode(NeutralModeValue.Coast);
 
     private static final MotorOutputConfigs RIGHT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
   }
@@ -84,6 +92,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   public ClimbPivotSubsystem() {
     leftPivotMotor = new TalonFX(ClimbPivotConstants.LEFT_PIVOT_MOTOR_ID);
     rightPivotMotor = new TalonFX(ClimbPivotConstants.RIGHT_PIVOT_MOTOR_ID);
+    pivotLimitSwitch = new DigitalInput(ClimbPivotConstants.PIVOT_LIMIT_SWITCH_PORT);
 
     // Set controller to factory default
     RobotContainer.applyTalonConfigs(leftPivotMotor, new TalonFXConfiguration());
@@ -128,15 +137,14 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
   }
 
   // Set methods \\
 
   public Command setVoltageCommand(double voltage) {
-    return this.run(() -> {
-      rightPivotMotor.setControl(voltageRequest.withOutput(voltage));
-      leftPivotMotor.setControl(voltageRequest.withOutput(voltage));
+    return run(() -> {
+          rightPivotMotor.setControl(voltageRequest.withOutput(voltage));
+          leftPivotMotor.setControl(voltageRequest.withOutput(voltage));
     }
   );
 }
@@ -179,6 +187,14 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     return rightPivotMotor.getPosition().getValueAsDouble() >= ClimbPivotConstants.PIVOT_OUT_POSITION;
   }
 
+  /**
+   * If limit switch is interrupted returns true, otherwise false
+   * @return true/false
+   */
+  public boolean isLimit() {
+    return !pivotLimitSwitch.get();
+  }
+
   public Command climbOut() {
     return run(() -> setVoltageCommand(3))
     .until(() -> isOutPosition())
@@ -186,10 +202,10 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   }
 
   public Command climbIn() {
-    return run(() -> setVoltageCommand(3))
-    .until(() -> isInPosition())
-    .finallyDo(() -> setVoltageCommand(0));
-  }
+    return setVoltageCommand(11)
+    .until(() -> isLimit())
+    .andThen(setVoltageCommand(0));
+    }
 
   @Override
   public void initSendable(SendableBuilder builder) {
@@ -199,5 +215,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Right Motor Rotations", () -> rightPivotMotor.getPosition().getValueAsDouble(), null);
     builder.addDoubleProperty("Left Pivot Current", () -> leftPivotMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("Right Pivot Current", () -> rightPivotMotor.getStatorCurrent().getValueAsDouble(), null);
+    builder.addBooleanProperty("Limit Switch", () -> isLimit(), null);
+    builder.addBooleanProperty("Is Climber Out", () -> isClimberOut, null);
   }
 }

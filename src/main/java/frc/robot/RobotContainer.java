@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.AlgaeRemovalCommand;
@@ -241,9 +242,9 @@ public class RobotContainer {
 				//joystick.x().onTrue(climbCommand);
 
 				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(3));
+				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(2));
 				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-				//joystick.x().whileTrue(climbSubsystem.climbIn());
+				joystick.x().whileTrue(climbSubsystem.climbIn());
 				//joystick.x().whileTrue(climbSubsystem.climbIn());
 				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
