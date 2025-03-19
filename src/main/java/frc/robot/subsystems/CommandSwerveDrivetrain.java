@@ -75,8 +75,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.RobotCentric nudgeRequest = new RobotCentric()
     .withDriveRequestType(DriveRequestType.Velocity);
 
-    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_LEFT_TRANSFORM3D);
-    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.BACK_RIGHT_TRANSFORM3D);
+    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
+    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_RIGHT_TRANSFORM3D);
     public final PhotonCamera allignCamera = new PhotonCamera("Camera_4_OV9281_USB_Camera");
 
     private final ProfiledPIDController thetaController = new ProfiledPIDController(

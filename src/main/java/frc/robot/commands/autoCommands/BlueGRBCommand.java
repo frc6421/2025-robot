@@ -3,9 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands.autoCommands;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -29,8 +26,8 @@ public class BlueGRBCommand extends SequentialCommandGroup {
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
 
-
-  public BlueGRBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
+  public BlueGRBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist,
+      IntakeSubsystem intake) {
 
     driveSubsystem = drive;
     elevatorSubsystem = elevator;
@@ -40,19 +37,21 @@ public class BlueGRBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        driveSubsystem.reefAlignCommand(() -> ((TrajectoryConstants.BLUE_G).plus(new Transform2d(0.0, Units.inchesToMeters(5.5), new Rotation2d(0))))),
+        new ParallelCommandGroup(
+            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_G),
+            intakeSubsystem.setIntakeSpeed(0.1),
+            elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
+            wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
+        intakeSubsystem.setIntakeSpeed(0.3),
+        new WaitCommand(0.1),
+        intakeSubsystem.stopIntake(),
 
-        //scoreSequence
-      new ParallelCommandGroup(
-          elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.L1_POSITION.magnitude()),
-          new SequentialCommandGroup(new WaitCommand(0.3), wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()))),
-      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
-      new WaitCommand(0.2),
-      intakeSubsystem.stopIntake(),
-      new ParallelCommandGroup(
-        wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-        new SequentialCommandGroup(new WaitCommand(0.4), elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH)))
-        
-);
+        intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+        new WaitCommand(0.1),
+        intakeSubsystem.stopIntake(),
+        new ParallelCommandGroup(
+            wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+            elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)))
+    );
   }
 }
