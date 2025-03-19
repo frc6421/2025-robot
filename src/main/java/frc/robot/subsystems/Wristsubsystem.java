@@ -42,7 +42,7 @@ public class WristSubsystem extends SubsystemBase {
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(270);
     public static final Angle WRIST_REVERSE_SOFT_LIMIT = Degrees.of(16); // TODO needs to chnage with new numbers
 
-    //TODO: GET THE NEW CONSTANTS!!!!!!!!!!!!!!!!!!!
+    //TODO: GET THE NEW CONSTANTS
     //PID Constants
     public static final double WRIST_KP = 0.01;
     public static final double WRIST_KI = 0.0;
@@ -74,8 +74,6 @@ public class WristSubsystem extends SubsystemBase {
   public double setAngle;
 
   public double targetWristAngle = WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude();
-
-  private ClosedLoopSlot why = ClosedLoopSlot.kSlot0;
 
   /** Creates a new Wristsubsystem. */
   public WristSubsystem() {

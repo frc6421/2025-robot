@@ -31,6 +31,7 @@ import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreFinishCommand;
 import frc.robot.commands.ScorePrepCommand;
 import frc.robot.commands.ScoreSequenceCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
@@ -92,7 +93,7 @@ public class RobotContainer {
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
     private SendableChooser<Pose2d> blueSourceChooser;
-		private SendableChooser<Double> elevatorPositionChooser;
+	private SendableChooser<Double> elevatorPositionChooser;
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
@@ -106,17 +107,17 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		elevatorPositionChooser = new SendableChooser<>();
-				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+		elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
-				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-				algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-				scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
-				scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
+		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -180,14 +181,14 @@ public class RobotContainer {
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
-    SmartDashboard.putData("Red Position Chooser", redPositionChooser);
-	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
-    SmartDashboard.putData("Red Source Chooser", redSourceChooser);
-	SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
+		SmartDashboard.putData("Red Position Chooser", redPositionChooser);
+		SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
+		SmartDashboard.putData("Red Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
-    configureBindings();
+    	configureBindings();
 	}
 
 	private void configureBindings() {
@@ -205,59 +206,56 @@ public class RobotContainer {
 		// Note that X is defined as forward according to WPILib convention,
 		// and Y is defined as to the left according to WPILib convention.
 		drivetrain.setDefaultCommand(
-				// Drivetrain will execute this command periodically
-				drivetrain.applyRequest(() -> drive
-						// Drive forward with negative Y (forward)
-						.withVelocityX(xDriveSlew.calculate(-joystick.getLeftY() * MaxSpeed))
-						// Drive left with negative X (left)
-						.withVelocityY(yDriveSlew.calculate(-joystick.getLeftX() * MaxSpeed))
-						// Drive counterclockwise with negative X (left)
-						.withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+			// Drivetrain will execute this command periodically
+			drivetrain.applyRequest(() -> drive
+					// Drive forward with negative Y (forward)
+					.withVelocityX(xDriveSlew.calculate(-joystick.getLeftY() * MaxSpeed))
+					// Drive left with negative X (left)
+					.withVelocityY(yDriveSlew.calculate(-joystick.getLeftX() * MaxSpeed))
+					// Drive counterclockwise with negative X (left)
+					.withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
 
 
+		//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+		joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
+		joystick.rightBumper().whileTrue(scorePrepCommand);
+		joystick.rightTrigger().onTrue(scoreFinishCommand);
+		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
+		joystick.b().onTrue(drivetrain.resetGyro());
 
-			//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
-			joystick.leftTrigger().onTrue(intakeSequenceCommand);
+		// Manual Overrides
+		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
+		joystick.back().whileTrue(wristSubsystem.resetWrist());
 
-				joystick.rightBumper().whileTrue(scorePrepCommand);
-				joystick.rightTrigger().onTrue(scoreFinishCommand);
-				//joystick.rightTrigger().onTrue(scoreSequenceCommand);
+		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
+		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-				joystick.b().onTrue(drivetrain.resetGyro());
+		joystick.a().whileTrue(algaeRemovalCommand);
+		joystick.a().onFalse(resetAlgaeCommand);
 
-				// Manual Overrides
-				joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
-				joystick.back().whileTrue(wristSubsystem.resetWrist());
+		//joystick.x().onTrue(climbCommand);
 
-				joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
-				joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
+		//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+		joystick.y().whileTrue(climbSubsystem.setVoltageCommand(3));
+		joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+		//joystick.x().whileTrue(climbSubsystem.climbIn());
+		//joystick.x().whileTrue(climbSubsystem.climbIn());
+		joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
-				joystick.a().whileTrue(algaeRemovalCommand);
-				joystick.a().onFalse(resetAlgaeCommand);
-
-				//joystick.x().onTrue(climbCommand);
-
-				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(3));
-				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-				//joystick.x().whileTrue(climbSubsystem.climbIn());
-				//joystick.x().whileTrue(climbSubsystem.climbIn());
-				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
-
-				if (!DriverStation.isFMSAttached()) {
-				testJoystick = new CommandXboxController(3);
-				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
-				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-				testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
-				// testJoystick.x().onFalse(wristSubsystem.stopWrist());
-				testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
-				// testJoystick.y().onFalse(wristSubsystem.stopWrist());
-				testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
-				testJoystick.a().onFalse(wristSubsystem.stopWrist());
-				}
+		if (!DriverStation.isFMSAttached()) {
+			testJoystick = new CommandXboxController(3);
+			testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
+			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+			testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
+			// testJoystick.x().onFalse(wristSubsystem.stopWrist());
+			testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
+			// testJoystick.y().onFalse(wristSubsystem.stopWrist());
+			testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
+			testJoystick.a().onFalse(wristSubsystem.stopWrist());
+		}
 
 
 		drivetrain.registerTelemetry(logger::telemeterize);
@@ -268,7 +266,7 @@ public class RobotContainer {
 	}
 
     public Pose2d getSelectedPoseCommand() {
-			alliance = DriverStation.getAlliance();
+		alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
 				System.out.println("red pos");
@@ -284,7 +282,7 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedSource() {
-			alliance = DriverStation.getAlliance();
+		alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
 				System.out.println("red source");
@@ -299,9 +297,9 @@ public class RobotContainer {
 		}
     }
 
-		public Double getElevatorPosition() {
-			return elevatorPositionChooser.getSelected();
-		}
+	public Double getElevatorPosition() {
+		return elevatorPositionChooser.getSelected();
+	}
 
     public static void applyTalonConfigs(TalonFX motor, TalonFXConfiguration config) {
 		StatusCode status = StatusCode.StatusCodeNotInitialized;
