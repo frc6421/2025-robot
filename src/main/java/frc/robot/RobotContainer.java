@@ -107,17 +107,17 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		elevatorPositionChooser = new SendableChooser<>();
-				elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
-				elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
+		elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
+		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
-				scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-				algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
-				resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-				scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
-				scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
+		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
+		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -181,10 +181,10 @@ public class RobotContainer {
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
-    SmartDashboard.putData("Red Position Chooser", redPositionChooser);
-	SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
-    SmartDashboard.putData("Red Source Chooser", redSourceChooser);
-	SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
+		SmartDashboard.putData("Red Position Chooser", redPositionChooser);
+		SmartDashboard.putData("Blue Position Chooser", bluePositionChooser);
+		SmartDashboard.putData("Red Source Chooser", redSourceChooser);
+		SmartDashboard.putData("Blue Source Chooser", blueSourceChooser);
 		SmartDashboard.putData("Elevator Position Chooser", elevatorPositionChooser);
 		SmartDashboard.putData("Gyro", drivetrain.getPigeon2());
 
@@ -223,42 +223,42 @@ public class RobotContainer {
 		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 			joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
-				joystick.rightBumper().whileTrue(scorePrepCommand);
-				joystick.rightTrigger().onTrue(scoreFinishCommand);
-				//joystick.rightTrigger().onTrue(scoreSequenceCommand);
+			joystick.rightBumper().whileTrue(scorePrepCommand);
+			joystick.rightTrigger().onTrue(scoreFinishCommand);
+			//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-				joystick.b().onTrue(drivetrain.resetGyro());
+			joystick.b().onTrue(drivetrain.resetGyro());
 
-		// Manual Overrides
-		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
-		joystick.back().whileTrue(wristSubsystem.resetWrist());
+			// Manual Overrides
+			joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
+			joystick.back().whileTrue(wristSubsystem.resetWrist());
 
-		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
-		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
+			joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
+			joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 
-				joystick.a().whileTrue(algaeRemovalCommand);
-				joystick.a().onFalse(resetAlgaeCommand);
+			joystick.a().whileTrue(algaeRemovalCommand);
+			joystick.a().onFalse(resetAlgaeCommand);
 
-				//joystick.x().onTrue(climbCommand);
+			//joystick.x().onTrue(climbCommand);
 
-				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-				joystick.y().whileTrue(climbSubsystem.setVoltageCommand(2));
-				joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-				joystick.x().whileTrue(climbSubsystem.climbIn());
-				//joystick.x().whileTrue(climbSubsystem.climbIn());
-				joystick.povUp().onTrue(wristSubsystem.setAngle(150));
+			//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+			joystick.y().whileTrue(climbSubsystem.setVoltageCommand(2));
+			joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
+			joystick.x().whileTrue(climbSubsystem.climbIn());
+			//joystick.x().whileTrue(climbSubsystem.climbIn());
+			joystick.povUp().onTrue(wristSubsystem.setAngle(150));
 
-				if (!DriverStation.isFMSAttached()) {
-				testJoystick = new CommandXboxController(3);
-				testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
-				testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-				testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
-				// testJoystick.x().onFalse(wristSubsystem.stopWrist());
-				testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
-				// testJoystick.y().onFalse(wristSubsystem.stopWrist());
-				testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
-				testJoystick.a().onFalse(wristSubsystem.stopWrist());
-				}
+		if (!DriverStation.isFMSAttached()) {
+			testJoystick = new CommandXboxController(3);
+			testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
+			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+			testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
+			// testJoystick.x().onFalse(wristSubsystem.stopWrist());
+			testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
+			// testJoystick.y().onFalse(wristSubsystem.stopWrist());
+			testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
+			testJoystick.a().onFalse(wristSubsystem.stopWrist());
+		}
 
 
 		drivetrain.registerTelemetry(logger::telemeterize);

@@ -29,20 +29,14 @@ public class Robot extends TimedRobot {
   
   @Override
   public void disabledInit() {
-    LED_NOT_a_Subsystem.setDisabledPattern();
-    LED_NOT_a_Subsystem.flicker(5);//Waits 5 robot cycles, or 100 milliseconds.
   }
 
   @Override
   public void disabledPeriodic() {
-    //Updates the strip(s). And by that I mean it runs the method and changes the colors on the strip based on 
-    //the current robot cycle.
-    LED_NOT_a_Subsystem.setLED(LED_NOT_a_Subsystem.getDisabledPattern());
   }
 
   @Override
   public void disabledExit() {
-    LED_NOT_a_Subsystem.resetLength();
   }
 
   @Override
@@ -65,7 +59,6 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    LED_NOT_a_Subsystem.off();
   }
 
   @Override

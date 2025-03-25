@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
@@ -79,7 +80,10 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     //Starting the LEDs
     led.start();
   }
-
+/* 
+  Command LEDScore(){
+    return runOnce(setLED(LEDConstants.WHITE));
+  }*/
   /**
    * @breif   Sets the LEDS to a specific color
    * @param color  The color to set to. 
@@ -269,7 +273,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static void flicker(int delay){
     flickerDelay = delay;
   }
-    /**
+  /**
    * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
    * @param elevatorTarget  The Distance object of the Elevator position
    * @param currentElevatorHeight  The current height of the elevator, given in inches
