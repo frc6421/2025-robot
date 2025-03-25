@@ -5,6 +5,7 @@
 package frc.robot.commands.autoCommands;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.TrajectoryConstants;
@@ -35,11 +36,10 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
     elevatorSubsystem = elevator;
     wristSubsystem = wrist;
     intakeSubsystem = intake;
-
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        intakeSubsystem.setIntakeSpeed(0.1),
+                intakeSubsystem.setIntakeSpeed(0.1),
                 new ParallelCommandGroup(
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_J)),
@@ -52,13 +52,12 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelCommandGroup(
+                new ParallelDeadlineGroup(
+                        intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_IN_SPEED),
-                new WaitCommand(1.0),
-                intakeSubsystem.setIntakeSpeed(0.3),
+                intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_K),
                 new ParallelCommandGroup(
@@ -70,13 +69,12 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelCommandGroup(
+                new ParallelDeadlineGroup(
+                        intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_IN_SPEED),
-                new WaitCommand(1.0),
-                intakeSubsystem.setIntakeSpeed(0.3),
+                intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_L),
                 new ParallelCommandGroup(

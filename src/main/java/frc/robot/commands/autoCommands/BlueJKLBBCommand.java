@@ -5,6 +5,7 @@
 package frc.robot.commands.autoCommands;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.TrajectoryConstants;
@@ -52,13 +53,12 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelCommandGroup(
+                new ParallelDeadlineGroup(
+                        intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_IN_SPEED),
-                new WaitCommand(1.0),
-                intakeSubsystem.setIntakeSpeed(0.3),
+                intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_K),
                 new ParallelCommandGroup(
@@ -70,13 +70,12 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelCommandGroup(
+                new ParallelDeadlineGroup(
+                        intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_IN_SPEED),
-                new WaitCommand(1.0),
-                intakeSubsystem.setIntakeSpeed(0.3),
+                intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_L),
                 new ParallelCommandGroup(

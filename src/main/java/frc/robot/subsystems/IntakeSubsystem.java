@@ -14,6 +14,7 @@ import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,12 +24,14 @@ public class IntakeSubsystem extends SubsystemBase {
   private TalonFX intakeMotor;
   private TalonFXConfiguration intakeMotorConfig;
   private TimeOfFlight intakeSensor;
+  private TimeOfFlight intakeAutoSensor;
   private MedianFilter intakeFilter;
 
   public static class IntakeConstants {
 
     private static final int INTAKE_MOTOR_ID = 40;
     private static final int INTAKE_TOF_ID = 1;
+    private static final int INTAKE_AUTO_TOF_ID = 24;
 
     private static final int INTAKE_CURRENT_LIMIT = 200;
 
@@ -54,6 +57,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // Identifies the motor object 
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
+    intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
     intakeFilter = new MedianFilter(5);
 
     RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
@@ -79,6 +83,9 @@ public class IntakeSubsystem extends SubsystemBase {
   }
  /** In Millimeters */
   public double getTOFDistance() {
+    if (DriverStation.isAutonomous()) {
+      return intakeFilter.calculate(intakeAutoSensor.getRange());
+    }
     return intakeFilter.calculate(intakeSensor.getRange());
   }
 

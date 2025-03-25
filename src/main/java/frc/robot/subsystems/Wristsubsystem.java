@@ -6,13 +6,16 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.revrobotics.AbsoluteEncoder;
 //Imports
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
@@ -66,11 +69,13 @@ public class WristSubsystem extends SubsystemBase {
     public static final Angle WRIST_STARTING_CONFIG = Degrees.of(269.3);
   }
 
-  private SparkFlex wristMotor;// Motor Objet
-  private SparkClosedLoopController wristPIDController;// Object for the motor's PID
-  private RelativeEncoder wristEncoder; // Motor Encoder Object
+  private final SparkFlex wristMotor;// Motor Objet
+  private final SparkClosedLoopController wristPIDController;// Object for the motor's PID
+  private final RelativeEncoder wristEncoder; // Motor Encoder Object
+  private final AbsoluteEncoder wristAbsoluteEncoder; // Motor Encoder Object
 
   private final SparkFlexConfig wristMotorConfig;// Configurator Object
+  private final AbsoluteEncoderConfig wristAbsoluteConfig;
 
   public double setAngle;
 
@@ -82,6 +87,8 @@ public class WristSubsystem extends SubsystemBase {
     wristMotor = new SparkFlex(WristConstants.WRIST_CAN_ID, MotorType.kBrushless);
 
     wristEncoder = wristMotor.getEncoder();
+    wristAbsoluteEncoder = wristMotor.getAbsoluteEncoder();
+    wristAbsoluteConfig = new AbsoluteEncoderConfig();
 
     // Create the config
     wristMotorConfig = new SparkFlexConfig();
