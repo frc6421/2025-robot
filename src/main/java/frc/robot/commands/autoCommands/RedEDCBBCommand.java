@@ -39,8 +39,9 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_E),
+        new WaitCommand(0.2),
         new ParallelCommandGroup(
-            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_E),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
@@ -56,8 +57,9 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
             driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_CENTER),
             intakeSubsystem.intakeCoral()),
 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_D),
+        new WaitCommand(0.2),
         new ParallelCommandGroup(
-            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_D),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
@@ -73,8 +75,9 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
             driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_CENTER),
             intakeSubsystem.intakeCoral()),
 
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_C),
+        new WaitCommand(0.2),
         new ParallelCommandGroup(
-            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_C),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),

@@ -47,7 +47,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
 				new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
         // wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude())),
 		intakeSubsystem.setIntakeSpeed(0.3),
-    new WaitCommand(0.1),
+    new WaitCommand(0.2),
     intakeSubsystem.stopIntake(),
     intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.1),

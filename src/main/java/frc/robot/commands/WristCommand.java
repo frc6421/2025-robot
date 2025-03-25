@@ -19,8 +19,8 @@ public class WristCommand extends Command {
   private final double WRIST_KG = 0.4;
   private final double WRIST_KS = 0.1;
   public static final double WRIST_KV = 0.1;//In Volts per radians per second
-  private final double WRIST_MAX_VELOCITY = 2400;//In rad/sec
-  private final double WRIST_MAX_ACCELERATION = 6000;//In rad/sec^2
+  private final double WRIST_MAX_VELOCITY = 300;//In rad/sec
+  private final double WRIST_MAX_ACCELERATION = 750;//In rad/sec^2
 
   private final WristSubsystem wrist;//Empty Wrist Object
   private Timer timer = new Timer();//Set up the timer 

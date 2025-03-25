@@ -23,10 +23,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.AlgaeRemovalCommand;
-import frc.robot.commands.ClimbCommand;
+import frc.robot.commands.ClimbInCommand;
+import frc.robot.commands.ClimbOutCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreFinishCommand;
@@ -73,9 +75,9 @@ public class RobotContainer {
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 	private final WristSubsystem wristSubsystem = new WristSubsystem();
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
-	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
+	// private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
+	// private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -101,6 +103,9 @@ public class RobotContainer {
 	private final WristCommand wristIntakeCommand;
 	private final WristCommand wristScore4Command;
 	private final WristCommand wristClimbCommand;
+	private final WristCommand wristResetCommand;
+	private final ClimbOutCommand climbOutCommand;
+	private final ClimbInCommand climbInCommand;
 	private final AlgaeRemovalCommand algaeRemovalCommand;
 	private final ResetAlgaeCommand resetAlgaeCommand;
 	private final ScorePrepCommand scorePrepCommand;
@@ -122,10 +127,13 @@ public class RobotContainer {
 		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
 		wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());
 		wristClimbCommand = new WristCommand(wristSubsystem, 150);
+		wristResetCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_STARTING_CONFIG.magnitude());
 		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
 		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+		climbOutCommand = new ClimbOutCommand(climbSubsystem);
+		climbInCommand = new ClimbInCommand(climbSubsystem);
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -240,6 +248,8 @@ public class RobotContainer {
 
 		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
+		joystick.povUp().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristUp()));
+		joystick.povDown().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristDown()));
 
 		joystick.a().whileTrue(algaeRemovalCommand);
 		joystick.a().onFalse(resetAlgaeCommand);
@@ -247,8 +257,8 @@ public class RobotContainer {
 		//joystick.x().onTrue(climbCommand);
 
 				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-				joystick.x().whileTrue(climbSubsystem.climbOut());
-				joystick.y().whileTrue(climbSubsystem.climbIn());
+				joystick.x().onTrue(climbOutCommand);
+				joystick.y().onTrue(climbInCommand);
 				//joystick.x().whileTrue(climbSubsystem.climbIn());
 
 		if (!DriverStation.isFMSAttached()) {
@@ -257,6 +267,7 @@ public class RobotContainer {
 			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
 			testJoystick.x().onTrue(wristScoreCommand);
 			testJoystick.y().onTrue(wristIntakeCommand);
+			testJoystick.a().onTrue(wristResetCommand);
 		}
 
 

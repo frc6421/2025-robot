@@ -39,8 +39,9 @@ public class RedHRBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_H),
+        new WaitCommand(0.5),
         new ParallelCommandGroup(
-            driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_H),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),

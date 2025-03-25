@@ -40,9 +40,9 @@ public class IntakeSubsystem extends SubsystemBase {
     // Reliable speed for grabbing the pieces
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
-    public static final double INTAKE_OUT_SPEED = -0.6; 
+    public static final double INTAKE_OUT_SPEED = -0.4; 
 
-    public static final double CORAL_DISTANCE = 45.0;
+    public static final double CORAL_DISTANCE = 60.0;
 
     private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
     .withNeutralMode(NeutralModeValue.Coast)

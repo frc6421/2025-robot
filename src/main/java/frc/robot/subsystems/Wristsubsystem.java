@@ -58,11 +58,12 @@ public class WristSubsystem extends SubsystemBase {
     private static final double POSITION_MIN_OUTPUT = -1;
     
 
-    public static final Angle WRIST_SCORE_POSITION = Degrees.of(210); // L2 & L3
-    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(210); 
+    public static final Angle WRIST_SCORE_POSITION = Degrees.of(212); // L2 & L3
+    public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(217); 
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(180);
-    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(20);
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(25);
     public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
+    public static final Angle WRIST_STARTING_CONFIG = Degrees.of(269.3);
   }
 
   private SparkFlex wristMotor;// Motor Objet
@@ -73,7 +74,7 @@ public class WristSubsystem extends SubsystemBase {
 
   public double setAngle;
 
-  public double targetWristAngle = WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude();
+  public double targetWristAngle = WristConstants.WRIST_STARTING_CONFIG.magnitude();
 
   /** Creates a new Wristsubsystem. */
   public WristSubsystem() {
@@ -119,7 +120,7 @@ public class WristSubsystem extends SubsystemBase {
     wristMotor.configure(wristMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kNoPersistParameters);
 
-    wristEncoder.setPosition(WristConstants.WRIST_REVERSE_SOFT_LIMIT.magnitude());
+    wristEncoder.setPosition(WristConstants.WRIST_STARTING_CONFIG.magnitude());
 
     SmartDashboard.putData("Wrist" , this);
   }
@@ -136,6 +137,14 @@ public class WristSubsystem extends SubsystemBase {
     // double angleError = 2;
     return this.runOnce(() -> wristPIDController.setReference(angle, SparkBase.ControlType.kPosition));
     // .until(() -> Math.abs(getWristEncoderPosition() - (angle)) < angleError);
+  }
+
+  public void nudgeWristUp() {
+    wristPIDController.setReference(getWristEncoderPosition() + 3.0, SparkBase.ControlType.kPosition);
+  }
+
+  public void nudgeWristDown() {
+    wristPIDController.setReference(getWristEncoderPosition() - 3.0, SparkBase.ControlType.kPosition);
   }
 
   /**
