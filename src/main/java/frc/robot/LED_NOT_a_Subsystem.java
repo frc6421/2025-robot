@@ -18,11 +18,13 @@ import java.util.Random;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
@@ -34,6 +36,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
     VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36},
     SEA_BLUE = {0,80,255}, FOAM_WHITE = {190,220,255}, SKY_BLUE = {150,150,255},
+    GYRO_GREEN = {25,255,25},
     OFF = {0,0,0},
     VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0};
     public static enum LED_MODES{
@@ -80,22 +83,44 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     //Starting the LEDs
     led.start();
   }
-/* 
-  Command LEDScore(){
-    return runOnce(setLED(LEDConstants.WHITE));
-  }*/
+
+  Command gyroReset(){
+    setLED(LEDConstants.GYRO_GREEN);
+    return run(() -> flicker());
+  }
   /**
-   * @breif   Sets the LEDS to a specific color
+   * Sets the LED's to the Score color, White, for coral
+   */
+   Command LEDScore(){
+    return runOnce(() -> setLED(LEDConstants.WHITE));
+  }
+  /**
+   * Sets the LED's to track the elevators position
+   * @param  elevatorTarget The target of the elevator, given from the chooser
+   * @param  elevator  The elevator subsystem object, given in the RobotContainer
+   */
+  Command elevatorLEDPosition(double elevatorTarget, ElevatorSubsystem elevator){
+    return run(() -> setElevatorLEDPosition(elevatorTarget, elevator.getElevatorRotations()));
+  }
+
+  /**
+   * Turns the LEDs off
+   */
+  Command off(){
+    return runOnce(() -> setLED(LEDConstants.OFF));
+  }
+  /**
+   * Sets the LEDS to a specific color
    * @param color  The color to set to. 
    */
-  public void setLED(int color[]){
+  public static void setLED(int color[]){
     //Creates a solid LED patern with the color given by the array, and applies it to the buffer
     LEDPattern.solid(new Color(color[0],color[1],color[2])).applyTo(ledBuffer); 
     led.setData(ledBuffer);
     patternColor = color;
   }
   /**
-   * @breif  Mixes colors together. Useful if several things happen at once, but only one LED strip
+   * Mixes colors together. Useful if several things happen at once, but only one LED strip
    * @param newColor  The color to add.
    */
   public static void addLED(int newColor[]){
@@ -105,7 +130,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     }
   }
   /**
-   * @breif  Mixes colors together. Useful if several things happen at once, but only one LED strip
+   * Mixes colors together. Useful if several things happen at once, but only one LED strip
    * @param newColor  The color to subtract.
    */
   public static void subtractLED(int newColor[]){
@@ -116,7 +141,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   }
 
   /**
-   * @breif   Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
+   * Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
    * This should be called in periodic, more realistically while disabled, since it can take away from the 
    * Rio processing.
    * @param mode  The LED mode to set to
@@ -257,7 +282,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   }
 
   /**
-   * @breif  Flickers the LED's every few robot cycles
+   * Flickers the LED's every few robot cycles
    */
   public static void flicker(){
     if(currentRobotCycle == flickerDelay){
@@ -274,7 +299,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     flickerDelay = delay;
   }
   /**
-   * @breif   Takes in the current position of the Elevator and uses it to display where the elevator will be going
+   * Takes in the current position of the Elevator and uses it to display where the elevator will be going
    * @param elevatorTarget  The Distance object of the Elevator position
    * @param currentElevatorHeight  The current height of the elevator, given in inches
    */
@@ -312,20 +337,12 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     led.setData(ledBuffer);//Update the strip
   }
 
-  /**
-   * @breif   Turns the LEDs off
-   */
-  public static void off(){
-    LEDPattern.solid(Color.kBlack).applyTo(ledBuffer);
-    led.setData(ledBuffer);
-  }
-
   public static LED_MODES getDisabledPattern(){
     return selectedDisabledPattern;
   }
 
   /**
-   * @breif  Sets the various things when the robot is disabled. Sets the pattern and colors to random
+   * Sets the various things when the robot is disabled. Sets the pattern and colors to random
    * each disabled period
    */
   public static void setDisabledPattern(){
@@ -349,7 +366,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     LED_NOT_a_Subsystem.setLED(selectedDisabledPattern);
   }
   /**
-   * @breif  Resets the length of the LED strip to the normal length. This should only be used after periodic
+   * Resets the length of the LED strip to the normal length. This should only be used after periodic
    */
   public static void resetLength(){ 
     ledBuffer = new AddressableLEDBuffer(LEDConstants.NUMBER_OF_LEDS); 

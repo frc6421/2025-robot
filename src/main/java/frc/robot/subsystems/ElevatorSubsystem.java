@@ -205,7 +205,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    * 
    * @param rotations - the motor you want rotations of
    */
-  private double getElevatorRotations() {
+  public double getElevatorRotations() {
     return elevatorLeftMotor.getPosition().refresh().getValue().magnitude();
   }
   /**

@@ -29,10 +29,6 @@ public class WristSubsystem extends SubsystemBase {
   public static class WristConstants {
 
     public static final int WRIST_CAN_ID = 30;
-<<<<<<< HEAD
-=======
-
->>>>>>> main
     // The Wrist Motor Current Limit
     private static final int WRIST_CURRENT_LIMIT = 80;
 

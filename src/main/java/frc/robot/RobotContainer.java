@@ -53,6 +53,8 @@ import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
 
+import frc.robot.LED_NOT_a_Subsystem;
+
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
 	private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
@@ -111,6 +113,8 @@ public class RobotContainer {
 	private final ScorePrepCommand scorePrepCommand;
 	private final ScoreFinishCommand scoreFinishCommand;
 
+	private final LED_NOT_a_Subsystem leds = new LED_NOT_a_Subsystem();
+
 	Optional<Alliance> alliance = DriverStation.getAlliance();
 
 	public RobotContainer() {
@@ -123,23 +127,17 @@ public class RobotContainer {
 
 		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-<<<<<<< HEAD
-=======
 		wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
 		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
 		wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());
 		wristClimbCommand = new WristCommand(wristSubsystem, 150);
 		wristResetCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_STARTING_CONFIG.magnitude());
->>>>>>> main
 		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
 		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-<<<<<<< HEAD
-=======
 		climbOutCommand = new ClimbOutCommand(climbSubsystem);
 		climbInCommand = new ClimbInCommand(climbSubsystem);
->>>>>>> main
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -242,42 +240,18 @@ public class RobotContainer {
 		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 		joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
-		joystick.rightBumper().whileTrue(scorePrepCommand);
-		joystick.rightTrigger().onTrue(scoreFinishCommand);
+		joystick.rightBumper().whileTrue(scorePrepCommand.andThen(leds.LEDScore()));
+		joystick.rightTrigger().onTrue(scoreFinishCommand
+			.andThen(leds.off())
+			.andThen(leds.elevatorLEDPosition(elevatorPositionChooser.getSelected().doubleValue(), elevatorSubsystem)));
 		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-		joystick.b().onTrue(drivetrain.resetGyro());
+		joystick.b().onTrue(drivetrain.resetGyro().andThen(leds.gyroReset()));
 
 		// Manual Overrides
 		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
 		// joystick.back().whileTrue(wristSubsystem.resetWrist());
 
-<<<<<<< HEAD
-			joystick.rightBumper().whileTrue(scorePrepCommand);
-			joystick.rightTrigger().onTrue(scoreFinishCommand);
-			//joystick.rightTrigger().onTrue(scoreSequenceCommand);
-
-			joystick.b().onTrue(drivetrain.resetGyro());
-
-			// Manual Overrides
-			joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
-			joystick.back().whileTrue(wristSubsystem.resetWrist());
-
-			joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
-			joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
-
-			joystick.a().whileTrue(algaeRemovalCommand);
-			joystick.a().onFalse(resetAlgaeCommand);
-
-			//joystick.x().onTrue(climbCommand);
-
-			//joystick.y().whileTrue(climbSubsystem.climbOut()); 
-			joystick.y().whileTrue(climbSubsystem.setVoltageCommand(2));
-			joystick.y().onFalse(climbSubsystem.setVoltageCommand(0));
-			joystick.x().whileTrue(climbSubsystem.climbIn());
-			//joystick.x().whileTrue(climbSubsystem.climbIn());
-			joystick.povUp().onTrue(wristSubsystem.setAngle(150));
-=======
 		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
 		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
 		joystick.povUp().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristUp()));
@@ -292,24 +266,14 @@ public class RobotContainer {
 				joystick.x().onTrue(climbOutCommand);
 				joystick.y().onTrue(climbInCommand);
 				//joystick.x().whileTrue(climbSubsystem.climbIn());
->>>>>>> main
 
 		if (!DriverStation.isFMSAttached()) {
 			testJoystick = new CommandXboxController(3);
 			testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
-<<<<<<< HEAD
-			testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
-			// testJoystick.x().onFalse(wristSubsystem.stopWrist());
-			testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
-			// testJoystick.y().onFalse(wristSubsystem.stopWrist());
-			testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
-			testJoystick.a().onFalse(wristSubsystem.stopWrist());
-=======
 			testJoystick.x().onTrue(wristScoreCommand);
 			testJoystick.y().onTrue(wristIntakeCommand);
 			testJoystick.a().onTrue(wristResetCommand);
->>>>>>> main
 		}
 
 

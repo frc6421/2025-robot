@@ -14,7 +14,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  private final LED_NOT_a_Subsystem leds = new LED_NOT_a_Subsystem();
 
   public Robot() {
     m_robotContainer = new RobotContainer();
