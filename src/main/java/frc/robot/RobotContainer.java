@@ -23,15 +23,18 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.AlgaeRemovalCommand;
-import frc.robot.commands.ClimbCommand;
+import frc.robot.commands.ClimbInCommand;
+import frc.robot.commands.ClimbOutCommand;
 import frc.robot.commands.IntakeSequenceCommand;
 import frc.robot.commands.ResetAlgaeCommand;
 import frc.robot.commands.ScoreFinishCommand;
 import frc.robot.commands.ScorePrepCommand;
 import frc.robot.commands.ScoreSequenceCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.commands.autoCommands.BlueEDCRBCommand;
 import frc.robot.commands.autoCommands.BlueGRBCommand;
 import frc.robot.commands.autoCommands.BlueJKLBBCommand;
@@ -72,9 +75,9 @@ public class RobotContainer {
 	private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 	private final WristSubsystem wristSubsystem = new WristSubsystem();
 	private final ClimbPivotSubsystem climbSubsystem = new ClimbPivotSubsystem();
-	private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
+	// private final CageIntakeSubsystem cageIntakeSubsystem = new CageIntakeSubsystem();
 
-	private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
+	// private final ClimbCommand climbCommand = new ClimbCommand(climbSubsystem, cageIntakeSubsystem, wristSubsystem);
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
@@ -88,7 +91,6 @@ public class RobotContainer {
 	private final BlueGRBCommand blueGRB;	
 
 	private SendableChooser<Command> redAutoChooser;
-	// private SendableChooser<Command> blueAutoChooser;
     private SendableChooser<Pose2d> redPositionChooser;
     private SendableChooser<Pose2d> bluePositionChooser;
     private SendableChooser<Pose2d> redSourceChooser;
@@ -97,6 +99,13 @@ public class RobotContainer {
 
 	private final ScoreSequenceCommand scoreSequenceCommand;
 	private final IntakeSequenceCommand intakeSequenceCommand;
+	private final WristCommand wristScoreCommand;
+	private final WristCommand wristIntakeCommand;
+	private final WristCommand wristScore4Command;
+	private final WristCommand wristClimbCommand;
+	private final WristCommand wristResetCommand;
+	private final ClimbOutCommand climbOutCommand;
+	private final ClimbInCommand climbInCommand;
 	private final AlgaeRemovalCommand algaeRemovalCommand;
 	private final ResetAlgaeCommand resetAlgaeCommand;
 	private final ScorePrepCommand scorePrepCommand;
@@ -114,10 +123,23 @@ public class RobotContainer {
 
 		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+<<<<<<< HEAD
+=======
+		wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
+		wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());
+		wristClimbCommand = new WristCommand(wristSubsystem, 150);
+		wristResetCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_STARTING_CONFIG.magnitude());
+>>>>>>> main
 		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
 		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
 		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
+<<<<<<< HEAD
+=======
+		climbOutCommand = new ClimbOutCommand(climbSubsystem);
+		climbInCommand = new ClimbInCommand(climbSubsystem);
+>>>>>>> main
 
 
 		testAuto = new TestAutoCommand(drivetrain);
@@ -206,23 +228,31 @@ public class RobotContainer {
 		// Note that X is defined as forward according to WPILib convention,
 		// and Y is defined as to the left according to WPILib convention.
 		drivetrain.setDefaultCommand(
-				// Drivetrain will execute this command periodically
-				drivetrain.applyRequest(() -> drive
-						// Drive forward with negative Y (forward)
-						.withVelocityX(xDriveSlew.calculate(-joystick.getLeftY() * MaxSpeed))
-						// Drive left with negative X (left)
-						.withVelocityY(yDriveSlew.calculate(-joystick.getLeftX() * MaxSpeed))
-						// Drive counterclockwise with negative X (left)
-						.withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+			// Drivetrain will execute this command periodically
+			drivetrain.applyRequest(() -> drive
+					// Drive forward with negative Y (forward)
+					.withVelocityX(xDriveSlew.calculate(-joystick.getLeftY() * MaxSpeed))
+					// Drive left with negative X (left)
+					.withVelocityY(yDriveSlew.calculate(-joystick.getLeftX() * MaxSpeed))
+					// Drive counterclockwise with negative X (left)
+					.withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
 
 
+		//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
+		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
+		joystick.leftTrigger().onTrue(intakeSequenceCommand);
 
+		joystick.rightBumper().whileTrue(scorePrepCommand);
+		joystick.rightTrigger().onTrue(scoreFinishCommand);
+		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
+		joystick.b().onTrue(drivetrain.resetGyro());
 
-			//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
-		  	joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
-			joystick.leftTrigger().onTrue(intakeSequenceCommand);
+		// Manual Overrides
+		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
+		// joystick.back().whileTrue(wristSubsystem.resetWrist());
 
+<<<<<<< HEAD
 			joystick.rightBumper().whileTrue(scorePrepCommand);
 			joystick.rightTrigger().onTrue(scoreFinishCommand);
 			//joystick.rightTrigger().onTrue(scoreSequenceCommand);
@@ -247,17 +277,39 @@ public class RobotContainer {
 			joystick.x().whileTrue(climbSubsystem.climbIn());
 			//joystick.x().whileTrue(climbSubsystem.climbIn());
 			joystick.povUp().onTrue(wristSubsystem.setAngle(150));
+=======
+		joystick.povLeft().onTrue(drivetrain.nudgeCommand(-1));
+		joystick.povRight().onTrue(drivetrain.nudgeCommand(1));
+		joystick.povUp().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristUp()));
+		joystick.povDown().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristDown()));
+
+		joystick.a().whileTrue(algaeRemovalCommand);
+		joystick.a().onFalse(resetAlgaeCommand);
+
+		//joystick.x().onTrue(climbCommand);
+
+				//joystick.y().whileTrue(climbSubsystem.climbOut()); 
+				joystick.x().onTrue(climbOutCommand);
+				joystick.y().onTrue(climbInCommand);
+				//joystick.x().whileTrue(climbSubsystem.climbIn());
+>>>>>>> main
 
 		if (!DriverStation.isFMSAttached()) {
 			testJoystick = new CommandXboxController(3);
 			testJoystick.leftTrigger().onTrue(intakeSequenceCommand);
 			testJoystick.rightTrigger().onTrue(scoreSequenceCommand);
+<<<<<<< HEAD
 			testJoystick.x().onTrue(wristSubsystem.setAngle(WristConstants.WRIST_SCORE_POSITION.magnitude()));
 			// testJoystick.x().onFalse(wristSubsystem.stopWrist());
 			testJoystick.y().whileTrue(wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()));
 			// testJoystick.y().onFalse(wristSubsystem.stopWrist());
 			testJoystick.a().whileTrue(wristSubsystem.setWristVoltage(-0.3));
 			testJoystick.a().onFalse(wristSubsystem.stopWrist());
+=======
+			testJoystick.x().onTrue(wristScoreCommand);
+			testJoystick.y().onTrue(wristIntakeCommand);
+			testJoystick.a().onTrue(wristResetCommand);
+>>>>>>> main
 		}
 
 
@@ -269,7 +321,7 @@ public class RobotContainer {
 	}
 
     public Pose2d getSelectedPoseCommand() {
-			alliance = DriverStation.getAlliance();
+		alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
 				System.out.println("red pos");
@@ -285,7 +337,7 @@ public class RobotContainer {
     }
 
     public Pose2d getSelectedSource() {
-			alliance = DriverStation.getAlliance();
+		alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			if (alliance.get() == Alliance.Red) {
 				System.out.println("red source");
@@ -315,5 +367,6 @@ public class RobotContainer {
 			DataLogManager.log("Erorr:" + motor.getDescription() + " Configuration not applied " + status.toString());
 		}
 	}
+
 
 }

@@ -62,15 +62,15 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withStatorCurrentLimitEnable(true)
         .withSupplyCurrentLimitEnable(true);
 
-    // soft limits
+    //Soft limits
     /** In rotations */
     public static final double PIVOT_FORWARD_SOFT_LIMIT = 10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
     public static final double PIVOT_REVERSE_SOFT_LIMIT = -10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
-
-    public static final double PIVOT_OUT_POSITION = 105 / CLIMB_DEGREES_PER_MOTOR_ROTATION;
-
-    public static final double PIVOT_IN_POSITION = -500;
+    /** In rotations */
+    public static final double PIVOT_OUT_POSITION = -607.0; //here
+    /** In rotations */
+    public static final double PIVOT_IN_POSITION = -500.0;
 
     private static final SoftwareLimitSwitchConfigs PIVOT_SOFT_LIMIT_CONFIGS = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitThreshold(ClimbPivotConstants.PIVOT_FORWARD_SOFT_LIMIT)
@@ -146,12 +146,17 @@ public class ClimbPivotSubsystem extends SubsystemBase {
           rightPivotMotor.setControl(voltageRequest.withOutput(voltage));
           leftPivotMotor.setControl(voltageRequest.withOutput(voltage));
     }
-  );
+  );//.finallyDo(() -> stopPivotMotors());
 }
 
-  public Command stopPivotMotors() {
-    return this.runOnce(() -> leftPivotMotor.stopMotor())
-        .alongWith(this.runOnce(() -> rightPivotMotor.stopMotor()));
+  public void setVoltage(double voltage) {
+    rightPivotMotor.setControl(voltageRequest.withOutput(voltage));
+    leftPivotMotor.setControl(voltageRequest.withOutput(voltage));
+  }
+
+  public void stopPivotMotors() {
+     leftPivotMotor.stopMotor();
+    rightPivotMotor.stopMotor();
   }
 
   /**
@@ -196,19 +201,21 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   }
 
   public Command climbOut() {
-    return run(() -> setVoltageCommand(3))
-    .until(() -> isOutPosition())
-    .finallyDo(() -> setVoltageCommand(0));
+    return setVoltageCommand(1)
+     .until(() -> isOutPosition())
+     .andThen(() -> stopPivotMotors());
   }
 
   public Command climbIn() {
-    return setVoltageCommand(11)
+    return setVoltageCommand(1)
     .until(() -> isLimit())
-    .andThen(setVoltageCommand(0));
+    .andThen(() -> stopPivotMotors());
     }
 
   @Override
   public void initSendable(SendableBuilder builder) {
+
+    super.initSendable(builder);
     builder.addDoubleProperty("Left Pivot Angle", () -> getPivotAngle(leftPivotMotor), null);
     builder.addDoubleProperty("Right Pivot Angle", () -> getPivotAngle(rightPivotMotor), null);
     builder.addDoubleProperty("Left Motor Rotations", () -> leftPivotMotor.getPosition().getValueAsDouble(), null);
@@ -216,6 +223,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Left Pivot Current", () -> leftPivotMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("Right Pivot Current", () -> rightPivotMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addBooleanProperty("Limit Switch", () -> isLimit(), null);
-    builder.addBooleanProperty("Is Climber Out", () -> isClimberOut, null);
+    builder.addBooleanProperty("Is Climber Out", () -> isOutPosition(), null);
+
   }
 }

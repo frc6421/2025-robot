@@ -19,6 +19,8 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
   private ElevatorSubsystem elevatorSubsystem;
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
+
+  private final WristCommand wristIntakeCommand;
   
   public IntakeSequenceCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
 
@@ -26,11 +28,13 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
     wristSubsystem = wrist;
     intakeSubsystem = intake;
 
+    wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());	
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH), 
-			wristSubsystem.setAngle(WristConstants.WRIST_INTAKE_POSITION.magnitude()), 
+			wristIntakeCommand, 
 			intakeSubsystem.intakeCoral(),
       intakeSubsystem.setIntakeSpeed(0.2), 
       new WaitCommand(0.3),

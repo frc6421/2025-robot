@@ -66,9 +66,12 @@ public class WarriorCamera implements Sendable {
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
     private final static double APRILTAG_LIMIT_METERS = 3.2;
-    private final static double MAXIMUM_AMBIGUITY = 100;
+    private final static double MAXIMUM_AMBIGUITY = 100.0;
+    private final static int[] BLACKLISTED_TAG_ID_LIST = {0,0,0};
+
     private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10));
     private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10));
+
     public static final Transform2d ODOMETRY_BLUE_OFFSET = new Transform2d(Inches.of(0.0).magnitude(),
         Inches.of(0.0).magnitude(), new Rotation2d());
     public static final Transform2d ODOMETRY_RED_OFFSET = new Transform2d(Inches.of(0.0).magnitude(),
@@ -113,6 +116,20 @@ public class WarriorCamera implements Sendable {
     return latestCameraResult.hasTargets();
   }
 
+//   public boolean isAmbiguousTags() {
+//     boolean containsAmbiguous = false;
+//     if (latestCameraResult.hasTargets()) {
+//     for(int c = 0; c < latestCameraResult.getTargets().size(); c++) {
+//       for(int i = 0; i < CameraConstants.BLACKLISTED_TAG_ID_LIST.length; i++) {
+//         if (latestCameraResult.getTargets().get(c).fiducialId == CameraConstants.BLACKLISTED_TAG_ID_LIST[i]) {
+//           containsAmbiguous = true;
+//         }
+//   };
+// }
+// }
+// return containsAmbiguous;
+// }
+
   private Distance getCameraDistance(Translation2d targetTranslation) {
     if (cameraEstimatedPose.isPresent()) {
       return Meters.of(
@@ -142,6 +159,13 @@ public class WarriorCamera implements Sendable {
   public int getBestTagId() {
     return latestCameraResult.getBestTarget().fiducialId;
   }
+
+  public double getAmbiguity() {
+    if (latestCameraResult.hasTargets()) {
+    return latestCameraResult.getBestTarget().poseAmbiguity;
+  }
+  return 1.0;
+}
 
   public double getPitch() {
     return latestCameraResult.getBestTarget().getPitch();
@@ -209,5 +233,6 @@ public class WarriorCamera implements Sendable {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType(camera.getName());
     builder.addBooleanProperty(camera.getName() + " has target?", () -> latestCameraResult.hasTargets(), null);
+    builder.addDoubleProperty(camera.getName() + " Ambiguity", () -> getAmbiguity(), null);
   }
 }

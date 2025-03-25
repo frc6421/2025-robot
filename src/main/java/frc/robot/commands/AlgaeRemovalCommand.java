@@ -22,6 +22,8 @@ public class AlgaeRemovalCommand extends SequentialCommandGroup {
   private ElevatorSubsystem elevatorSubsystem;
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
+
+  private final WristCommand wristAlgaeCommand;
   
   public AlgaeRemovalCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake, DoubleSupplier position) {
 
@@ -29,12 +31,15 @@ public class AlgaeRemovalCommand extends SequentialCommandGroup {
     wristSubsystem = wrist;
     intakeSubsystem = intake;
 
+    wristAlgaeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_ALGAE_POSITION.magnitude());	
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
     new ParallelCommandGroup(
 				elevatorSubsystem.setElevatorPositionCommand(position),
-				intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), wristSubsystem.setAngle(WristConstants.WRIST_ALGAE_POSITION.magnitude()))
+				intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), 
+        wristAlgaeCommand)
     );
   }
 }
