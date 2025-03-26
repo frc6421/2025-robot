@@ -7,6 +7,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.LED_NOT_a_Subsystem;
+import frc.robot.LED_NOT_a_Subsystem.LEDConstants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -26,7 +28,7 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
 
   private final WristCommand wristIntakeCommand;
 
-  public ScoreFinishCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
+  public ScoreFinishCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake, LED_NOT_a_Subsystem led) {
 
     elevatorSubsystem = elevator;
     wristSubsystem = wrist;
@@ -41,10 +43,12 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
     new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
     intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+    led.setLED(LEDConstants.BLUE, true),
 		new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
 			wristIntakeCommand,
-			elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))));
+			elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))),
+    led.off());
   }
 }

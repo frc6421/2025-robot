@@ -90,31 +90,49 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   /**
    * LED Pattern when the Gyro is reset
    */
-  Command gyroReset(){
+  public Command gyroReset(){
     setLED(LEDConstants.GYRO_GREEN);
     return run(()->flicker(4)).deadlineFor(new WaitCommand(0.02)).andThen(off());
   }
+
   /**
    * Sets the LED's to the Score color, White, for coral
    */
-  Command LEDScore(){
+  public Command LEDScore(){
     return runOnce(() -> setLED(LEDConstants.WHITE));
   }
-
 
   /**
    * Sets the LED's to track the elevators position
    * @param  elevatorTarget The target of the elevator, given from the chooser
    * @param  elevator  The elevator subsystem object, given in the RobotContainer
    */
-  Command elevatorLEDPosition(double elevatorTarget, ElevatorSubsystem elevator){
+  public Command elevatorLEDPosition(double elevatorTarget, ElevatorSubsystem elevator){
     return run(() -> setElevatorLEDPosition(elevatorTarget, elevator.getElevatorRotations()));
+  }
+
+  /**
+   * Sets the LED's to a specific color, but now with new Command Flavor and spicy timeouts!!
+   * @param color  The color to set to
+   * @param command  The Command to wait until is finished
+   */
+  public Command setLED(int color[], Command command){
+    return runOnce(() -> setLED(color)).until(() -> command.isFinished());
+  }
+  /**
+   * Sets the LED's to a specific color, but now with new Command Flavor!
+   * @param color  The color to set to
+   * @param isACommand  A simple boolean that is used to select between the different setLED methods. Value does
+   * not matter at all.
+   */
+  public Command setLED(int color[], boolean isACommand){
+    return runOnce(() -> setLED(color));
   }
 
   /**
    * Turns the LEDs off
    */
-  Command off(){
+  public Command off(){
     return runOnce(() -> setLED(LEDConstants.OFF));
   }
 
@@ -128,23 +146,6 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     LEDPattern.solid(new Color(color[0],color[1],color[2])).applyTo(ledBuffer); 
     led.setData(ledBuffer);
     patternColor = color;
-  }
-  /**
-   * Sets the LED's to a specific color, but now with new Command Flavor and spicy timeouts!!
-   * @param color  The color to set to
-   * @param command  The Command to wait until is finished
-   */
-  Command setLED(int color[], Command command){
-    return runOnce(() -> setLED(color)).until(() -> command.isFinished());
-  }
-  /**
-   * Sets the LED's to a specific color, but now with new Command Flavor!
-   * @param color  The color to set to
-   * @param isACommand  A simple boolean that is used to select between the different setLED methods. Value does
-   * not matter at all.
-   */
-  Command setLED(int color[], boolean isACommand){
-    return runOnce(() -> setLED(color));
   }
   /**
    * Mixes colors together. Useful if several things happen at once, but only one LED strip
