@@ -6,9 +6,11 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
@@ -23,7 +25,8 @@ public class AlgaeRemovalCommand extends SequentialCommandGroup {
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
 
-  private final WristCommand wristAlgaeCommand;
+  private final WristCommand wristAlgae2Command;
+  private final WristCommand wristAlgae3Command;
   
   public AlgaeRemovalCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake, DoubleSupplier position) {
 
@@ -31,15 +34,16 @@ public class AlgaeRemovalCommand extends SequentialCommandGroup {
     wristSubsystem = wrist;
     intakeSubsystem = intake;
 
-    wristAlgaeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_ALGAE_POSITION.magnitude());	
+    wristAlgae2Command = new WristCommand(wristSubsystem, WristConstants.WRIST_ALGAE_POSITION.magnitude());	
+    wristAlgae3Command = new WristCommand(wristSubsystem, 16);
 
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
     new ParallelCommandGroup(
-				elevatorSubsystem.setElevatorPositionCommand(position),
+        new ConditionalCommand(elevatorSubsystem.setElevatorPositionCommand(() -> 39), elevatorSubsystem.setElevatorPositionCommand(() -> 58), () -> (position.getAsDouble() == ElevatorConstants.L2_POSITION.magnitude())),
 				intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED), 
-        wristAlgaeCommand)
+        new ConditionalCommand(wristAlgae3Command, wristAlgae2Command, () -> (position.getAsDouble() == ElevatorConstants.L3_POSITION.magnitude())))
     );
   }
 }
