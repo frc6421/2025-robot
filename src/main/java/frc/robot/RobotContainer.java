@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.AlgaeRemovalCommand;
@@ -54,6 +55,7 @@ import frc.robot.subsystems.IntakeSubsystem.IntakeConstants;
 import frc.robot.subsystems.WristSubsystem.WristConstants;
 
 import frc.robot.LED_NOT_a_Subsystem;
+import frc.robot.LED_NOT_a_Subsystem.LEDConstants;
 
 public class RobotContainer {
 	private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -238,15 +240,13 @@ public class RobotContainer {
 
 		//joystick.rightBumper().whileTrue(drivetrain.reefAlignCommand(() -> getSelectedPoseCommand()));
 		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
-		joystick.leftTrigger().onTrue(intakeSequenceCommand);
+		joystick.leftTrigger().onTrue(intakeSequenceCommand.alongWith(leds.setLED(LEDConstants.PINK, intakeSequenceCommand)));
 
-		joystick.rightBumper().whileTrue(scorePrepCommand.andThen(leds.LEDScore()));
-		joystick.rightTrigger().onTrue(scoreFinishCommand
-			.andThen(leds.off())
-			.andThen(leds.elevatorLEDPosition(elevatorPositionChooser.getSelected().doubleValue(), elevatorSubsystem)));
+		joystick.rightBumper().whileTrue(scorePrepCommand.alongWith(leds.elevatorLEDPosition(elevatorPositionChooser.getSelected().doubleValue(), elevatorSubsystem)));
+		joystick.rightTrigger().onTrue(scoreFinishCommand.alongWith(leds.off()));
 		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-		joystick.b().onTrue(drivetrain.resetGyro().andThen(leds.gyroReset()));
+		joystick.b().onTrue(drivetrain.resetGyro().alongWith(leds.gyroReset()));
 
 		// Manual Overrides
 		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());
@@ -257,8 +257,8 @@ public class RobotContainer {
 		joystick.povUp().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristUp()));
 		joystick.povDown().onTrue(new InstantCommand(() -> wristSubsystem.nudgeWristDown()));
 
-		joystick.a().whileTrue(algaeRemovalCommand);
-		joystick.a().onFalse(resetAlgaeCommand);
+		joystick.a().whileTrue(algaeRemovalCommand.alongWith(leds.setLED(LEDConstants.ALGAE_GREEN, true)));//We have fun here, don't we?
+		joystick.a().onFalse(resetAlgaeCommand.alongWith(leds.off()));
 
 		//joystick.x().onTrue(climbCommand);
 

@@ -22,9 +22,12 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
@@ -36,7 +39,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
     VISION_BLUE = {50,50,255}, ALLIANCE_BLUE = {0,102,179}, ALIANCE_RED = {237,28,36},
     SEA_BLUE = {0,80,255}, FOAM_WHITE = {190,220,255}, SKY_BLUE = {150,150,255},
-    GYRO_GREEN = {25,255,25},
+    GYRO_GREEN = {25,255,25}, ALGAE_GREEN = {80,255,100},
     OFF = {0,0,0},
     VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0};
     public static enum LED_MODES{
@@ -84,16 +87,21 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     led.start();
   }
 
+  /**
+   * LED Pattern when the Gyro is reset
+   */
   Command gyroReset(){
     setLED(LEDConstants.GYRO_GREEN);
-    return run(() -> flicker());
+    return run(()->flicker(4)).deadlineFor(new WaitCommand(0.02)).andThen(off());
   }
   /**
    * Sets the LED's to the Score color, White, for coral
    */
-   Command LEDScore(){
+  Command LEDScore(){
     return runOnce(() -> setLED(LEDConstants.WHITE));
   }
+
+
   /**
    * Sets the LED's to track the elevators position
    * @param  elevatorTarget The target of the elevator, given from the chooser
@@ -109,8 +117,10 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   Command off(){
     return runOnce(() -> setLED(LEDConstants.OFF));
   }
+
+
   /**
-   * Sets the LEDS to a specific color
+   * Sets the LED's to a specific color
    * @param color  The color to set to. 
    */
   public static void setLED(int color[]){
@@ -118,6 +128,23 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     LEDPattern.solid(new Color(color[0],color[1],color[2])).applyTo(ledBuffer); 
     led.setData(ledBuffer);
     patternColor = color;
+  }
+  /**
+   * Sets the LED's to a specific color, but now with new Command Flavor and spicy timeouts!!
+   * @param color  The color to set to
+   * @param command  The Command to wait until is finished
+   */
+  Command setLED(int color[], Command command){
+    return runOnce(() -> setLED(color)).until(() -> command.isFinished());
+  }
+  /**
+   * Sets the LED's to a specific color, but now with new Command Flavor!
+   * @param color  The color to set to
+   * @param isACommand  A simple boolean that is used to select between the different setLED methods. Value does
+   * not matter at all.
+   */
+  Command setLED(int color[], boolean isACommand){
+    return runOnce(() -> setLED(color));
   }
   /**
    * Mixes colors together. Useful if several things happen at once, but only one LED strip
@@ -295,8 +322,18 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       currentRobotCycle++;
     }
   }
+
   public static void flicker(int delay){
     flickerDelay = delay;
+    if(currentRobotCycle == flickerDelay){
+      LEDPattern.solid(new Color(patternColor[0], patternColor[1], patternColor[2])).applyTo(ledBuffer);
+      led.setData(ledBuffer);
+      currentRobotCycle = 0;
+    }else{
+      LEDPattern.solid(new Color(0,0,0)).applyTo(ledBuffer);
+      led.setData(ledBuffer);
+      currentRobotCycle++;
+    }
   }
   /**
    * Takes in the current position of the Elevator and uses it to display where the elevator will be going
