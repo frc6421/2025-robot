@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.LED_NOT_a_Subsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
@@ -34,7 +35,7 @@ public class ScorePrepCommand extends SequentialCommandGroup {
 	private final WristCommand wristScore4Command;
 
   public ScorePrepCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake,
-      CommandSwerveDrivetrain drive, DoubleSupplier position, Supplier<Pose2d> location) {
+      CommandSwerveDrivetrain drive, DoubleSupplier position, Supplier<Pose2d> location, LED_NOT_a_Subsystem led) {
 
     elevatorSubsystem = elevator;
     wristSubsystem = wrist;
@@ -51,7 +52,8 @@ public class ScorePrepCommand extends SequentialCommandGroup {
             drivetrain.reefAlignCommand(location),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(position),
-            new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
+            new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude())),
+            led.elevatorLEDPosition(position.getAsDouble(), elevatorSubsystem)),
         intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.2),
         intakeSubsystem.stopIntake());

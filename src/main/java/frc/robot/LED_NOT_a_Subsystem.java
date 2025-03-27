@@ -117,7 +117,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
    * @param command  The Command to wait until is finished
    */
   public Command setLED(int color[], Command command){
-    return runOnce(() -> setLED(color)).until(() -> command.isFinished());
+    return run(() -> setLED(color)).until(() -> command.isFinished());
   }
   /**
    * Sets the LED's to a specific color, but now with new Command Flavor!

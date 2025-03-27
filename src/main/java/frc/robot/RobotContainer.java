@@ -136,7 +136,7 @@ public class RobotContainer {
 		wristResetCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_STARTING_CONFIG.magnitude());
 		algaeRemovalCommand = new AlgaeRemovalCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		resetAlgaeCommand = new ResetAlgaeCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand());
+		scorePrepCommand = new ScorePrepCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, drivetrain, () -> getElevatorPosition(), () -> getSelectedPoseCommand(), leds);
 		scoreFinishCommand = new ScoreFinishCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, leds);
 		climbOutCommand = new ClimbOutCommand(climbSubsystem);
 		climbInCommand = new ClimbInCommand(climbSubsystem);
@@ -242,8 +242,8 @@ public class RobotContainer {
 		joystick.leftBumper().whileTrue(drivetrain.sourceAlignCommand(() -> getSelectedSource()));
 		joystick.leftTrigger().onTrue(intakeSequenceCommand.alongWith(leds.setLED(LEDConstants.PINK, intakeSequenceCommand)));
 
-		joystick.rightBumper().whileTrue(scorePrepCommand.alongWith(leds.elevatorLEDPosition(elevatorPositionChooser.getSelected().doubleValue(), elevatorSubsystem)));
-		joystick.rightTrigger().onTrue(scoreFinishCommand.alongWith(leds.off()));
+		joystick.rightBumper().whileTrue(scorePrepCommand);
+		joystick.rightTrigger().onTrue(scoreFinishCommand);
 		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
 		joystick.b().onTrue(drivetrain.resetGyro().alongWith(leds.gyroReset()));
