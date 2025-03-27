@@ -54,7 +54,7 @@ public class WristCommand extends Command {
   @Override
   public void initialize(){
     timer.reset();//Resets the Timer
-    wristInitial = new TrapezoidProfile.State(wrist.getWristEncoderPosition(),0);//Sets the inital Wrist Position
+    wristInitial = new TrapezoidProfile.State(wrist.getWristAbsoluteEncoderPosition(),0);//Sets the inital Wrist Position
     wristGoal = new TrapezoidProfile.State(goToPos, 0);//Sets the position
     timer.start();//Starts the timer
   }
@@ -73,7 +73,7 @@ public class WristCommand extends Command {
     //System.out.println(wristProfile.timeLeftUntil(goToPos));
 
     wrist.setAngle(wristNext.position, armFeedForward.calculateWithVelocities(
-      Math.toRadians(wrist.getWristEncoderPosition()), 
+      Math.toRadians(wrist.getWristAbsoluteEncoderPosition()), 
       Math.toRadians(wristCurrent.velocity), 
       Math.toRadians(wristNext.velocity))
       );//Setting the angle of the motor

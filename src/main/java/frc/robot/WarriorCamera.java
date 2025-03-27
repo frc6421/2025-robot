@@ -168,6 +168,8 @@ return containsAmbiguous;
   return 1.0;
 }
 
+  // public double get
+
   public double getPitch() {
     return latestCameraResult.getBestTarget().getPitch();
   }
