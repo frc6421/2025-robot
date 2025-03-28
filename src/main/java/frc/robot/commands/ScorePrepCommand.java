@@ -4,12 +4,14 @@
 
 package frc.robot.commands;
 
+import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -30,7 +32,8 @@ public class ScorePrepCommand extends SequentialCommandGroup {
   private IntakeSubsystem intakeSubsystem;
   private CommandSwerveDrivetrain drivetrain;
 
-  private final WristCommand wristScoreCommand;
+  private final WristCommand wristScore2Command;
+  private final WristCommand wristScore3Command;
 	private final WristCommand wristScore4Command;
 
   public ScorePrepCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake,
@@ -41,7 +44,8 @@ public class ScorePrepCommand extends SequentialCommandGroup {
     intakeSubsystem = intake;
     drivetrain = drive;
 
-    wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+    wristScore2Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_2.magnitude());
+    wristScore3Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_3.magnitude());
 		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());	
 
     // Add your commands in the addCommands() call, e.g.
@@ -51,7 +55,12 @@ public class ScorePrepCommand extends SequentialCommandGroup {
             drivetrain.reefAlignCommand(location),
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(position),
-            new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
+            //new ConditionalCommand(wristScore4Command, wristScore2Command, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))
+            new SelectCommand<>(Map.ofEntries(
+            Map.entry(ElevatorConstants.L1_POSITION, wristScore2Command),
+            Map.entry(ElevatorConstants.L2_POSITION, wristScore2Command), 
+            Map.entry(ElevatorConstants.L3_POSITION, wristScore3Command), 
+            Map.entry(ElevatorConstants.L4_POSITION, wristScore4Command)), () -> position.getAsDouble())),
         intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.2),
         intakeSubsystem.stopIntake());

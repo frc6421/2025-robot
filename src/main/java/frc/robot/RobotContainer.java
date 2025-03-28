@@ -123,7 +123,7 @@ public class RobotContainer {
 
 		scoreSequenceCommand = new ScoreSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem, () -> getElevatorPosition());
 		intakeSequenceCommand = new IntakeSequenceCommand(elevatorSubsystem, wristSubsystem, intakeSubsystem);
-		wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+		wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_2.magnitude());
 		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
 		wristIntakeCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude());
 		wristClimbCommand = new WristCommand(wristSubsystem, 150);

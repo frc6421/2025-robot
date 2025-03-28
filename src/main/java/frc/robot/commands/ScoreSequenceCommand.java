@@ -35,7 +35,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
     wristSubsystem = wrist;
     intakeSubsystem = intake;
 
-    wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION.magnitude());
+    wristScoreCommand = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_2.magnitude());
 		wristScore4Command = new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude());
 		
     // Add your commands in the addCommands() call, e.g.
