@@ -67,8 +67,9 @@ public class WarriorCamera implements Sendable {
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
     private final static double APRILTAG_LIMIT_METERS = 3.7;
+    private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.5;
     private final static double MAXIMUM_AMBIGUITY = 0.20;
-    private final static int[] BLACKLISTED_TAG_ID_LIST = {4,5};
+    private final static int[] BLACKLISTED_TAG_ID_LIST = {4,5,14,15};
 
     private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10));
     private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10));
@@ -223,6 +224,7 @@ return containsAmbiguous;
           .toTranslation2d();
 
       if (cameraTranslation2d.getDistance(targetTranslation2d) < CameraConstants.APRILTAG_LIMIT_METERS
+          && cameraTranslation2d.getDistance(targetTranslation2d) > CameraConstants.APRILTAG_CLOSE_LIMIT_METERS
           && bestTarget.getPoseAmbiguity() < CameraConstants.MAXIMUM_AMBIGUITY && !isAmbiguousTags()) {
         return true;
       } else {

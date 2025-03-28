@@ -53,7 +53,7 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelDeadlineGroup(
+                new ParallelCommandGroup(
                         intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
@@ -70,7 +70,7 @@ public class BlueEDCRBCommand extends SequentialCommandGroup {
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
-                new ParallelDeadlineGroup(
+                new ParallelCommandGroup(
                         intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
