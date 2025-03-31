@@ -73,7 +73,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.RobotCentric nudgeRequest = new RobotCentric()
     .withDriveRequestType(DriveRequestType.Velocity);
 
-    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_1_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
+    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_2_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
     public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_RIGHT_TRANSFORM3D);
     public final PhotonCamera allignCamera = new PhotonCamera("Camera_4_OV9281_USB_Camera");
 
@@ -288,8 +288,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.04, .1);
-        yController.setTolerance(.04, .1);
+        xController.setTolerance(.03, .1);
+        yController.setTolerance(.03, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
@@ -302,8 +302,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.01, .1);
-        yController.setTolerance(.01, .1);
+        xController.setTolerance(.1, .1);
+        yController.setTolerance(.1, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.0, 4.0);

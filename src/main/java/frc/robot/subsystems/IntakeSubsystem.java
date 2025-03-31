@@ -58,7 +58,7 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
     intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
-    intakeFilter = new MedianFilter(5);
+    intakeFilter = new MedianFilter(15);
 
     RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
 
