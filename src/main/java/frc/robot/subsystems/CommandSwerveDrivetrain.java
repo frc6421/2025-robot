@@ -339,6 +339,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return runOnce(() -> getPigeon2().reset());
     }
 
+    public void visionGyroReset() {
+        double cameraAngle = 0.0;
+
+        if (backLeftCamera.hasTarget() && backRightCamera.hasTarget()) {
+            cameraAngle = 
+            (backLeftCamera.getPose2d().getRotation().getDegrees() + 
+            backRightCamera.getPose2d().getRotation().getDegrees()) / 2.0;
+        } 
+
+        if (backLeftCamera.hasTarget() && !backRightCamera.hasTarget()) {
+            cameraAngle = backLeftCamera.getPose2d().getRotation().getDegrees();
+        }
+
+        if (!backLeftCamera.hasTarget() && backRightCamera.hasTarget()) {
+            cameraAngle = backRightCamera.getPose2d().getRotation().getDegrees();
+        }
+
+        if (!backLeftCamera.hasTarget() && !backRightCamera.hasTarget()) {
+            cameraAngle = getPigeon2().getYaw().getValueAsDouble();
+        }
+
+        getPigeon2().setYaw(cameraAngle);
+    }
+
     @Override
     public void periodic() {
         

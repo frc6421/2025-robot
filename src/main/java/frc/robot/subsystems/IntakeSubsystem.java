@@ -72,6 +72,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
     SmartDashboard.putData("Intake", this);
+    SmartDashboard.putData("TOF Auto", intakeAutoSensor);
+    SmartDashboard.putData("TOF TeleOp", intakeSensor);
   }
 
   /**

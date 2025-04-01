@@ -145,7 +145,6 @@ return containsAmbiguous;
     return cameraPose2d;
   }
 
-
   public Matrix<N3, N1> getStandardDeviation() {
     return standardDeviation;
   }

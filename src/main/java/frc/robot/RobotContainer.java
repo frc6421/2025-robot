@@ -310,6 +310,10 @@ public class RobotContainer {
 		}
     }
 
+		public void visionGyroReset() {
+			drivetrain.visionGyroReset();
+		}
+
 	public Double getElevatorPosition() {
 		return elevatorPositionChooser.getSelected();
 	}
