@@ -18,22 +18,19 @@ import java.util.Random;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorConstants;
 
 public class LED_NOT_a_Subsystem extends SubsystemBase {
   public static class LEDConstants {
     public static final int PERIODIC_DELAY = 1;
-    public static final int NUMBER_OF_LEDS = 100;
+    public static final int NUMBER_OF_LEDS = 300;
     public static final int[] WHITE = {255,255,255}, 
     PINK = {255,192,203}, CORAL = {255,127,80}, HOT_PINK = {255,105,180},
     RED = {255,0,0}, GREEN = {0,255,0}, BLUE = {0,0,255},
@@ -41,7 +38,7 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     SEA_BLUE = {0,80,255}, FOAM_WHITE = {190,220,255}, SKY_BLUE = {150,150,255},
     GYRO_GREEN = {25,255,25}, ALGAE_GREEN = {80,255,100},
     OFF = {0,0,0},
-    VISION_BACK_LEFT_COLOR = {0,0,255}, VISION_BACK_RIGHT_COLOR = {255,0,0};
+    VISION_LEFT_COLOR = {0,0,255}, VISION_RIGHT_COLOR = {255,0,0};
     public static enum LED_MODES{
       RAINBOW,
       SNAKING_RAINBOW,
@@ -50,26 +47,32 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
     };
     private static int[] ELEVATOR_TARGET_COLOR = {0,255,0}, ELEVATOR_CURRENT_POS_COLOR = {0,0,255};
     private static int TRAILING_BRIGHTNESS = 7;//How long the brightness chain lasts. Larger is a smaller trail, smaller is a larger trail
+    private static int NUMBER_OF_LEDS_PER_SECTION = 100;//TODO: Change this number when we know the length of each strip on the Elevator
   }
+
+  private static int RIO_PIN = 9;//TODO: Determine which pin of the Rio we are going to use the LEDs on
+
   private static AddressableLED led;//Led Strip
   private static AddressableLEDBuffer ledBuffer;//Buffer used before displaying to the strip
+
   private static int flickerDelay = 1;
   private static int[] patternColor = LEDConstants.OFF;
   private static int previousColorLimit;//Store the color limit for rainbow. When the rainbow is called during periodic, this value is used to store the 
   //previous position that the strip was at.
-  private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overruns
-  private static int RIO_PIN = 0;//TODO: Determine which pin of the Rio we are going to use the LEDs on
+  private static int previousSnakingLED;//Stores the LED that was last at. Useful in making sure there are no loop overrun
   private static int currentRobotCycle;//Current amount of waited robot cycles
-  private static LED_MODES selectedDisabledPattern;
   private static double waveStep = Math.PI / 4;//The position of the sine wave, in radians.
   private static int waveHeight;
   //Stars for the disabled pattern
-  private static int[] starPositions = {0,0,0,0,0};
+  private static int[][] starPositions = {{0,0},{0,0},{0,0},{0,0},{0,0}};
   private static boolean starBool = false;
   private static int starAmount;
   //Sky brightness for the wave pattern.
   private static double waveSkyBrightness;
   private static double starBrightness = 0;
+
+  private static frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES mode;
+
   
 
   /** Creates a new LEDSubsystem. */
@@ -172,9 +175,8 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
    * Sets the LEDs to follow a pattern. The colors are set by setPatternColor and setBackgroundColor. 
    * This should be called in periodic, more realistically while disabled, since it can take away from the 
    * Rio processing.
-   * @param mode  The LED mode to set to
    */
-  public static void setLED(frc.robot.LED_NOT_a_Subsystem.LEDConstants.LED_MODES mode){
+  public void runDisabledPattern(){
     switch(mode){
       case RAINBOW: 
         if(currentRobotCycle == LEDConstants.PERIODIC_DELAY){
@@ -256,28 +258,56 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
       case WAVE:
         if(waveStep == 2*Math.PI) waveStep = 0;
         //The acutal height of the wave
-        long position = Math.round(4 * Math.sin(waveStep) + waveHeight) + Math.round(8 * Math.sin(waveStep / 16));
+        long position[] = {
+          Math.round(4 * Math.sin(waveStep) + waveHeight) + Math.round(8 * Math.sin(waveStep / 16)),
+          Math.round(4 * Math.sin(waveStep + 1) + waveHeight) + Math.round(8 * Math.sin(waveStep + 1 / 16)),
+          Math.round(4 * Math.sin(waveStep + 2) + waveHeight) + Math.round(8 * Math.sin(waveStep + 2 / 16))
+        };
+
         waveSkyBrightness = (0.5 * Math.sin(waveStep / 16 + Math.PI / 4)) - 0.5;
         for(int LEDNum = 0; LEDNum < LEDConstants.NUMBER_OF_LEDS; LEDNum++){
+          
           //Setting the wave
-          if(LEDNum <= position) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
+          if(LEDNum <= position[0]) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
+          if(LEDNum > position[0] && LEDNum <= position[1]) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
+          if(LEDNum > position[1] && LEDNum <= position[2]) ledBuffer.setRGB(LEDNum, LEDConstants.SEA_BLUE[0], LEDConstants.SEA_BLUE[1], LEDConstants.SEA_BLUE[2]);
+          
           //Setting the layer of foam on top
-          if(LEDNum == position + 1 || LEDNum == position + 2){
+          if(LEDNum == position[0] + 1 || LEDNum == position[0] + 2){
             ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
           }
-          if(LEDNum > position + 2){ ledBuffer.setRGB(LEDNum, 
+          if(LEDNum == position[1] + 1 || LEDNum == position[1] + 2){
+            ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
+          }
+          if(LEDNum == position[2] + 1 || LEDNum == position[2] + 2){
+            ledBuffer.setRGB(LEDNum, LEDConstants.FOAM_WHITE[0], LEDConstants.FOAM_WHITE[1], LEDConstants.FOAM_WHITE[2]);
+          }
+
+          if(LEDNum > position[0] + 2 && LEDNum < position[1] + 2 && LEDNum < position[2] + 2){ ledBuffer.setRGB(LEDNum, 
             (int)(LEDConstants.SKY_BLUE[0] + LEDConstants.SKY_BLUE[0] * waveSkyBrightness), 
             (int)(LEDConstants.SKY_BLUE[1] + LEDConstants.SKY_BLUE[1] * waveSkyBrightness), 
             (int)(LEDConstants.SKY_BLUE[2] + LEDConstants.SKY_BLUE[2] * waveSkyBrightness));
           }
+          if(LEDNum > position[1] + 2 && LEDNum < position[2] + 2){ ledBuffer.setRGB(LEDNum, 
+            (int)(LEDConstants.SKY_BLUE[0] + LEDConstants.SKY_BLUE[0] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[1] + LEDConstants.SKY_BLUE[1] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[2] + LEDConstants.SKY_BLUE[2] * waveSkyBrightness));
+          }
+          if(LEDNum > position[2] + 2){ ledBuffer.setRGB(LEDNum, 
+            (int)(LEDConstants.SKY_BLUE[0] + LEDConstants.SKY_BLUE[0] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[1] + LEDConstants.SKY_BLUE[1] * waveSkyBrightness), 
+            (int)(LEDConstants.SKY_BLUE[2] + LEDConstants.SKY_BLUE[2] * waveSkyBrightness));
+          }
+
           if(waveSkyBrightness < 0.5 * Math.sin(Math.PI / 8) - 0.5){
             if(!starBool){
               starAmount = new Random().nextInt(1,5);
               for(int i = 0; i < starAmount; i++){
                 //Generates the star position above the maximum of each sine wave for position.
-                starPositions[i] = new Random().nextInt(
-                  (int) Math.round(4 * Math.sin(Math.PI / 2) + waveHeight + 10 + (8 * Math.sin(Math.PI / 32))), 
-                  LEDConstants.NUMBER_OF_LEDS);
+                starPositions[i][0] = new Random().nextInt(
+                  (int)Math.round(4 * Math.sin(Math.PI / 2) + waveHeight + 10 + (8 * Math.sin(Math.PI / 32))), 
+                  LEDConstants.NUMBER_OF_LEDS_PER_SECTION);
+                starPositions[i][1] = new Random().nextInt(0,3);//Strip 0 to Strip 2
               }
               starBool = true;
             }else{
@@ -292,9 +322,16 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
                 if(color[i] > 255) color[i] = 255;
                 if(color[i] < 0) color[i] = 0;
               }
+              /* A small modifier to select which strip the star is to appear on. */
+              int addedAmount = 0;
               for(int i = 0; i < starAmount; i++){
                 //Setting the stars
-                ledBuffer.setRGB(starPositions[i], color[0], color[1], color[2]);
+                switch(starPositions[i][1]){
+                  case 0: addedAmount = 0; break;
+                  case 1: addedAmount = LEDConstants.NUMBER_OF_LEDS_PER_SECTION; break;
+                  case 2: addedAmount = 2 * LEDConstants.NUMBER_OF_LEDS_PER_SECTION; break;
+                }
+                ledBuffer.setRGB(starPositions[i][0] + addedAmount, color[0], color[1], color[2]);
               }
             }
           }else{
@@ -376,32 +413,31 @@ public class LED_NOT_a_Subsystem extends SubsystemBase {
   }
 
   public static LED_MODES getDisabledPattern(){
-    return selectedDisabledPattern;
+    return mode;
   }
 
   /**
    * Sets the various things when the robot is disabled. Sets the pattern and colors to random
    * each disabled period
    */
-  public static void setDisabledPattern(){
+  public void setDisabledPattern(){
     //Random Object
     Random random = new Random();
     //There are six different patterns
     switch(random.nextInt(4)){
-      case 0: selectedDisabledPattern = LED_MODES.RAINBOW; break;
+      case 0: mode = LED_MODES.RAINBOW; break;
       case 1: 
-        selectedDisabledPattern = LED_MODES.SNAKING_RAINBOW; 
+        mode = LED_MODES.SNAKING_RAINBOW; 
         ledBuffer = new AddressableLEDBuffer(LEDConstants.NUMBER_OF_LEDS + LEDConstants.TRAILING_BRIGHTNESS * 2);
         ledBuffer.setRGB(0,0,0,0);
         //Setting the length of the LED strip
         led.setLength(ledBuffer.getLength());break;
-      case 2: selectedDisabledPattern = LED_MODES.COLLISION; break;
+      case 2: mode = LED_MODES.COLLISION; break;
       case 3: 
-        selectedDisabledPattern = LED_MODES.WAVE; 
+        mode = LED_MODES.WAVE; 
         waveHeight = random.nextInt(20, Math.round(LEDConstants.NUMBER_OF_LEDS / 2));
       break;
     }
-    LED_NOT_a_Subsystem.setLED(selectedDisabledPattern);
   }
   /**
    * Resets the length of the LED strip to the normal length. This should only be used after periodic
