@@ -40,6 +40,7 @@ import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Add your docs here. */
@@ -65,9 +66,10 @@ public class WarriorCamera implements Sendable {
 
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
-    private final static double APRILTAG_LIMIT_METERS = 3.2;
-    private final static double MAXIMUM_AMBIGUITY = 100.0;
-    private final static int[] BLACKLISTED_TAG_ID_LIST = {0,0,0};
+    private final static double APRILTAG_LIMIT_METERS = 3.7;
+    private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.5;
+    private final static double MAXIMUM_AMBIGUITY = 0.20;
+    private final static int[] BLACKLISTED_TAG_ID_LIST = {4,5,14,15};
 
     private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10));
     private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10));
@@ -116,19 +118,19 @@ public class WarriorCamera implements Sendable {
     return latestCameraResult.hasTargets();
   }
 
-//   public boolean isAmbiguousTags() {
-//     boolean containsAmbiguous = false;
-//     if (latestCameraResult.hasTargets()) {
-//     for(int c = 0; c < latestCameraResult.getTargets().size(); c++) {
-//       for(int i = 0; i < CameraConstants.BLACKLISTED_TAG_ID_LIST.length; i++) {
-//         if (latestCameraResult.getTargets().get(c).fiducialId == CameraConstants.BLACKLISTED_TAG_ID_LIST[i]) {
-//           containsAmbiguous = true;
-//         }
-//   };
-// }
-// }
-// return containsAmbiguous;
-// }
+  public boolean isAmbiguousTags() {
+    boolean containsAmbiguous = false;
+    if (latestCameraResult.hasTargets()) {
+    for(int c = 0; c < latestCameraResult.getTargets().size(); c++) {
+      for(int i = 0; i < CameraConstants.BLACKLISTED_TAG_ID_LIST.length; i++) {
+        if (latestCameraResult.getTargets().get(c).fiducialId == CameraConstants.BLACKLISTED_TAG_ID_LIST[i]) {
+          containsAmbiguous = true;
+        }
+  };
+}
+}
+return containsAmbiguous;
+}
 
   private Distance getCameraDistance(Translation2d targetTranslation) {
     if (cameraEstimatedPose.isPresent()) {
@@ -166,6 +168,8 @@ public class WarriorCamera implements Sendable {
   }
   return 1.0;
 }
+
+  // public double get
 
   public double getPitch() {
     return latestCameraResult.getBestTarget().getPitch();
@@ -220,7 +224,8 @@ public class WarriorCamera implements Sendable {
           .toTranslation2d();
 
       if (cameraTranslation2d.getDistance(targetTranslation2d) < CameraConstants.APRILTAG_LIMIT_METERS
-          && bestTarget.getPoseAmbiguity() < CameraConstants.MAXIMUM_AMBIGUITY) {
+          && cameraTranslation2d.getDistance(targetTranslation2d) > CameraConstants.APRILTAG_CLOSE_LIMIT_METERS
+          && bestTarget.getPoseAmbiguity() < CameraConstants.MAXIMUM_AMBIGUITY && !isAmbiguousTags()) {
         return true;
       } else {
         return false;

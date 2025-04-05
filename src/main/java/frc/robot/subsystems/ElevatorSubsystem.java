@@ -127,7 +127,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final Distance STATION_POSITION = Inches.of(38.75);
     public static final Distance L1_POSITION = Inches.of(38.75);
     public static final Distance L2_POSITION = Inches.of(38.75);
-    public static final Distance L3_POSITION = Inches.of(52.0);
+    public static final Distance L3_POSITION = Inches.of(54.5);
     public static final Distance L4_POSITION = Inches.of(80.0); 
 
     // For trapezoid profile constrants.
