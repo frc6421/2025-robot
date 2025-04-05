@@ -11,6 +11,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
+import com.playingwithfusion.TimeOfFlight.Status;
 
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -26,6 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private TimeOfFlight intakeSensor;
   private TimeOfFlight intakeAutoSensor;
   private MedianFilter intakeFilter;
+  private MedianFilter intakeAutoFilter;
 
   public static class IntakeConstants {
 
@@ -59,6 +62,10 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
     intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
     intakeFilter = new MedianFilter(15);
+    intakeAutoFilter = new MedianFilter(15);
+
+    intakeAutoSensor.setRangingMode(RangingMode.Short, 20);
+    intakeSensor.setRangingMode(RangingMode.Short, 20);
 
     RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
 
@@ -83,12 +90,20 @@ public class IntakeSubsystem extends SubsystemBase {
   public Command setIntakeSpeed(double output) {
     return runOnce(() -> intakeMotor.set(output));
   }
+
  /** In Millimeters */
   public double getTOFDistance() {
-    if (DriverStation.isAutonomous()) {
-      return intakeFilter.calculate(intakeAutoSensor.getRange());
-    }
+    if (intakeSensor.getStatus() == Status.Valid) {
     return intakeFilter.calculate(intakeSensor.getRange());
+    }
+    return 1000.0;
+  } 
+
+  public double getTOFAutoDistance() {
+    if (intakeAutoSensor.getStatus() == Status.Valid) {
+    return intakeAutoFilter.calculate(intakeAutoSensor.getRange());  
+    }
+    return 1000.0;
   }
 
   /**
@@ -99,6 +114,9 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean haveCoral(){
+    //if (DriverStation.isAutonomous()) {
+    //return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
+    //}
     return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
   }
 
@@ -111,7 +129,6 @@ public Command intakeCoral () {
 
   @Override
   public void periodic() {
-    getTOFDistance();
     // This method will be called once per scheduler run
   }
 
@@ -122,6 +139,10 @@ public Command intakeCoral () {
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
     builder.addDoubleProperty("Intake Current", () -> intakeMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("TOF Distance", () -> getTOFDistance(), null);
+    builder.addDoubleProperty("TOF Auto Distance", () -> getTOFAutoDistance(), null);
+    builder.addStringProperty("TOF State", () -> intakeSensor.getStatus().toString(), null);
+    builder.addStringProperty("TOF Auto State", () -> intakeAutoSensor.getStatus().toString(), null);
+    builder.addBooleanProperty("Has Coral", () -> haveCoral(), null);
   }
 
 }

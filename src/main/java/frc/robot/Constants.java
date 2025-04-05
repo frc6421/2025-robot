@@ -91,7 +91,7 @@ public final class Constants {
   // public static final Pose2d BLUE_L = new Pose2d (new Translation2d(Inches.of(144.895), Inches.of(198.668)), new Rotation2d(Degrees.of(120)));
       
 // constants w/ 180 flip
-public static final Pose2d R_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(646.79), Inches.of(40.362)), new Rotation2d(Degrees.of(126)));
+public static final Pose2d R_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(646.79 - 3.53 * 1.3), Inches.of(40.362 + 4.854 * 1.3)), new Rotation2d(Degrees.of(126)));
 public static final Pose2d R_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(646.79), Inches.of(276.638)), new Rotation2d(Degrees.of(234)));
 public static final Pose2d B_HP_RIGHT_CENTER = new Pose2d (new Translation2d(Inches.of(44.09), Inches.of(40.362)), new Rotation2d(Degrees.of(54)));
 public static final Pose2d B_HP_LEFT_CENTER = new Pose2d (new Translation2d(Inches.of(44.09), Inches.of(276.638)), new Rotation2d(Degrees.of(306)));

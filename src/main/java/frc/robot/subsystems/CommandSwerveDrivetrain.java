@@ -73,8 +73,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.RobotCentric nudgeRequest = new RobotCentric()
     .withDriveRequestType(DriveRequestType.Velocity);
 
-    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_2_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
-    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_RIGHT_TRANSFORM3D);
+    public final WarriorCamera backLeftCamera = new WarriorCamera("Camera_6_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_LEFT_TRANSFORM3D);
+    public final WarriorCamera backRightCamera = new WarriorCamera("Camera_2_OV9281_USB_Camera", WarriorCamera.CameraConstants.FRONT_RIGHT_TRANSFORM3D);
     public final PhotonCamera allignCamera = new PhotonCamera("Camera_4_OV9281_USB_Camera");
 
     private final ProfiledPIDController thetaController = new ProfiledPIDController(
@@ -301,13 +301,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
-        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(1.0));
         xController.setTolerance(.1, .1);
         yController.setTolerance(.1, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -4.0, 4.0);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -4.0, 4.0);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.5, 2.5);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
         }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
@@ -342,12 +342,29 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void visionGyroReset() {
         double cameraAngle = 0.0;
 
+
         if (backLeftCamera.hasTarget() && backRightCamera.hasTarget()) {
-            cameraAngle = 
+            if (backLeftCamera.getNumberOfTags() >= 2 && backRightCamera.getNumberOfTags() >= 2) {
+                cameraAngle = 
             (backLeftCamera.getPose2d().getRotation().getDegrees() + 
             backRightCamera.getPose2d().getRotation().getDegrees()) / 2.0;
-        } 
+            }
 
+            if (backLeftCamera.getNumberOfTags() < 2 && backRightCamera.getNumberOfTags() >= 2) {
+                cameraAngle = backRightCamera.getPose2d().getRotation().getDegrees();
+            }
+
+            if (backLeftCamera.getNumberOfTags() >= 2 && backRightCamera.getNumberOfTags() < 2) {
+                cameraAngle = backLeftCamera.getPose2d().getRotation().getDegrees();
+            }
+
+            if (backLeftCamera.getNumberOfTags() < 2 && backRightCamera.getNumberOfTags() < 2) {
+                cameraAngle = 
+            (backLeftCamera.getPose2d().getRotation().getDegrees() + 
+            backRightCamera.getPose2d().getRotation().getDegrees()) / 2.0;
+            }
+        } 
+        
         if (backLeftCamera.hasTarget() && !backRightCamera.hasTarget()) {
             cameraAngle = backLeftCamera.getPose2d().getRotation().getDegrees();
         }
@@ -359,7 +376,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (!backLeftCamera.hasTarget() && !backRightCamera.hasTarget()) {
             cameraAngle = getPigeon2().getYaw().getValueAsDouble();
         }
-
         getPigeon2().setYaw(cameraAngle);
     }
 

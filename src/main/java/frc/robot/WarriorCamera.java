@@ -55,24 +55,41 @@ public class WarriorCamera implements Sendable {
   private Matrix<N3, N1> standardDeviation;
 
   public final static class CameraConstants {
-    public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(.25, .27, .21),// adding makes number bigger
-        new Rotation3d(Units.degreesToRadians(-1), Units.degreesToRadians(-24.2),
-            Units.degreesToRadians(-26)));
-    public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(.22, -.28, .21),
-        new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-18.5),
-            Units.degreesToRadians(26)));
+    // Camera 2
+    public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(0.25, -0.24, 0.21), // Adding
+                                                                                                                    // makes
+                                                                                                                    // number
+                                                                                                                    // bigger
+        new Rotation3d(Units.degreesToRadians(-.24), Units.degreesToRadians(-12.5),
+            Units.degreesToRadians(24.6)));
+    // Camera 6
+    public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.28, 0.22),
+        new Rotation3d(Units.degreesToRadians(-0), Units.degreesToRadians(-25.1),
+            Units.degreesToRadians(-26.0)));
+    // public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(0.34, -0.16, 0.12), // Adding
+    //                                                                                                                 // makes
+    //                                                                                                                 // number
+    //                                                                                                                 // bigger
+    //     new Rotation3d(Units.degreesToRadians(-1.0), Units.degreesToRadians(-15.6),
+    //         Units.degreesToRadians(24.4)));
+    // // Camera 6
+    // public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.3, 0.31),
+    //     new Rotation3d(Units.degreesToRadians(-0.6), Units.degreesToRadians(-21.9),
+    //         Units.degreesToRadians(-26.0)));
+
     private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
         .loadField(AprilTagFields.k2025ReefscapeWelded);
 
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
-    private final static double APRILTAG_LIMIT_METERS = 3.7;
+    private final static double APRILTAG_LIMIT_METERS = 4.7;
+    private final static double APRILTAG_LIMIT_METERS_AUTO = 1.0;
     private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.5;
     private final static double MAXIMUM_AMBIGUITY = 0.20;
-    private final static int[] BLACKLISTED_TAG_ID_LIST = {4,5,14,15};
+    private final static int[] BLACKLISTED_TAG_ID_LIST = { 4, 5, 14, 15 };
 
-    private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(10));
-    private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(10));
+    private final static Matrix<N3, N1> LOW_SD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(0.1));
+    private final static Matrix<N3, N1> HIGH_SD = VecBuilder.fill(0.9, 0.9, Units.degreesToRadians(0.1));
 
     public static final Transform2d ODOMETRY_BLUE_OFFSET = new Transform2d(Inches.of(0.0).magnitude(),
         Inches.of(0.0).magnitude(), new Rotation2d());
@@ -84,7 +101,7 @@ public class WarriorCamera implements Sendable {
 
   /* Robot swerve drive state */
   private final NetworkTable cameraStateTable;
-  private final StructPublisher<Pose3d> cameraPose; 
+  private final StructPublisher<Pose3d> cameraPose;
 
   public WarriorCamera(String cameraName, Transform3d offsets) {
     camera = new PhotonCamera(cameraName);
@@ -121,16 +138,17 @@ public class WarriorCamera implements Sendable {
   public boolean isAmbiguousTags() {
     boolean containsAmbiguous = false;
     if (latestCameraResult.hasTargets()) {
-    for(int c = 0; c < latestCameraResult.getTargets().size(); c++) {
-      for(int i = 0; i < CameraConstants.BLACKLISTED_TAG_ID_LIST.length; i++) {
-        if (latestCameraResult.getTargets().get(c).fiducialId == CameraConstants.BLACKLISTED_TAG_ID_LIST[i]) {
-          containsAmbiguous = true;
+      for (int c = 0; c < latestCameraResult.getTargets().size(); c++) {
+        for (int i = 0; i < CameraConstants.BLACKLISTED_TAG_ID_LIST.length; i++) {
+          if (latestCameraResult.getTargets().get(c).fiducialId == CameraConstants.BLACKLISTED_TAG_ID_LIST[i]) {
+            containsAmbiguous = true;
+          }
         }
-  };
-}
-}
-return containsAmbiguous;
-}
+        ;
+      }
+    }
+    return containsAmbiguous;
+  }
 
   private Distance getCameraDistance(Translation2d targetTranslation) {
     if (cameraEstimatedPose.isPresent()) {
@@ -163,10 +181,10 @@ return containsAmbiguous;
 
   public double getAmbiguity() {
     if (latestCameraResult.hasTargets()) {
-    return latestCameraResult.getBestTarget().poseAmbiguity;
+      return latestCameraResult.getBestTarget().poseAmbiguity;
+    }
+    return 1.0;
   }
-  return 1.0;
-}
 
   // public double get
 
@@ -176,6 +194,10 @@ return containsAmbiguous;
 
   public double getYaw() {
     return latestCameraResult.getBestTarget().getYaw();
+  }
+
+  public int getNumberOfTags() {
+    return cameraEstimatedPose.get().targetsUsed.size();
   }
 
   public boolean filterOdometry() {
@@ -196,7 +218,7 @@ return containsAmbiguous;
       return false;
     }
 
-    if (isTagReliable() && cameraEstimatedPose.get().targetsUsed.size() >= 1) {
+    if (isTagReliable() && getNumberOfTags() >= 1) {
       standardDeviation = CameraConstants.LOW_SD;
     } else {
       standardDeviation = CameraConstants.HIGH_SD;
@@ -215,12 +237,22 @@ return containsAmbiguous;
   }
 
   public boolean isTagReliable() {
+
     if (latestCameraResult.hasTargets()) {
       PhotonTrackedTarget bestTarget = latestCameraResult.getBestTarget();
       int targetID = bestTarget.getFiducialId();
       Translation2d cameraTranslation2d = cameraPose2d.getTranslation();
       Translation2d targetTranslation2d = CameraConstants.TAG_LAYOUT.getTagPose(targetID).get().getTranslation()
           .toTranslation2d();
+
+      // if (DriverStation.isAutonomous()) {
+      //   if (cameraTranslation2d.getDistance(targetTranslation2d) < CameraConstants.APRILTAG_LIMIT_METERS_AUTO &&
+      //       bestTarget.getPoseAmbiguity() < CameraConstants.MAXIMUM_AMBIGUITY && !isAmbiguousTags()) {
+      //     return true;
+      //   } else {
+      //     return false;
+      //   }
+      // }
 
       if (cameraTranslation2d.getDistance(targetTranslation2d) < CameraConstants.APRILTAG_LIMIT_METERS
           && cameraTranslation2d.getDistance(targetTranslation2d) > CameraConstants.APRILTAG_CLOSE_LIMIT_METERS

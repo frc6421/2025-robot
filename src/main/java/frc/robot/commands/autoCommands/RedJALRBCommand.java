@@ -21,7 +21,7 @@ import frc.robot.subsystems.WristSubsystem.WristConstants;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RedJKLRBCommand extends SequentialCommandGroup {
+public class RedJALRBCommand extends SequentialCommandGroup {
   /** Creates a new BLUEHRB. */
   // subsystems
   private CommandSwerveDrivetrain driveSubsystem;
@@ -29,7 +29,7 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
   private WristSubsystem wristSubsystem;
   private IntakeSubsystem intakeSubsystem;
 
-  public RedJKLRBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist,
+  public RedJALRBCommand(CommandSwerveDrivetrain drive, ElevatorSubsystem elevator, WristSubsystem wrist,
       IntakeSubsystem intake) {
 
     driveSubsystem = drive;
@@ -59,7 +59,7 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER)),
                 intakeSubsystem.setIntakeSpeed(0.1),
 
-                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_K),
+                driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_A),
                 new ParallelCommandGroup(
                         elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
@@ -72,9 +72,8 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-                        elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))
-                        ),
-                driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
+                        elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
+                        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER)),
                 intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_L),
