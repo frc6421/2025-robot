@@ -61,8 +61,8 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
     intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
-    intakeFilter = new MedianFilter(15);
-    intakeAutoFilter = new MedianFilter(15);
+    intakeFilter = new MedianFilter(10);
+    intakeAutoFilter = new MedianFilter(10);
 
     intakeAutoSensor.setRangingMode(RangingMode.Short, 20);
     intakeSensor.setRangingMode(RangingMode.Short, 20);
@@ -114,12 +114,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean haveCoral(){
-    //if (DriverStation.isAutonomous()) {
-    //return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
-    //}
+    if (DriverStation.isAutonomous()) {
+    return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
+    }
     return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
   }
-
 
 public Command intakeCoral () {
   return run(() -> intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED))

@@ -14,6 +14,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -81,6 +84,8 @@ public class RobotContainer {
 
 	private final SlewRateLimiter xDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
 	private final SlewRateLimiter yDriveSlew = new SlewRateLimiter(Constants.DriveConstants.DRIVE_SLEW_RATE);
+
+	private final UsbCamera driverCamera = CameraServer.startAutomaticCapture();
 
 	private final TestAutoCommand testAuto;
 	private final RedJKLRBCommand redJKLRB;
@@ -195,6 +200,8 @@ public class RobotContainer {
         blueSourceChooser.addOption("4", TrajectoryConstants.B_HP_RIGHT_IN);
         blueSourceChooser.addOption("5", TrajectoryConstants.B_HP_RIGHT_CENTER);
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
+
+		driverCamera.setResolution(180, 120);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
 		SmartDashboard.putData("Red Position Chooser", redPositionChooser);

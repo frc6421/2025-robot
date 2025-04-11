@@ -72,9 +72,9 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         intakeSubsystem.intakeCoral(),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+                        driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))
                         ),
-                driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
                 intakeSubsystem.setIntakeSpeed(0.1),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_L),

@@ -288,44 +288,47 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.03, .1);
-        yController.setTolerance(.03, .1);
+        xController.setTolerance(.03, .4);
+        yController.setTolerance(.03, .4);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
           double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.5, 2.5);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint())
+        .andThen(this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0)));
     }
 
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
-        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(1.0));
-        xController.setTolerance(.1, .1);
-        yController.setTolerance(.1, .1);
+        alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(1.0), Units.degreesToRadians(2.0));
+        xController.setTolerance(.1, .4);
+        yController.setTolerance(.1, .4);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
-          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
-          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.5, 2.5);
+          double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.7, 3.7);
+          double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.7, 3.7);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint())
+        .andThen(this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0)));
     }
 
 
     public Command offsetAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(5.0), Units.degreesToRadians(1.0));
-        xController.setTolerance(.2, .1);
-        yController.setTolerance(.2, .1);
+        xController.setTolerance(.2, .4);
+        yController.setTolerance(.2, .4);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.5, 3.5);
           double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -3.5, 3.5);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint())
+        .andThen(this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0)));
     }
 
     public Command nudgeCommand(double direction) {

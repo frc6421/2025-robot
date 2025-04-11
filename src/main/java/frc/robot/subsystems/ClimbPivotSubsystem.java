@@ -79,11 +79,11 @@ public class ClimbPivotSubsystem extends SubsystemBase {
         .withReverseSoftLimitEnable(true);
 
     private static final MotorOutputConfigs LEFT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.CounterClockwise_Positive)
+        .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
     private static final MotorOutputConfigs RIGHT_PIVOT_MOTOR_CONFIGS = new MotorOutputConfigs()
-        .withInverted(InvertedValue.Clockwise_Positive)
+        .withInverted(InvertedValue.CounterClockwise_Positive)
         .withNeutralMode(NeutralModeValue.Coast);
 
   }
