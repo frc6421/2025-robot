@@ -201,7 +201,7 @@ public class RobotContainer {
         blueSourceChooser.addOption("5", TrajectoryConstants.B_HP_RIGHT_CENTER);
         blueSourceChooser.addOption("6", TrajectoryConstants.B_HP_RIGHT_OUT);
 
-		driverCamera.setResolution(180, 120);
+		//driverCamera.setResolution(180, 120);
 
 		SmartDashboard.putData("Red Auto Chooser", redAutoChooser);
 		SmartDashboard.putData("Red Position Chooser", redPositionChooser);

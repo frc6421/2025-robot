@@ -30,6 +30,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -37,6 +38,7 @@ import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -53,6 +55,7 @@ public class WarriorCamera implements Sendable {
   private final PhotonPoseEstimator poseEstimator;
   Optional<EstimatedRobotPose> cameraEstimatedPose;
   private Matrix<N3, N1> standardDeviation;
+  private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
   public final static class CameraConstants {
     // Camera 2
@@ -97,16 +100,16 @@ public class WarriorCamera implements Sendable {
         Inches.of(0.0).magnitude(), new Rotation2d());
   }
 
-  private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
-
   /* Robot swerve drive state */
   private final NetworkTable cameraStateTable;
   private final StructPublisher<Pose3d> cameraPose;
+  private final BooleanPublisher cameraReliable;
 
   public WarriorCamera(String cameraName, Transform3d offsets) {
     camera = new PhotonCamera(cameraName);
     cameraStateTable = inst.getTable(camera.getName() + "CameraState");
     cameraPose = cameraStateTable.getStructTopic("Pose", Pose3d.struct).publish();
+    cameraReliable = cameraStateTable.getBooleanTopic("Reliable").publish();
 
     poseEstimator = new PhotonPoseEstimator(
         CameraConstants.TAG_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, offsets);
@@ -204,8 +207,10 @@ public class WarriorCamera implements Sendable {
     refreshData();
 
     if (!camera.isConnected()) {
+      cameraReliable.set(false);
       return false;
     } else if (!(cameraEstimatedPose.isPresent())) {
+      cameraReliable.set(false);
       return false;
     }
 
@@ -215,6 +220,7 @@ public class WarriorCamera implements Sendable {
         cameraPose2d.getX() < 0 ||
         cameraPose2d.getY() < 0) {
       DataLogManager.log("Out of Field");
+      cameraReliable.set(false);
       return false;
     }
 
@@ -222,6 +228,7 @@ public class WarriorCamera implements Sendable {
       standardDeviation = CameraConstants.LOW_SD;
     } else {
       standardDeviation = CameraConstants.HIGH_SD;
+      cameraReliable.set(false);
       return false;
     }
 
@@ -233,6 +240,7 @@ public class WarriorCamera implements Sendable {
         cameraPose2d.plus(CameraConstants.ODOMETRY_BLUE_OFFSET);
       }
     }
+    cameraReliable.set(true);
     return true;
   }
 
@@ -257,11 +265,14 @@ public class WarriorCamera implements Sendable {
       if (cameraTranslation2d.getDistance(targetTranslation2d) < CameraConstants.APRILTAG_LIMIT_METERS
           && cameraTranslation2d.getDistance(targetTranslation2d) > CameraConstants.APRILTAG_CLOSE_LIMIT_METERS
           && bestTarget.getPoseAmbiguity() < CameraConstants.MAXIMUM_AMBIGUITY && !isAmbiguousTags()) {
+        cameraReliable.set(true);
         return true;
       } else {
+        cameraReliable.set(false);
         return false;
       }
     }
+    cameraReliable.set(false);
     return false;
   }
 
