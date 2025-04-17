@@ -121,8 +121,8 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		elevatorPositionChooser = new SendableChooser<>();
-		elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
-		elevatorPositionChooser.addOption("L2", ElevatorConstants.L2_POSITION.magnitude());
+		//elevatorPositionChooser.setDefaultOption("L1", ElevatorConstants.L1_POSITION.magnitude());
+		elevatorPositionChooser.setDefaultOption("L2", ElevatorConstants.L2_POSITION.magnitude());
 		elevatorPositionChooser.addOption("L3", ElevatorConstants.L3_POSITION.magnitude());
 		elevatorPositionChooser.addOption("L4", ElevatorConstants.L4_POSITION.magnitude());
 
@@ -247,7 +247,7 @@ public class RobotContainer {
 		joystick.rightTrigger().onTrue(scoreFinishCommand);
 		//joystick.rightTrigger().onTrue(scoreSequenceCommand);
 
-		joystick.b().onTrue(drivetrain.resetGyro());
+		joystick.back().onTrue(drivetrain.resetGyro());
 
 		// Manual Overrides
 		joystick.start().whileTrue(elevatorSubsystem.stupidStupid());

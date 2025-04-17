@@ -57,7 +57,7 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(0.1),
+                intakeSubsystem.setIntakeSpeed(0.7),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_K),
                 new ParallelCommandGroup(
@@ -75,7 +75,7 @@ public class RedJKLRBCommand extends SequentialCommandGroup {
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_LEFT_CENTER),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))
                         ),
-                intakeSubsystem.setIntakeSpeed(0.1),
+                intakeSubsystem.setIntakeSpeed(0.7),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_L),
                 new ParallelCommandGroup(

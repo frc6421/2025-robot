@@ -288,8 +288,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.03, .4);
-        yController.setTolerance(.03, .4);
+        xController.setTolerance(.03, .1);
+        yController.setTolerance(.03, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
@@ -303,8 +303,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(1.0), Units.degreesToRadians(2.0));
-        xController.setTolerance(.1, .4);
-        yController.setTolerance(.1, .4);
+        xController.setTolerance(.1, .1);
+        yController.setTolerance(.1, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.7, 3.7);
@@ -319,8 +319,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command offsetAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(5.0), Units.degreesToRadians(1.0));
-        xController.setTolerance(.2, .4);
-        yController.setTolerance(.2, .4);
+        xController.setTolerance(.2, .1);
+        yController.setTolerance(.2, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -3.5, 3.5);

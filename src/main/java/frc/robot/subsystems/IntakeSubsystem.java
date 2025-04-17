@@ -61,8 +61,8 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
     intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
-    intakeFilter = new MedianFilter(10);
-    intakeAutoFilter = new MedianFilter(10);
+    intakeFilter = new MedianFilter(15);
+    intakeAutoFilter = new MedianFilter(15);
 
     intakeAutoSensor.setRangingMode(RangingMode.Short, 20);
     intakeSensor.setRangingMode(RangingMode.Short, 20);
@@ -100,8 +100,8 @@ public class IntakeSubsystem extends SubsystemBase {
   } 
 
   public double getTOFAutoDistance() {
-    if (intakeAutoSensor.getStatus() == Status.Valid) {
-    return intakeAutoFilter.calculate(intakeAutoSensor.getRange());  
+    if (intakeSensor.getStatus() == Status.Valid) {
+    return intakeAutoFilter.calculate(intakeSensor.getRange());  
     }
     return 1000.0;
   }

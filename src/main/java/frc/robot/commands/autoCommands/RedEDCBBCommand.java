@@ -58,7 +58,7 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(0.1),
+                intakeSubsystem.setIntakeSpeed(0.7),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_D),
                 new ParallelCommandGroup(
@@ -75,7 +75,7 @@ public class RedEDCBBCommand extends SequentialCommandGroup {
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.R_HP_RIGHT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(0.1),
+                intakeSubsystem.setIntakeSpeed(0.7),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_C),
                 new ParallelCommandGroup(
