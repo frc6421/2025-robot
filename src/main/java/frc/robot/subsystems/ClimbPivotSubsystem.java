@@ -68,7 +68,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
     /** In rotations */
     public static final double PIVOT_REVERSE_SOFT_LIMIT = -10000 / CLIMB_DEGREES_PER_MOTOR_ROTATION; // TODO: Update Numbers
     /** In rotations */
-    public static final double PIVOT_OUT_POSITION = -607.0; //here
+    public static final double PIVOT_OUT_POSITION = -646.0; //here
     /** In rotations */
     public static final double PIVOT_IN_POSITION = -500.0;
 

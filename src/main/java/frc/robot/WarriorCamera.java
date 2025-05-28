@@ -66,19 +66,19 @@ public class WarriorCamera implements Sendable {
         new Rotation3d(Units.degreesToRadians(-.24), Units.degreesToRadians(-12.5),
             Units.degreesToRadians(24.6)));
     // Camera 6
-    public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.28, 0.22),
-        new Rotation3d(Units.degreesToRadians(-0), Units.degreesToRadians(-25.1),
-            Units.degreesToRadians(-26.0)));
+    // public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.28, 0.22),
+    //     new Rotation3d(Units.degreesToRadians(-0), Units.degreesToRadians(-25.1),
+    //         Units.degreesToRadians(-26.0)));
     // public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(0.34, -0.16, 0.12), // Adding
     //                                                                                                                 // makes
     //                                                                                                                 // number
     //                                                                                                                 // bigger
     //     new Rotation3d(Units.degreesToRadians(-1.0), Units.degreesToRadians(-15.6),
     //         Units.degreesToRadians(24.4)));
-    // // Camera 6
-    // public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.3, 0.31),
-    //     new Rotation3d(Units.degreesToRadians(-0.6), Units.degreesToRadians(-21.9),
-    //         Units.degreesToRadians(-26.0)));
+    // Camera 6
+    public final static Transform3d FRONT_LEFT_TRANSFORM3D = new Transform3d(new Translation3d(0.24, 0.3, 0.31),
+        new Rotation3d(Units.degreesToRadians(-0.6), Units.degreesToRadians(-21.9),
+            Units.degreesToRadians(-26.0)));
 
     private final static AprilTagFieldLayout TAG_LAYOUT = AprilTagFieldLayout
         .loadField(AprilTagFields.k2025ReefscapeWelded);
@@ -87,7 +87,7 @@ public class WarriorCamera implements Sendable {
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
     private final static double APRILTAG_LIMIT_METERS = 4.7;
     private final static double APRILTAG_LIMIT_METERS_AUTO = 1.0;
-    private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.5;
+    private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.0;
     private final static double MAXIMUM_AMBIGUITY = 0.20;
     private final static int[] BLACKLISTED_TAG_ID_LIST = { 4, 5, 14, 15 };
 

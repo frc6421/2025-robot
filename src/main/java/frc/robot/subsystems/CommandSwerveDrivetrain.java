@@ -288,16 +288,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command reefAlignCommand(Supplier<Pose2d> targetPose) {
         alignAngleRequest.HeadingController.setP(AutoConstants.THETA_P);
         alignAngleRequest.HeadingController.setTolerance(Units.degreesToRadians(0.5), Units.degreesToRadians(0.5));
-        xController.setTolerance(.03, .1);
-        yController.setTolerance(.03, .1);
+        xController.setTolerance(.015, .1);
+        yController.setTolerance(.015, .1);
         return applyRequest(() ->  { 
           Pose2d currentPose = getState().Pose;
           double xVelocity = MathUtil.clamp(xController.calculate(currentPose.getX(), targetPose.get().getX()), -2.5, 2.5);
           double yVelocity = MathUtil.clamp(yController.calculate(currentPose.getY(), targetPose.get().getY()), -2.5, 2.5);
 
           return alignAngleRequest.withTargetDirection(targetPose.get().getRotation()).withVelocityX(xVelocity).withVelocityY(yVelocity);
-        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint())
-        .andThen(this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0)));
+        }).until(() -> xController.atSetpoint() && yController.atSetpoint() && alignAngleRequest.HeadingController.atSetpoint());
+        //.andThen(this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0)));
     }
 
     public Command sourceAlignCommand(Supplier<Pose2d> targetPose) {
@@ -336,6 +336,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double time = 0.1;
         return this.applyRequest(() -> nudgeRequest.withVelocityY(velocity * direction))
         .withTimeout(time);
+    }
+
+    public Command nudgeForwardCommand() {
+        double velocity = 0.2;
+        double time = 0.5;
+        return this.applyRequest(() -> nudgeRequest.withVelocityX(velocity))
+        .withTimeout(time)
+        .andThen(this.runOnce(() -> nudgeRequest.withVelocityX(0)));
+    }
+
+    public Command stopAlignCommand() {
+        return this.runOnce(() -> alignAngleRequest.withVelocityX(0).withVelocityY(0));
     }
 
     public Command resetGyro() {

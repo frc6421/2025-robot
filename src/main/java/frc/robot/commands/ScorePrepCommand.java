@@ -52,8 +52,10 @@ public class ScorePrepCommand extends SequentialCommandGroup {
             intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(position),
             new ConditionalCommand(wristScore4Command, wristScoreCommand, () -> (position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()))),
+          drivetrain.nudgeForwardCommand(),
         intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.2),
-        intakeSubsystem.stopIntake());
+        intakeSubsystem.stopIntake()
+        );
   }
 }

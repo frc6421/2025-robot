@@ -4,6 +4,9 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -26,7 +29,8 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
 
   private final WristCommand wristIntakeCommand;
 
-  public ScoreFinishCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake) {
+  public ScoreFinishCommand(ElevatorSubsystem elevator, WristSubsystem wrist, IntakeSubsystem intake, 
+  DoubleSupplier position) {
 
     elevatorSubsystem = elevator;
     wristSubsystem = wrist;
@@ -40,7 +44,9 @@ public class ScoreFinishCommand extends SequentialCommandGroup {
     intakeSubsystem.setIntakeSpeed(0.3),
     new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
-    intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+    new ConditionalCommand(intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4), intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L2_L3), 
+    () -> position.getAsDouble() == ElevatorConstants.L4_POSITION.magnitude()),
+    //intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
 		new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(

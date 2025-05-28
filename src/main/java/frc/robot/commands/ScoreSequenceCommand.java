@@ -49,7 +49,7 @@ public class ScoreSequenceCommand extends SequentialCommandGroup {
 		intakeSubsystem.setIntakeSpeed(0.3),
     new WaitCommand(0.2),
     intakeSubsystem.stopIntake(),
-    intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED),
+    intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
 		new WaitCommand(0.1),
     intakeSubsystem.stopIntake(),
 		new ParallelCommandGroup(
