@@ -46,7 +46,7 @@ public class BlueGRBCommand extends SequentialCommandGroup {
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
         intakeSubsystem.setIntakeSpeed(0.3),
-        new WaitCommand(0.1),
+        new WaitCommand(0.5),
         intakeSubsystem.stopIntake(),
         intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
         new WaitCommand(0.1),

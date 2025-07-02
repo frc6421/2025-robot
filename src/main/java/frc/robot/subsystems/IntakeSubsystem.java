@@ -47,7 +47,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public static final double INTAKE_IN_SPEED = 0.6;
     // Reliable speed for ejecting the pieces
     public static final double INTAKE_OUT_SPEED_L4 = -0.4; 
-    public static final double INTAKE_OUT_SPEED_L2_L3 = -0.3; 
+    public static final double INTAKE_OUT_SPEED_L2_L3 = -0.25; 
 
     public static final double CORAL_DISTANCE = 60.0;
 
