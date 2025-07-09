@@ -336,5 +336,16 @@ public class RobotContainer {
 		}
 	}
 
+	public CommandSwerveDrivetrain getDriveTrain() {
+		return drivetrain;
+	}
+
+	public Telemetry getTelemetry() {
+		return logger;
+	}
+
+	public void updateVision() {
+
+	}
 
 }

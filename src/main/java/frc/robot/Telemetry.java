@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class Telemetry {
     private final double MaxSpeed;
+    private Pose2d statePose;
 
     /**
      * Construct a telemetry object, with the specified max speed of the robot
@@ -30,6 +31,7 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
+        statePose = new Pose2d();
         SignalLogger.start();
     }
 
@@ -92,6 +94,8 @@ public class Telemetry {
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
 
+        statePose = state.Pose;
+
         /* Also write to log file */
         m_poseArray[0] = state.Pose.getX();
         m_poseArray[1] = state.Pose.getY();
@@ -120,5 +124,9 @@ public class Telemetry {
 
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+    }
+
+    public final Pose2d getStatePose() {
+        return statePose;
     }
 }

@@ -452,5 +452,4 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }))
             .until(() -> timer.hasElapsed(trajectory.getTotalTimeSeconds()));
   }
-
 }

@@ -9,14 +9,18 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
+  private final CommandSwerveDrivetrain driveTrain;
+
   public Robot() {
     m_robotContainer = new RobotContainer();
+    driveTrain = m_robotContainer.getDriveTrain();
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
   }
@@ -75,5 +79,11 @@ public class Robot extends TimedRobot {
   public void testExit() {}
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+
+    driveTrain.backLeftCamera.updateSim(m_robotContainer.getTelemetry().getStatePose());
+
+    var debugField = driveTrain.backLeftCamera.getSimDebugField();
+    debugField.getObject("EstimatedRobot").setPose(m_robotContainer.getTelemetry().getStatePose());
+  }
 }

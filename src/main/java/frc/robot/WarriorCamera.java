@@ -13,6 +13,9 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -44,10 +47,16 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /** Add your docs here. */
 public class WarriorCamera implements Sendable {
+  // Simulation
+  private final VisionSystemSim visionSim;
+  private final PhotonCameraSim cameraSim;
+  private final SimCameraProperties simCamProperties;
 
+  // Real
   private final PhotonCamera camera;
   private Pose2d cameraPose2d = new Pose2d();
   private List<PhotonPipelineResult> cameraResult;
@@ -58,6 +67,13 @@ public class WarriorCamera implements Sendable {
   private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
   public final static class CameraConstants {
+    // Simulation
+    private final static int CAM_WIDTH = 1200;
+    private final static int CAM_HEIGHT = 800;
+    private final static Rotation2d CAM_FOV = Rotation2d.fromDegrees(90);
+
+    private final static boolean DRAW_CAMERA = true;
+
     // Camera 2
     public final static Transform3d FRONT_RIGHT_TRANSFORM3D = new Transform3d(new Translation3d(0.25, -0.24, 0.21), // Adding
                                                                                                                     // makes
@@ -106,6 +122,7 @@ public class WarriorCamera implements Sendable {
   private final BooleanPublisher cameraReliable;
 
   public WarriorCamera(String cameraName, Transform3d offsets) {
+    // Real
     camera = new PhotonCamera(cameraName);
     cameraStateTable = inst.getTable(camera.getName() + "CameraState");
     cameraPose = cameraStateTable.getStructTopic("Pose", Pose3d.struct).publish();
@@ -113,6 +130,24 @@ public class WarriorCamera implements Sendable {
 
     poseEstimator = new PhotonPoseEstimator(
         CameraConstants.TAG_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, offsets);
+
+    // Simulation
+    visionSim = new VisionSystemSim("frontLeftCamSim");
+    visionSim.addAprilTags(CameraConstants.TAG_LAYOUT);
+
+    cameraSim = new PhotonCameraSim(camera);
+    cameraSim.enableDrawWireframe(CameraConstants.DRAW_CAMERA);
+
+    simCamProperties = new SimCameraProperties();
+
+    simCamProperties.setCalibration(CameraConstants.CAM_WIDTH, CameraConstants.CAM_HEIGHT, CameraConstants.CAM_FOV);
+    // simCamProperties.setCalibError(,);
+    // simCamProperties.setFPS();
+    // SimCameraProperties.setAvgLatencyMs();
+    // SimCameraProperties.setLatencyStdDevMs();
+
+    visionSim.addCamera(cameraSim, offsets);
+  
 
     refreshData();
 
@@ -275,6 +310,17 @@ public class WarriorCamera implements Sendable {
     cameraReliable.set(false);
     return false;
   }
+
+  public void updateSim(Pose2d pose2d) {
+    visionSim.update(pose2d);
+  }
+
+  public Field2d getSimDebugField() {
+    if (!Robot.isSimulation()) { 
+      return null;
+    }
+    return visionSim.getDebugField();
+}
 
   @Override
   public void initSendable(SendableBuilder builder) {
