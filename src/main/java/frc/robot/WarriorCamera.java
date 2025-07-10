@@ -71,6 +71,11 @@ public class WarriorCamera implements Sendable {
     private final static int CAM_WIDTH = 1200;
     private final static int CAM_HEIGHT = 800;
     private final static Rotation2d CAM_FOV = Rotation2d.fromDegrees(90);
+    private final static double CAM_PX_ERROR = 1.0;
+    private final static double CAM_STD_ERROR = .15;
+    private final static double CAM_FPS = 20;
+    private final static double CAM_LATENCY = 40;
+    private final static double CAM_STD_LATENCY = 15;
 
     private final static boolean DRAW_CAMERA = true;
 
@@ -141,10 +146,10 @@ public class WarriorCamera implements Sendable {
     simCamProperties = new SimCameraProperties();
 
     simCamProperties.setCalibration(CameraConstants.CAM_WIDTH, CameraConstants.CAM_HEIGHT, CameraConstants.CAM_FOV);
-    // simCamProperties.setCalibError(,);
-    // simCamProperties.setFPS();
-    // SimCameraProperties.setAvgLatencyMs();
-    // SimCameraProperties.setLatencyStdDevMs();
+    simCamProperties.setCalibError(CameraConstants.CAM_PX_ERROR, CameraConstants.CAM_STD_ERROR);
+    simCamProperties.setFPS(CameraConstants.CAM_FPS);
+    simCamProperties.setAvgLatencyMs(CameraConstants.CAM_LATENCY);
+    simCamProperties.setLatencyStdDevMs(CameraConstants.CAM_STD_LATENCY);
 
     visionSim.addCamera(cameraSim, offsets);
   
