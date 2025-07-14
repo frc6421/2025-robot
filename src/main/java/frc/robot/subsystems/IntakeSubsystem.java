@@ -16,6 +16,7 @@ import com.playingwithfusion.TimeOfFlight.Status;
 
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,11 +31,16 @@ public class IntakeSubsystem extends SubsystemBase {
   private MedianFilter intakeFilter;
   private MedianFilter intakeAutoFilter;
 
+  private boolean sensorDetected;
+
+  private DigitalInput intakeSensorNew;
+
   public static class IntakeConstants {
 
     private static final int INTAKE_MOTOR_ID = 40;
     private static final int INTAKE_TOF_ID = 1;
     private static final int INTAKE_AUTO_TOF_ID = 24;
+    private static final int INTAKE_SENSOR_PORT = 0;
 
     private static final int INTAKE_CURRENT_LIMIT = 200;
 
@@ -62,6 +68,13 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
     intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
+    sensorDetected = true;
+    try {
+      intakeSensorNew = new DigitalInput(IntakeConstants.INTAKE_SENSOR_PORT);
+    } catch (final Exception exception) {
+      sensorDetected = false;
+      System.out.println("---- Intake Sensor Not Detected! ----");
+    }
     intakeFilter = new MedianFilter(15);
     intakeAutoFilter = new MedianFilter(15);
 
@@ -115,10 +128,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean haveCoral(){
-    if (DriverStation.isAutonomous()) {
-    return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
-    }
-    return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
+    // if (DriverStation.isAutonomous()) {
+    // return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
+    // }
+    // return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
+    return !intakeSensorNew.get();
   }
 
 public Command intakeCoral () {
@@ -143,6 +157,7 @@ public Command intakeCoral () {
     builder.addStringProperty("TOF State", () -> intakeSensor.getStatus().toString(), null);
     builder.addStringProperty("TOF Auto State", () -> intakeAutoSensor.getStatus().toString(), null);
     builder.addBooleanProperty("Has Coral", () -> haveCoral(), null);
+    builder.addBooleanProperty("Sensor Detected", () -> sensorDetected, null);
   }
 
 }

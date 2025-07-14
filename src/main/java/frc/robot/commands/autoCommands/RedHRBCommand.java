@@ -39,20 +39,18 @@ public class RedHRBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_H),
-        new WaitCommand(0.5),
-        new ParallelCommandGroup(
-            intakeSubsystem.setIntakeSpeed(0.1),
-            elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
-            new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
-        intakeSubsystem.setIntakeSpeed(0.3),
-        new WaitCommand(0.1),
-        intakeSubsystem.stopIntake(),
-        intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
-        new WaitCommand(0.1),
-        intakeSubsystem.stopIntake(),
-        new ParallelCommandGroup(
-            new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
-            elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))));
+      new WaitCommand(6.0),
+      driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.RED_H),
+      new WaitCommand(0.5),
+      new ParallelCommandGroup(
+          elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
+          new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
+      new WaitCommand(0.5),
+      intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
+      new WaitCommand(0.2),
+      intakeSubsystem.stopIntake(),
+      new ParallelCommandGroup(
+          new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
+          elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH))));
   }
 }

@@ -39,17 +39,15 @@ public class BlueGRBCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+        new WaitCommand(6.0),
         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_G),
         new WaitCommand(0.5),
         new ParallelCommandGroup(
-            intakeSubsystem.setIntakeSpeed(0.1),
             elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
             new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
-        intakeSubsystem.setIntakeSpeed(0.3),
         new WaitCommand(0.5),
-        intakeSubsystem.stopIntake(),
         intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
-        new WaitCommand(0.1),
+        new WaitCommand(0.2),
         intakeSubsystem.stopIntake(),
         new ParallelCommandGroup(
             new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),

@@ -40,7 +40,6 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         addCommands(
-                intakeSubsystem.setIntakeSpeed(0.1),
                 new ParallelCommandGroup(
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_J)),
@@ -48,9 +47,7 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
                         driveSubsystem.stopAlignCommand(),
                         elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
-                intakeSubsystem.setIntakeSpeed(0.3),
                 new WaitCommand(0.5),
-                intakeSubsystem.stopIntake(),
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
@@ -59,16 +56,14 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(0.7),
+                intakeSubsystem.stopIntake(),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_K),
                 new ParallelCommandGroup(
                         driveSubsystem.stopAlignCommand(),
                         elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
-                intakeSubsystem.setIntakeSpeed(0.3),
                 new WaitCommand(0.5),
-                intakeSubsystem.stopIntake(),
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),
@@ -77,16 +72,14 @@ public class BlueJKLBBCommand extends SequentialCommandGroup {
                         new WristCommand(wristSubsystem, WristConstants.WRIST_INTAKE_POSITION.magnitude()),
                         elevatorSubsystem.setElevatorPositionCommand(() -> (ElevatorConstants.MIN_HEIGHT_MATCH)),
                         driveSubsystem.sourceAlignCommand(() -> TrajectoryConstants.B_HP_LEFT_CENTER)),
-                intakeSubsystem.setIntakeSpeed(0.7),
+                intakeSubsystem.stopIntake(),
 
                 driveSubsystem.reefAlignCommand(() -> TrajectoryConstants.BLUE_L),
                 new ParallelCommandGroup(
                         driveSubsystem.stopAlignCommand(),
                         elevatorSubsystem.setElevatorPositionCommand(ElevatorConstants.L4_POSITION.magnitude()),
                         new WristCommand(wristSubsystem, WristConstants.WRIST_SCORE_POSITION_4.magnitude())),
-                intakeSubsystem.setIntakeSpeed(0.3),
-                new WaitCommand(0.1),
-                intakeSubsystem.stopIntake(),
+                new WaitCommand(0.5),
                 intakeSubsystem.setIntakeSpeed(IntakeConstants.INTAKE_OUT_SPEED_L4),
                 new WaitCommand(0.2),
                 intakeSubsystem.stopIntake(),

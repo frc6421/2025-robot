@@ -33,7 +33,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
   private final TalonFX leftPivotMotor;
   private final TalonFX rightPivotMotor;
-  private final DigitalInput pivotLimitSwitch;
+  private DigitalInput pivotLimitSwitch;
 
   private final TalonFXConfiguration leftPivotMotorConfig;
   private final TalonFXConfiguration rightPivotMotorConfig;
@@ -42,6 +42,7 @@ public class ClimbPivotSubsystem extends SubsystemBase {
 
   private StatusCode status = StatusCode.StatusCodeNotInitialized;
   private boolean isClimberOut = false;
+  private boolean sensorDetectedClimber = true;
 
   public static class ClimbPivotConstants {
 
@@ -92,7 +93,13 @@ public class ClimbPivotSubsystem extends SubsystemBase {
   public ClimbPivotSubsystem() {
     leftPivotMotor = new TalonFX(ClimbPivotConstants.LEFT_PIVOT_MOTOR_ID);
     rightPivotMotor = new TalonFX(ClimbPivotConstants.RIGHT_PIVOT_MOTOR_ID);
+    try {
     pivotLimitSwitch = new DigitalInput(ClimbPivotConstants.PIVOT_LIMIT_SWITCH_PORT);
+  }
+    catch (final Exception exception) {
+      sensorDetectedClimber = false;
+      System.out.println("---- Climber Sensor Not Detected! ----");
+    }
 
     // Set controller to factory default
     RobotContainer.applyTalonConfigs(leftPivotMotor, new TalonFXConfiguration());
@@ -197,7 +204,12 @@ public class ClimbPivotSubsystem extends SubsystemBase {
    * @return true/false
    */
   public boolean isLimit() {
+    if (sensorDetectedClimber) {
     return !pivotLimitSwitch.get();
+    } else {
+      System.out.println("---- Sensor failed to create ----");
+      return false;
+    }
   }
 
   public Command climbOut() {
