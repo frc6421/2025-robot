@@ -40,7 +40,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final int INTAKE_MOTOR_ID = 40;
     private static final int INTAKE_TOF_ID = 1;
     private static final int INTAKE_AUTO_TOF_ID = 24;
-    private static final int INTAKE_SENSOR_PORT = 0;
+    private static final int INTAKE_SENSOR_PORT = 9;
 
     private static final int INTAKE_CURRENT_LIMIT = 200;
 
@@ -48,14 +48,11 @@ public class IntakeSubsystem extends SubsystemBase {
     .withStatorCurrentLimit(INTAKE_CURRENT_LIMIT)
     .withStatorCurrentLimitEnable(true);
 
-    private static final double INTAKE_STALL_LIMIT = 60;
     // Reliable speed for grabbing the pieces
-    public static final double INTAKE_IN_SPEED = 0.6;
+    public static final double INTAKE_IN_SPEED = 1.0;
     // Reliable speed for ejecting the pieces
     public static final double INTAKE_OUT_SPEED_L4 = -0.4; 
     public static final double INTAKE_OUT_SPEED_L2_L3 = -0.25; 
-
-    public static final double CORAL_DISTANCE = 60.0;
 
     private static final MotorOutputConfigs INTAKE_MOTOR_CONFIGS = new MotorOutputConfigs()
     .withNeutralMode(NeutralModeValue.Coast)
