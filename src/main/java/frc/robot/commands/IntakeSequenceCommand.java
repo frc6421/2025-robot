@@ -36,7 +36,6 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
       elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH), 
 			wristIntakeCommand, 
 			intakeSubsystem.intakeCoral(),
-      intakeSubsystem.setIntakeSpeed(0.2), 
       new WaitCommand(0.3),
       intakeSubsystem.stopIntake()
     );
