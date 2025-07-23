@@ -344,8 +344,11 @@ public class RobotContainer {
 		return logger;
 	}
 
-	public void updateVision() {
-
+	public Command driveCommand() {
+		return drivetrain.applyRequest(() -> drive
+		.withVelocityX(xDriveSlew.calculate(-joystick.getLeftY() * MaxSpeed))
+		.withVelocityY(yDriveSlew.calculate(-joystick.getLeftX() * MaxSpeed))
+		.withRotationalRate(-joystick.getRightX() * MaxAngularRate));
 	}
 
 }

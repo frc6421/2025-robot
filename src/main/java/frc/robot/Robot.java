@@ -82,6 +82,7 @@ public class Robot extends TimedRobot {
   public void simulationPeriodic() {
 
     driveTrain.backLeftCamera.updateSim(m_robotContainer.getTelemetry().getStatePose());
+    //m_robotContainer.driveCommand();
 
     var debugField = driveTrain.backLeftCamera.getSimDebugField();
     debugField.getObject("EstimatedRobot").setPose(m_robotContainer.getTelemetry().getStatePose());
