@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringArrayPublisher;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.Sendable;
@@ -125,19 +128,21 @@ public class WarriorCamera implements Sendable {
   private final NetworkTable cameraStateTable;
   private final StructPublisher<Pose3d> cameraPose;
   private final BooleanPublisher cameraReliable;
+  private final StringPublisher dataFaults;
 
   public WarriorCamera(String cameraName, Transform3d offsets) {
     // Real
     camera = new PhotonCamera(cameraName);
     cameraStateTable = inst.getTable(camera.getName() + "CameraState");
     cameraPose = cameraStateTable.getStructTopic("Pose", Pose3d.struct).publish();
-    cameraReliable = cameraStateTable.getBooleanTopic("Reliable").publish();
+    cameraReliable = cameraStateTable.getBooleanTopic(cameraName + "Reliable").publish();
+    dataFaults = cameraStateTable.getStringTopic(cameraName + "_DataFaults").publish();
 
     poseEstimator = new PhotonPoseEstimator(
         CameraConstants.TAG_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, offsets);
 
     // Simulation
-    visionSim = new VisionSystemSim("frontLeftCamSim");
+    visionSim = new VisionSystemSim(cameraName + "_Sim");
     visionSim.addAprilTags(CameraConstants.TAG_LAYOUT);
 
     cameraSim = new PhotonCameraSim(camera);
@@ -229,8 +234,6 @@ public class WarriorCamera implements Sendable {
     return 1.0;
   }
 
-  // public double get
-
   public double getPitch() {
     return latestCameraResult.getBestTarget().getPitch();
   }
@@ -248,9 +251,11 @@ public class WarriorCamera implements Sendable {
 
     if (!camera.isConnected()) {
       cameraReliable.set(false);
+      dataFaults.accept("No Camera Connected");
       return false;
     } else if (!(cameraEstimatedPose.isPresent())) {
       cameraReliable.set(false);
+      dataFaults.accept("No Pose Connected");
       return false;
     }
 
@@ -259,8 +264,8 @@ public class WarriorCamera implements Sendable {
         cameraPose2d.getY() > CameraConstants.MAXIMUM_Y_POSE ||
         cameraPose2d.getX() < 0 ||
         cameraPose2d.getY() < 0) {
-      DataLogManager.log("Out of Field");
       cameraReliable.set(false);
+      dataFaults.accept("Pose Outside Field");
       return false;
     }
 
@@ -269,6 +274,7 @@ public class WarriorCamera implements Sendable {
     } else {
       standardDeviation = CameraConstants.HIGH_SD;
       cameraReliable.set(false);
+      dataFaults.accept("No Camera Connected");
       return false;
     }
 
