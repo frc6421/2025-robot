@@ -42,7 +42,7 @@ public class WristSubsystem extends SubsystemBase {
     private static final Angle WRIST_DEGREES_PER_ROTATION = Degrees.of(360.0 / WRIST_GEARBOX_RATIO / WRIST_SPROCKET_RATIO);
 
     private static final boolean WRIST_ABS_INVERTED = false;
-    private static final double WRIST_ABS_OFFSET = 22.8 / 360.0;
+    private static final double WRIST_ABS_OFFSET = (22.8 + 104.0) / 360.0;
 
     // Soft Limits
     public static final Angle WRIST_FORWARD_SOFT_LIMIT = Degrees.of(270);
@@ -67,7 +67,7 @@ public class WristSubsystem extends SubsystemBase {
     public static final Angle WRIST_SCORE_POSITION = Degrees.of(213); // L2 & L3
     public static final Angle WRIST_SCORE_POSITION_4 = Degrees.of(218); 
     public static final Angle WRIST_ALGAE_POSITION = Degrees.of(25);
-    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(25);
+    public static final Angle WRIST_INTAKE_POSITION = Degrees.of(27);
     public static final Angle WRIST_RESTING_POSITION = Degrees.of(110);
     public static final Angle WRIST_STARTING_CONFIG = Degrees.of(269.3);
   }

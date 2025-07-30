@@ -33,9 +33,13 @@ public class IntakeSequenceCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+      elevatorSubsystem.setStep("Elevator"),
       elevatorSubsystem.setElevatorPositionCommand(() -> ElevatorConstants.MIN_HEIGHT_MATCH), 
+      elevatorSubsystem.setStep("Wrist"),
 			wristIntakeCommand, 
+      elevatorSubsystem.setStep("Intake"),
 			intakeSubsystem.intakeCoral(),
+      elevatorSubsystem.setStep("Final Intake"),
       intakeSubsystem.setIntakeSpeed(0.2), 
       new WaitCommand(0.3),
       intakeSubsystem.stopIntake()

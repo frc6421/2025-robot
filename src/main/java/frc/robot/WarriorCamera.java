@@ -85,7 +85,7 @@ public class WarriorCamera implements Sendable {
 
     private final static double MAXIMUM_X_POSE = TAG_LAYOUT.getFieldLength();
     private final static double MAXIMUM_Y_POSE = TAG_LAYOUT.getFieldWidth();
-    private final static double APRILTAG_LIMIT_METERS = 4.7;
+    private final static double APRILTAG_LIMIT_METERS = 6.7;
     private final static double APRILTAG_LIMIT_METERS_AUTO = 1.0;
     private final static double APRILTAG_CLOSE_LIMIT_METERS = 0.0;
     private final static double MAXIMUM_AMBIGUITY = 0.20;

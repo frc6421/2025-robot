@@ -23,6 +23,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -45,6 +46,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   private MotionMagicVoltage elevatorRequest;// Voltage to maintian the set point
   private PositionVoltage voltageRequest;
 
+  public String commandStep = "";
+
   public static final class ElevatorConstants {
     // CAN ID's
     private static final int ELEVATOR_LEFT_CAN_ID = 20;
@@ -60,7 +63,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private static final double MAX_HEIGHT_INCHES = 88;
     public static final double MIN_HEIGHT_INCHES = 38.5;
     public static final double MIN_HEIGHT_MATCH = MIN_HEIGHT_INCHES + 0.25;
-    private static final double MAX_ERROR_INCHES = 0.50;
+    private static final double MAX_ERROR_INCHES = 0.6;
     // Maximum and minimum extension of the elevator, in rotations
     private static final double MAX_HEIGHT_ROTATIONS = MAX_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
     private static final double MIN_HEIGHT_ROTATIONS = MIN_HEIGHT_INCHES / ELEVATOR_INCHES_PER_ROTATION;
@@ -278,6 +281,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   });
   }
 
+  public Command setStep(String step) {
+    return runOnce(() -> {
+      commandStep = step;
+    });
+  }
+
   @Override
   public void periodic() {
   }
@@ -295,6 +304,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     builder.addDoubleProperty("R Elevator Stator Current", () -> elevatorRightMotor.getStatorCurrent().getValueAsDouble(), null);
 
     builder.addDoubleProperty("L Elevator Velocity", () -> elevatorLeftMotor.getVelocity().getValueAsDouble(), null);
+
+    builder.addStringProperty("IntakeSequence Step", () -> commandStep, null);
     super.initSendable(builder);
   }
 }

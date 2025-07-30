@@ -26,7 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private TalonFX intakeMotor;
   private TalonFXConfiguration intakeMotorConfig;
   private TimeOfFlight intakeSensor;
-  private TimeOfFlight intakeAutoSensor;
+  //private TimeOfFlight intakeAutoSensor;
   private MedianFilter intakeFilter;
   private MedianFilter intakeAutoFilter;
 
@@ -61,11 +61,11 @@ public class IntakeSubsystem extends SubsystemBase {
     // Identifies the motor object 
     intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
     intakeSensor = new TimeOfFlight(IntakeConstants.INTAKE_TOF_ID);
-    intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
+    //intakeAutoSensor = new TimeOfFlight(IntakeConstants.INTAKE_AUTO_TOF_ID);
     intakeFilter = new MedianFilter(15);
-    intakeAutoFilter = new MedianFilter(15);
+    //intakeAutoFilter = new MedianFilter(15);
 
-    intakeAutoSensor.setRangingMode(RangingMode.Short, 20);
+    //intakeAutoSensor.setRangingMode(RangingMode.Short, 20);
     intakeSensor.setRangingMode(RangingMode.Short, 20);
 
     RobotContainer.applyTalonConfigs(intakeMotor, new TalonFXConfiguration());
@@ -80,7 +80,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
     SmartDashboard.putData("Intake", this);
-    SmartDashboard.putData("TOF Auto", intakeAutoSensor);
+    //SmartDashboard.putData("TOF Auto", intakeAutoSensor);
     SmartDashboard.putData("TOF TeleOp", intakeSensor);
   }
 
@@ -100,12 +100,12 @@ public class IntakeSubsystem extends SubsystemBase {
     return 1000.0;
   } 
 
-  public double getTOFAutoDistance() {
-    if (intakeSensor.getStatus() == Status.Valid) {
-    return intakeAutoFilter.calculate(intakeSensor.getRange());  
-    }
-    return 1000.0;
-  }
+  // public double getTOFAutoDistance() {
+  //   if (intakeSensor.getStatus() == Status.Valid) {
+  //   return intakeAutoFilter.calculate(intakeSensor.getRange());  
+  //   }
+  //   return 1000.0;
+  // }
 
   /**
    * @breif Stops the motor
@@ -115,15 +115,16 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean haveCoral(){
-    if (DriverStation.isAutonomous()) {
-    return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
-    }
+    // if (DriverStation.isAutonomous()) {
+    // return getTOFAutoDistance() < IntakeConstants.CORAL_DISTANCE;
+    // }
     return getTOFDistance() < IntakeConstants.CORAL_DISTANCE;
   }
 
 public Command intakeCoral () {
   return run(() -> intakeMotor.set(IntakeConstants.INTAKE_IN_SPEED))
-    .until(() -> haveCoral());
+    .until(() -> haveCoral())
+    .andThen(runOnce(() -> stopIntake()));
 }
 
 
@@ -139,9 +140,9 @@ public Command intakeCoral () {
     builder.addDoubleProperty("Intake Speed", () -> intakeMotor.get(), null);
     builder.addDoubleProperty("Intake Current", () -> intakeMotor.getStatorCurrent().getValueAsDouble(), null);
     builder.addDoubleProperty("TOF Distance", () -> getTOFDistance(), null);
-    builder.addDoubleProperty("TOF Auto Distance", () -> getTOFAutoDistance(), null);
+    //builder.addDoubleProperty("TOF Auto Distance", () -> getTOFAutoDistance(), null);
     builder.addStringProperty("TOF State", () -> intakeSensor.getStatus().toString(), null);
-    builder.addStringProperty("TOF Auto State", () -> intakeAutoSensor.getStatus().toString(), null);
+    //builder.addStringProperty("TOF Auto State", () -> intakeAutoSensor.getStatus().toString(), null);
     builder.addBooleanProperty("Has Coral", () -> haveCoral(), null);
   }
 
